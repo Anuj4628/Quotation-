@@ -176,7 +176,11 @@ export const QuotationDocument: React.FC<QuotationDocumentProps> = ({
           </p>
         </div>
         <div className="pt-2 font-mono text-[10px] font-bold text-slate-700 flex flex-wrap gap-2">
-          <span className="bg-white border border-slate-200 px-1.5 py-0.5 rounded">GSTIN: {quotation.customerGstin}</span>
+          {quotation.customerGstin ? (
+            <span className="bg-white border border-slate-200 px-1.5 py-0.5 rounded">GSTIN: {quotation.customerGstin}</span>
+          ) : (
+            <span className="bg-white border border-slate-200 px-1.5 py-0.5 rounded text-slate-400 font-normal">GSTIN: Unregistered / N/A</span>
+          )}
           {quotation.customerPan && (
             <span className="bg-white border border-slate-200 px-1.5 py-0.5 rounded">PAN: {quotation.customerPan}</span>
           )}
@@ -214,67 +218,64 @@ export const QuotationDocument: React.FC<QuotationDocumentProps> = ({
       <table className="w-full text-left border-collapse border border-slate-300 table-fixed">
         <thead>
           <tr className="bg-slate-900 text-white text-[10px] font-bold uppercase tracking-wider print:bg-slate-900 print:text-white">
-            <th className="p-2 border border-slate-700 w-[5%] text-center">Sr.</th>
-            <th className="p-2 border border-slate-700 w-[40%]">Product & Material Specification</th>
-            <th className="p-2 border border-slate-700 w-[10%] text-center">HSN</th>
-            <th className="p-2 border border-slate-700 w-[11%] text-right">Qty</th>
-            <th className="p-2 border border-slate-700 w-[12%] text-right">Rate (₹)</th>
-            <th className="p-2 border border-slate-700 w-[8%] text-center">GST</th>
-            <th className="p-2 border border-slate-700 w-[14%] text-right">Amount (₹)</th>
+            <th className="py-2.5 px-2 border border-slate-700 w-[5%] text-center">S.No.</th>
+            <th className="py-2.5 px-3 border border-slate-700 w-[47%]">Item Description</th>
+            <th className="py-2.5 px-3 border border-slate-700 w-[8%] text-right">Qty</th>
+            <th className="py-2.5 px-2 border border-slate-700 w-[8%] text-center">Unit</th>
+            <th className="py-2.5 px-3 border border-slate-700 w-[13%] text-right">Rate (₹)</th>
+            <th className="py-2.5 px-3 border border-slate-700 w-[19%] text-right">Amount (₹)</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-200 text-xs">
           {items.map((item, idx) => {
             const sr = item.srNo || (startIdx + idx + 1);
+            const rowGross = item.grossAmount || (Number(item.quantity) || 0) * (Number(item.rate) || 0);
             return (
               <tr key={item.id} className={idx % 2 === 1 ? 'bg-slate-50/70 print:bg-transparent' : 'bg-white'}>
-                <td className="p-2 border border-slate-300 text-center font-bold text-slate-500 align-top text-xs">
+                <td className="py-2.5 px-2 border border-slate-300 text-center font-bold text-slate-500 align-middle text-xs whitespace-nowrap">
                   {sr}
                 </td>
-                <td className="p-2 border border-slate-300 align-top">
-                  <p className="font-bold text-slate-900 text-xs leading-snug">{item.productName}</p>
-                  <div className="flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] text-slate-600 mt-1 leading-tight">
-                    {item.material && (
-                      <span><strong className="text-slate-800">Mat:</strong> {item.material}</span>
-                    )}
-                    {item.grade && (
-                      <span><strong className="text-slate-800">Grade:</strong> {item.grade}</span>
-                    )}
-                    {item.size && (
-                      <span><strong className="text-slate-800">Size:</strong> {item.size}</span>
-                    )}
-                    {item.schedule && (
-                      <span><strong className="text-slate-800">Sched:</strong> {item.schedule}</span>
-                    )}
-                    {item.thickness && (
-                      <span><strong className="text-slate-800">Thk:</strong> {item.thickness}</span>
-                    )}
+                <td className="py-2.5 px-3 border border-slate-300 align-middle">
+                  <div className="text-xs text-slate-900 leading-snug font-medium whitespace-pre-wrap break-words">
+                    {item.description || item.productName}
                   </div>
-                  {item.description && (
-                    <p className="text-[10px] text-slate-500 italic mt-1 leading-normal break-words">
-                      {item.description}
-                    </p>
-                  )}
+                  {(!item.description || !item.description.includes(item.productName)) &&
+                    Boolean(item.material || item.grade || item.size) && (
+                      <div className="flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] text-slate-600 mt-1 leading-tight">
+                        {item.material && (
+                          <span><strong className="text-slate-800">Mat:</strong> {item.material}</span>
+                        )}
+                        {item.grade && (
+                          <span><strong className="text-slate-800">Grade:</strong> {item.grade}</span>
+                        )}
+                        {item.size && (
+                          <span><strong className="text-slate-800">Size:</strong> {item.size}</span>
+                        )}
+                        {item.schedule && (
+                          <span><strong className="text-slate-800">Sched:</strong> {item.schedule}</span>
+                        )}
+                        {item.thickness && (
+                          <span><strong className="text-slate-800">Thk:</strong> {item.thickness}</span>
+                        )}
+                      </div>
+                    )}
                 </td>
-                <td className="p-2 border border-slate-300 text-center font-mono text-[11px] text-slate-700 align-top">
-                  {item.hsnCode}
+                <td className="py-2.5 px-3 border border-slate-300 text-right font-semibold text-slate-900 align-middle text-xs whitespace-nowrap tabular-nums">
+                  {item.quantity}
                 </td>
-                <td className="p-2 border border-slate-300 text-right font-semibold text-slate-900 align-top text-xs">
-                  {item.quantity} <span className="text-[10px] font-normal text-slate-500">{item.unit}</span>
+                <td className="py-2.5 px-2 border border-slate-300 text-center font-medium text-slate-700 align-middle text-xs whitespace-nowrap">
+                  {item.unit || 'PCS'}
                 </td>
-                <td className="p-2 border border-slate-300 text-right font-mono text-slate-800 align-top text-xs">
-                  {item.rate.toFixed(2)}
+                <td className="py-2.5 px-3 border border-slate-300 text-right font-mono text-slate-800 align-middle text-xs whitespace-nowrap tabular-nums">
+                  {new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(item.rate) || 0)}
                   {item.discountPercent > 0 && (
-                    <span className="block text-[10px] text-emerald-600 font-sans font-semibold">
+                    <span className="block text-[10px] text-emerald-600 font-sans font-semibold whitespace-nowrap">
                       -{item.discountPercent}%
                     </span>
                   )}
                 </td>
-                <td className="p-2 border border-slate-300 text-center font-mono text-[11px] text-slate-700 align-top">
-                  {item.gstRate}%
-                </td>
-                <td className="p-2 border border-slate-300 text-right font-mono font-bold text-slate-900 align-top text-xs">
-                  {formatINR(item.totalAmount)}
+                <td className="py-2.5 px-3 border border-slate-300 text-right font-mono font-bold text-slate-900 align-middle text-xs whitespace-nowrap tabular-nums">
+                  {formatINR(rowGross)}
                 </td>
               </tr>
             );
@@ -310,65 +311,65 @@ export const QuotationDocument: React.FC<QuotationDocumentProps> = ({
 
       {/* Right: Financial Totals Breakdown */}
       <div className="col-span-5 bg-slate-50 rounded-lg p-2.5 border border-slate-200 text-xs space-y-1.5 print:bg-white print:border-slate-300">
-        <div className="flex justify-between text-slate-600 text-[11px]">
+        <div className="flex justify-between items-center text-slate-600 text-[11px]">
           <span>Item Subtotal:</span>
-          <span className="font-mono font-semibold text-slate-900">{formatINR(quotation.subtotal)}</span>
+          <span className="font-mono font-semibold text-slate-900 whitespace-nowrap tabular-nums text-right">{formatINR(quotation.subtotal)}</span>
         </div>
         {quotation.totalDiscount > 0 && (
-          <div className="flex justify-between text-emerald-600 text-[11px]">
+          <div className="flex justify-between items-center text-emerald-600 text-[11px]">
             <span>Total Discount:</span>
-            <span className="font-mono font-semibold">- {formatINR(quotation.totalDiscount)}</span>
+            <span className="font-mono font-semibold whitespace-nowrap tabular-nums text-right">- {formatINR(quotation.totalDiscount)}</span>
           </div>
         )}
-        <div className="flex justify-between text-slate-700 font-semibold border-t border-slate-200 pt-1 text-[11px]">
+        <div className="flex justify-between items-center text-slate-700 font-semibold border-t border-slate-200 pt-1 text-[11px]">
           <span>Taxable Value:</span>
-          <span className="font-mono text-slate-900">{formatINR(quotation.taxableAmount)}</span>
+          <span className="font-mono text-slate-900 whitespace-nowrap tabular-nums text-right">{formatINR(quotation.taxableAmount)}</span>
         </div>
 
         {/* GST Breakdown */}
         {quotation.isInterstate ? (
-          <div className="flex justify-between text-slate-600 text-[11px]">
-            <span>IGST (18%):</span>
-            <span className="font-mono font-medium text-slate-800">{formatINR(quotation.igstTotal)}</span>
+          <div className="flex justify-between items-center text-slate-600 text-[11px]">
+            <span>IGST ({quotation.items[0]?.gstRate || 18}%):</span>
+            <span className="font-mono font-medium text-slate-800 whitespace-nowrap tabular-nums text-right">{formatINR(quotation.igstTotal)}</span>
           </div>
         ) : (
           <>
-            <div className="flex justify-between text-slate-600 text-[11px]">
-              <span>CGST (9%):</span>
-              <span className="font-mono font-medium text-slate-800">{formatINR(quotation.cgstTotal)}</span>
+            <div className="flex justify-between items-center text-slate-600 text-[11px]">
+              <span>CGST ({(quotation.items[0]?.gstRate || 18) / 2}%):</span>
+              <span className="font-mono font-medium text-slate-800 whitespace-nowrap tabular-nums text-right">{formatINR(quotation.cgstTotal)}</span>
             </div>
-            <div className="flex justify-between text-slate-600 text-[11px]">
-              <span>SGST (9%):</span>
-              <span className="font-mono font-medium text-slate-800">{formatINR(quotation.sgstTotal)}</span>
+            <div className="flex justify-between items-center text-slate-600 text-[11px]">
+              <span>SGST ({(quotation.items[0]?.gstRate || 18) / 2}%):</span>
+              <span className="font-mono font-medium text-slate-800 whitespace-nowrap tabular-nums text-right">{formatINR(quotation.sgstTotal)}</span>
             </div>
           </>
         )}
 
         {/* Extra Charges */}
         {quotation.freightCharges > 0 && (
-          <div className="flex justify-between text-slate-600 text-[11px]">
+          <div className="flex justify-between items-center text-slate-600 text-[11px]">
             <span>Freight / Logistics:</span>
-            <span className="font-mono font-medium">{formatINR(quotation.freightCharges)}</span>
+            <span className="font-mono font-medium whitespace-nowrap tabular-nums text-right">{formatINR(quotation.freightCharges)}</span>
           </div>
         )}
         {quotation.packingCharges > 0 && (
-          <div className="flex justify-between text-slate-600 text-[11px]">
+          <div className="flex justify-between items-center text-slate-600 text-[11px]">
             <span>Packing & Handling:</span>
-            <span className="font-mono font-medium">{formatINR(quotation.packingCharges)}</span>
+            <span className="font-mono font-medium whitespace-nowrap tabular-nums text-right">{formatINR(quotation.packingCharges)}</span>
           </div>
         )}
 
         {quotation.roundOff !== 0 && (
-          <div className="flex justify-between text-slate-500 text-[10px]">
+          <div className="flex justify-between items-center text-slate-500 text-[10px]">
             <span>Round Off:</span>
-            <span className="font-mono">{quotation.roundOff > 0 ? `+₹${quotation.roundOff}` : `-₹${Math.abs(quotation.roundOff)}`}</span>
+            <span className="font-mono whitespace-nowrap tabular-nums text-right">{quotation.roundOff > 0 ? `+${formatINR(quotation.roundOff)}` : `-${formatINR(Math.abs(quotation.roundOff))}`}</span>
           </div>
         )}
 
         {/* Grand Total */}
         <div className="flex justify-between items-center text-xs font-extrabold text-white bg-red-600 p-2 rounded shadow-xs print:bg-slate-900 mt-1">
           <span className="tracking-wide">GRAND TOTAL:</span>
-          <span className="font-mono text-sm sm:text-base">{formatINR(quotation.grandTotal)}</span>
+          <span className="font-mono text-sm sm:text-base whitespace-nowrap tabular-nums text-right">{formatINR(quotation.grandTotal)}</span>
         </div>
       </div>
     </div>

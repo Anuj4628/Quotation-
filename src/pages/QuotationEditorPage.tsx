@@ -20,9 +20,10 @@ import {
   Check,
   X,
   ChevronDown,
+  ClipboardList,
 } from 'lucide-react';
 import { storage } from '../services/storage';
-import { calculateQuotation, formatINR } from '../utils/calculator';
+import { calculateQuotation, formatINR, getStateCodeByName } from '../utils/calculator';
 import {
   Customer,
   Product,
@@ -33,6 +34,7 @@ import {
 } from '../types';
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
+import { UnitSelector } from '../components/common/UnitSelector';
 
 export const QuotationEditorPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -119,14 +121,14 @@ export const QuotationEditorPage: React.FC = () => {
   >([
     {
       id: `item-${Date.now()}`,
-      productName: 'SS 316L Seamless Pipe',
-      description: 'ASTM A312 TP316L, 2" NB SCH 40, Pickled Finish, Solution Annealed',
-      material: 'Stainless Steel',
-      grade: 'ASTM A312 TP316L',
-      size: '2" NB',
-      schedule: 'SCH 40',
-      thickness: '3.91 mm',
-      standard: 'ASTM A312',
+      productName: 'SS 304 Seamless Pipe, 2 inch NB, SCH 40, ASTM A312 TP304, 6M',
+      description: 'SS 304 Seamless Pipe, 2 inch NB, SCH 40, ASTM A312 TP304, 6M',
+      material: '',
+      grade: '',
+      size: '',
+      schedule: '',
+      thickness: '',
+      standard: '',
       quantity: 50,
       unit: 'MTR',
       rate: 1450,
@@ -135,6 +137,10 @@ export const QuotationEditorPage: React.FC = () => {
       hsnCode: '73044100',
     },
   ]);
+
+  const [defaultGstRate, setDefaultGstRate] = useState<number>(18);
+  const [isBulkPasteOpen, setIsBulkPasteOpen] = useState(false);
+  const [bulkPasteText, setBulkPasteText] = useState('');
 
   // Extra Charges
   const [freightAmount, setFreightAmount] = useState<number>(0);
@@ -210,24 +216,41 @@ export const QuotationEditorPage: React.FC = () => {
         // Set items
         if (existing.items && existing.items.length > 0) {
           setItems(
-            existing.items.map((it) => ({
-              id: it.id,
-              productId: it.productId,
-              productName: it.productName,
-              description: it.description,
-              material: it.material,
-              grade: it.grade,
-              size: it.size,
-              schedule: it.schedule || '',
-              thickness: it.thickness || '',
-              standard: it.standard || '',
-              quantity: it.quantity,
-              unit: it.unit,
-              rate: it.rate,
-              discountPercent: it.discountPercent,
-              gstRate: it.gstRate,
-              hsnCode: it.hsnCode,
-            }))
+            existing.items.map((it, idx) => {
+              let desc = (it.description || '').trim();
+              if (!desc) {
+                const parts = [
+                  it.productName,
+                  it.material,
+                  it.grade,
+                  it.size,
+                  it.schedule,
+                  it.thickness,
+                  it.standard,
+                ].filter(Boolean);
+                desc = parts.join(', ');
+              } else if (it.productName && !desc.toLowerCase().includes(it.productName.toLowerCase())) {
+                desc = `${it.productName} - ${desc}`;
+              }
+              return {
+                id: it.id || `item-${Date.now()}-${idx}`,
+                productId: it.productId,
+                productName: it.productName || desc.split('\n')[0] || 'Industrial Item',
+                description: desc,
+                material: it.material || '',
+                grade: it.grade || '',
+                size: it.size || '',
+                schedule: it.schedule || '',
+                thickness: it.thickness || '',
+                standard: it.standard || '',
+                quantity: Number(it.quantity) || 1,
+                unit: it.unit || 'PCS',
+                rate: Number(it.rate) || 0,
+                discountPercent: Number(it.discountPercent) || 0,
+                gstRate: Number(it.gstRate) ?? 18,
+                hsnCode: it.hsnCode || '7304',
+              };
+            })
           );
         }
       }
@@ -263,7 +286,12 @@ export const QuotationEditorPage: React.FC = () => {
     const customerState = selectedCustomer ? selectedCustomer.state : company.state;
 
     return calculateQuotation({
-      items,
+      items: items.map((it, idx) => ({
+        ...it,
+        srNo: idx + 1,
+        productName: it.description.trim() || it.productName.trim() || 'Item',
+        description: it.description.trim() || it.productName.trim(),
+      })),
       companyState: company.state,
       customerState,
       freightAmount,
@@ -286,12 +314,13 @@ export const QuotationEditorPage: React.FC = () => {
   // --------------------------------------------------------------------------
   // Item Handlers
   // --------------------------------------------------------------------------
-  const handleAddItem = () => {
+  const handleAddItem = (focusNext = true) => {
+    const newId = `item-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
     const newItem = {
-      id: `item-${Date.now()}`,
+      id: newId,
       productName: '',
       description: '',
-      material: 'Stainless Steel',
+      material: '',
       grade: '',
       size: '',
       schedule: '',
@@ -301,15 +330,40 @@ export const QuotationEditorPage: React.FC = () => {
       unit: 'PCS' as UnitType,
       rate: 0,
       discountPercent: 0,
-      gstRate: 18,
+      gstRate: defaultGstRate,
       hsnCode: '7304',
     };
     setItems((prev) => [...prev, newItem]);
+    if (focusNext) {
+      setTimeout(() => {
+        const el = document.getElementById(`desc-input-${newId}`);
+        el?.focus();
+      }, 50);
+    }
   };
 
   const handleRemoveItem = (index: number) => {
     if (items.length <= 1) {
-      error('Cannot Remove', 'Quotation must have at least one line item');
+      const newId = `item-${Date.now()}`;
+      setItems([
+        {
+          id: newId,
+          productName: '',
+          description: '',
+          material: '',
+          grade: '',
+          size: '',
+          schedule: '',
+          thickness: '',
+          standard: '',
+          quantity: 1,
+          unit: 'PCS' as UnitType,
+          rate: 0,
+          discountPercent: 0,
+          gstRate: defaultGstRate,
+          hsnCode: '7304',
+        },
+      ]);
       return;
     }
     setItems((prev) => prev.filter((_, i) => i !== index));
@@ -317,7 +371,7 @@ export const QuotationEditorPage: React.FC = () => {
 
   const handleDuplicateItem = (index: number) => {
     const orig = items[index];
-    const copy = { ...orig, id: `item-${Date.now()}` };
+    const copy = { ...orig, id: `item-${Date.now()}-${Math.random().toString(36).slice(2, 6)}` };
     const next = [...items];
     next.splice(index + 1, 0, copy);
     setItems(next);
@@ -331,13 +385,66 @@ export const QuotationEditorPage: React.FC = () => {
     });
   };
 
+  // Bulk Paste Handler
+  const handleApplyBulkPaste = () => {
+    if (!bulkPasteText.trim()) {
+      setIsBulkPasteOpen(false);
+      return;
+    }
+    const lines = bulkPasteText
+      .split('\n')
+      .map((l) => l.trim())
+      .filter(Boolean);
+
+    if (lines.length === 0) {
+      setIsBulkPasteOpen(false);
+      return;
+    }
+
+    const newRows = lines.map((line, idx) => ({
+      id: `item-${Date.now()}-${idx}-${Math.random().toString(36).slice(2, 6)}`,
+      productName: line,
+      description: line,
+      material: '',
+      grade: '',
+      size: '',
+      schedule: '',
+      thickness: '',
+      standard: '',
+      quantity: 1,
+      unit: 'PCS' as UnitType,
+      rate: 0,
+      discountPercent: 0,
+      gstRate: defaultGstRate,
+      hsnCode: '7304',
+    }));
+
+    setItems((prev) => {
+      if (prev.length === 1 && !prev[0].description.trim() && !prev[0].productName.trim() && prev[0].rate === 0) {
+        return newRows;
+      }
+      return [...prev, ...newRows];
+    });
+
+    setBulkPasteText('');
+    setIsBulkPasteOpen(false);
+    success('Items Added', `Added ${newRows.length} item rows from paste`);
+  };
+
+  const handleGlobalGstChange = (newRate: number) => {
+    setDefaultGstRate(newRate);
+    setItems((prev) => prev.map((it) => ({ ...it, gstRate: newRate })));
+    success('Tax Rate Updated', `GST set to ${newRate}% for quotation items`);
+  };
+
   // Add Product from Database
   const handleSelectProduct = (prod: Product) => {
+    const fullDesc = [prod.name, prod.material, prod.grade, prod.size, prod.description].filter(Boolean).join(', ');
     const newItem = {
       id: `item-${Date.now()}`,
       productId: prod.id,
       productName: prod.name,
-      description: prod.description,
+      description: fullDesc,
       material: prod.material,
       grade: prod.grade,
       size: prod.size || '',
@@ -359,25 +466,28 @@ export const QuotationEditorPage: React.FC = () => {
   // Quick Customer Creation
   const handleCreateCustomerSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newCustName || !newCustGstin) {
-      error('Missing fields', 'Company name and GSTIN are required');
+    if (!newCustName.trim()) {
+      error('Missing fields', 'Company name is required');
       return;
     }
 
+    const resolvedStateCode = getStateCodeByName(newCustState, newCustGstin);
+
     const created = storage.saveCustomer({
       customerCode: `CUST-JMA-${Date.now().toString().slice(-4)}`,
-      companyName: newCustName,
+      companyName: newCustName.trim(),
       contactPerson: newCustPerson || 'Procurement In-Charge',
       email: newCustEmail || 'purchase@company.com',
       phone: newCustPhone || '+91 98000 00000',
-      gstin: newCustGstin.toUpperCase(),
+      gstin: newCustGstin ? newCustGstin.toUpperCase().trim() : '',
+      pan: (newCustGstin && newCustGstin.trim().length >= 12) ? newCustGstin.trim().substring(2, 12) : '',
       billingAddress: newCustAddress || 'Industrial Area',
       shippingAddress: newCustAddress || 'Industrial Area',
       city: newCustCity || 'Mumbai',
       state: newCustState,
-      stateCode: newCustGstin.substring(0, 2),
+      stateCode: resolvedStateCode,
       country: 'India',
-      pinCode: newCustPin,
+      pinCode: newCustPin || '400001',
       paymentTerms: '30 Days Net',
       creditLimit: 1000000,
     });
@@ -403,9 +513,9 @@ export const QuotationEditorPage: React.FC = () => {
       return;
     }
 
-    const emptyName = items.some((it) => !it.productName.trim());
-    if (emptyName) {
-      error('Validation Error', 'All item rows must have a Product Name');
+    const emptyDesc = items.some((it) => !it.description.trim() && !it.productName.trim());
+    if (emptyDesc) {
+      error('Validation Error', 'All item rows must have an Item Description');
       return;
     }
 
@@ -422,7 +532,7 @@ export const QuotationEditorPage: React.FC = () => {
       customerContactPerson: selectedCustomer.contactPerson,
       customerEmail: selectedCustomer.email,
       customerPhone: selectedCustomer.phone,
-      customerGstin: selectedCustomer.gstin,
+      customerGstin: selectedCustomer.gstin || '',
       customerPan: selectedCustomer.pan,
       billingAddress: selectedCustomer.billingAddress,
       shippingAddress: sameAsBilling ? selectedCustomer.billingAddress : shippingAddress,
@@ -430,7 +540,22 @@ export const QuotationEditorPage: React.FC = () => {
       customerState: selectedCustomer.state,
       customerStateCode: selectedCustomer.stateCode,
       customerPinCode: selectedCustomer.pinCode,
-      items: calculations.items,
+      items: calculations.items.map((it, idx) => {
+        const raw = items[idx] || {};
+        const fullDesc = raw.description?.trim() || it.description?.trim() || it.productName?.trim() || '';
+        return {
+          ...it,
+          srNo: idx + 1,
+          description: fullDesc,
+          productName: fullDesc.split('\n')[0].slice(0, 120) || 'Industrial Item',
+          material: raw.material || it.material || '',
+          grade: raw.grade || it.grade || '',
+          size: raw.size || it.size || '',
+          schedule: raw.schedule || it.schedule || '',
+          thickness: raw.thickness || it.thickness || '',
+          standard: raw.standard || it.standard || '',
+        };
+      }),
       subtotal: calculations.subtotal,
       totalDiscount: calculations.totalDiscount,
       taxableAmount: calculations.taxableAmount,
@@ -692,229 +817,195 @@ export const QuotationEditorPage: React.FC = () => {
             </div>
           </div>
 
-          {/* SECTION 3: Metal Products Line Items Builder */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-soft space-y-4">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2">
-                <Package className="w-4 h-4 text-red-600" />
-                <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                  3. Product Line Items & Metal Specifications ({items.length})
-                </h2>
+          {/* SECTION 3: Simple, Fast, Tally-Style Quotation Item Entry Table */}
+          <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-soft space-y-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-3.5">
+              <div className="flex items-center gap-2.5">
+                <div className="p-1.5 bg-red-50 text-red-600 rounded-lg">
+                  <Package className="w-4 h-4" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+                    3. Quotation Items ({items.length})
+                  </h2>
+                  <p className="text-[11px] text-slate-500">
+                    Tally-style quick entry • Paste complete product description, enter Qty & Rate
+                  </p>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
+
+              <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-start sm:justify-end">
+                {/* GST Rate Quick Selector for Non-GST / Custom Rates */}
+                <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-700">
+                  <span className="text-[11px] font-semibold text-slate-500">Tax:</span>
+                  <select
+                    value={defaultGstRate}
+                    onChange={(e) => handleGlobalGstChange(parseFloat(e.target.value) || 0)}
+                    className="bg-transparent font-bold text-xs text-slate-900 outline-none cursor-pointer"
+                    title="Change GST rate for quotation items (e.g. 0% for non-GST quotes)"
+                  >
+                    <option value="18">18% GST (Standard)</option>
+                    <option value="0">0% (Non-GST / Exempt)</option>
+                    <option value="12">12% GST</option>
+                    <option value="28">28% GST</option>
+                    <option value="5">5% GST</option>
+                  </select>
+                </div>
+
                 <button
                   type="button"
-                  onClick={() => setIsProductPickerOpen(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-sm"
+                  onClick={() => setIsBulkPasteOpen(true)}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors"
+                  title="Bulk paste multiple items from clipboard"
                 >
-                  <Search className="w-3.5 h-3.5 text-red-400" />
-                  <span>Select from Product Catalog</span>
+                  <ClipboardList className="w-3.5 h-3.5 text-slate-600" />
+                  <span>Bulk Paste</span>
                 </button>
+
                 <button
                   type="button"
-                  onClick={handleAddItem}
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold"
+                  onClick={() => handleAddItem(true)}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-sm shadow-red-600/20 transition-all"
+                  title="Add blank row (Shortcut: Press Enter on Rate)"
                 >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>+ Add Blank Row</span>
+                  <Plus className="w-4 h-4" />
+                  <span>+ Add Item</span>
                 </button>
               </div>
             </div>
 
-            {/* Line Items List */}
-            <div className="space-y-4">
-              {items.map((item, idx) => {
-                const gross = (Number(item.quantity) || 0) * (Number(item.rate) || 0);
-                const disc = (gross * (Number(item.discountPercent) || 0)) / 100;
-                const net = gross - disc;
+            {/* Tally-Style Item Table */}
+            <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+              <table className="w-full text-left border-collapse min-w-[720px]">
+                <thead>
+                  <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                    <th className="py-2.5 px-3 w-12 text-center">S.No.</th>
+                    <th className="py-2.5 px-3">Item Description (Copy & Paste Full Specs)</th>
+                    <th className="py-2.5 px-3 w-24 text-right">Qty</th>
+                    <th className="py-2.5 px-3 w-24 text-left">Unit</th>
+                    <th className="py-2.5 px-3 w-32 text-right">Rate (₹)</th>
+                    <th className="py-2.5 px-3 w-36 text-right">Amount (₹)</th>
+                    <th className="py-2.5 px-2 w-10 text-center"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-xs">
+                  {items.map((item, idx) => {
+                    const rowAmount = (Number(item.quantity) || 0) * (Number(item.rate) || 0);
+                    return (
+                      <tr key={item.id} className="hover:bg-slate-50/60 transition-colors group">
+                        {/* 1. S.No. */}
+                        <td className="py-2.5 px-3 text-center align-top font-mono font-bold text-xs text-slate-400 pt-3.5">
+                          {idx + 1}
+                        </td>
 
-                return (
-                  <div
-                    key={item.id}
-                    className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-slate-50 transition-colors space-y-3"
-                  >
-                    <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                      <span className="font-mono font-bold text-xs text-slate-700">
-                        Item #{idx + 1}
-                      </span>
-                      <div className="flex items-center gap-1">
-                        <button
-                          type="button"
-                          onClick={() => handleDuplicateItem(idx)}
-                          title="Duplicate Item"
-                          className="p-1 text-slate-400 hover:text-slate-700 rounded-md"
-                        >
-                          <Copy className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveItem(idx)}
-                          title="Delete Item"
-                          className="p-1 text-slate-400 hover:text-red-600 rounded-md"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
+                        {/* 2. Item Description */}
+                        <td className="py-2 px-3 align-top">
+                          <textarea
+                            id={`desc-input-${item.id}`}
+                            rows={Math.max(1, Math.min(6, (item.description.match(/\n/g) || []).length + 1))}
+                            value={item.description}
+                            onChange={(e) => handleItemChange(idx, 'description', e.target.value)}
+                            placeholder="Paste complete product description (e.g. SS 304 Seamless Pipe, 2 inch NB, SCH 40, ASTM A312, 6M)..."
+                            className="w-full bg-white border border-slate-200 focus:border-red-500 focus:ring-1 focus:ring-red-500 rounded-lg p-2 text-xs font-medium text-slate-900 placeholder:text-slate-400 outline-none resize-y min-h-[38px] transition-all leading-relaxed"
+                          />
+                        </td>
 
-                    {/* Row 1: Product Name & Specs */}
-                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 text-xs">
-                      <div className="sm:col-span-5">
-                        <label className="block font-semibold text-slate-700 mb-0.5">Product Name</label>
-                        <input
-                          type="text"
-                          value={item.productName}
-                          onChange={(e) => handleItemChange(idx, 'productName', e.target.value)}
-                          placeholder="e.g. SS 316L Seamless Pipe"
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 font-semibold text-slate-900 outline-none focus:border-red-500"
-                        />
-                      </div>
+                        {/* 3. Qty */}
+                        <td className="py-2 px-3 align-top w-24">
+                          <input
+                            type="number"
+                            step="any"
+                            min="0"
+                            value={item.quantity === 0 ? '' : item.quantity}
+                            onChange={(e) =>
+                              handleItemChange(idx, 'quantity', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)
+                            }
+                            placeholder="1"
+                            className="w-full bg-white border border-slate-200 focus:border-red-500 focus:ring-1 focus:ring-red-500 rounded-lg px-2.5 py-2 text-xs font-mono font-semibold text-right text-slate-900 outline-none transition-all"
+                          />
+                        </td>
 
-                      <div className="sm:col-span-3">
-                        <label className="block font-semibold text-slate-700 mb-0.5">Material</label>
-                        <input
-                          type="text"
-                          value={item.material}
-                          onChange={(e) => handleItemChange(idx, 'material', e.target.value)}
-                          placeholder="e.g. Stainless Steel / Inconel"
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-800 outline-none focus:border-red-500"
-                        />
-                      </div>
+                        {/* 4. Unit */}
+                        <td className="py-2 px-3 align-top w-28">
+                          <UnitSelector
+                            id={`unit-input-${item.id}`}
+                            value={item.unit}
+                            onChange={(newUnit) => handleItemChange(idx, 'unit', newUnit)}
+                            onEnterNext={() => {
+                              document.getElementById(`rate-input-${item.id}`)?.focus();
+                            }}
+                          />
+                        </td>
 
-                      <div className="sm:col-span-4">
-                        <label className="block font-semibold text-slate-700 mb-0.5">Grade / Specification</label>
-                        <input
-                          type="text"
-                          value={item.grade}
-                          onChange={(e) => handleItemChange(idx, 'grade', e.target.value)}
-                          placeholder="e.g. ASTM A312 TP316L"
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-800 outline-none focus:border-red-500"
-                        />
-                      </div>
-                    </div>
+                        {/* 5. Rate */}
+                        <td className="py-2 px-3 align-top w-32">
+                          <div className="relative">
+                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[11px] font-mono text-slate-400">
+                              ₹
+                            </span>
+                            <input
+                              id={`rate-input-${item.id}`}
+                              type="number"
+                              step="any"
+                              min="0"
+                              value={item.rate === 0 ? '' : item.rate}
+                              onChange={(e) =>
+                                handleItemChange(idx, 'rate', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)
+                              }
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  if (idx === items.length - 1) {
+                                    handleAddItem(true);
+                                  } else {
+                                    const nextId = items[idx + 1]?.id;
+                                    document.getElementById(`desc-input-${nextId}`)?.focus();
+                                  }
+                                }
+                              }}
+                              placeholder="0.00"
+                              className="w-full bg-white border border-slate-200 focus:border-red-500 focus:ring-1 focus:ring-red-500 rounded-lg pl-6 pr-2.5 py-2 text-xs font-mono font-semibold text-right text-slate-900 outline-none transition-all"
+                            />
+                          </div>
+                        </td>
 
-                    {/* Row 2: Engineering dimensions */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                      <div>
-                        <label className="block font-medium text-slate-500 mb-0.5">Size / NB</label>
-                        <input
-                          type="text"
-                          value={item.size}
-                          onChange={(e) => handleItemChange(idx, 'size', e.target.value)}
-                          placeholder='2" NB / 50mm'
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-slate-800 outline-none"
-                        />
-                      </div>
-                      <div>
-                        <label className="block font-medium text-slate-500 mb-0.5">Schedule / Class</label>
-                        <input
-                          type="text"
-                          value={item.schedule}
-                          onChange={(e) => handleItemChange(idx, 'schedule', e.target.value)}
-                          placeholder="SCH 40 / Class 150"
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-slate-800 outline-none"
-                        />
-                      </div>
-                      <div>
-                        <label className="block font-medium text-slate-500 mb-0.5">Thickness / Standard</label>
-                        <input
-                          type="text"
-                          value={item.thickness}
-                          onChange={(e) => handleItemChange(idx, 'thickness', e.target.value)}
-                          placeholder="3.91 mm"
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-slate-800 outline-none"
-                        />
-                      </div>
-                      <div>
-                        <label className="block font-medium text-slate-500 mb-0.5">HSN Code</label>
-                        <input
-                          type="text"
-                          value={item.hsnCode}
-                          onChange={(e) => handleItemChange(idx, 'hsnCode', e.target.value)}
-                          placeholder="73044100"
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 font-mono text-slate-800 outline-none"
-                        />
-                      </div>
-                    </div>
+                        {/* 6. Amount */}
+                        <td className="py-2 px-3 align-top w-36">
+                          <div className="px-2.5 py-2 bg-slate-100/80 rounded-lg font-mono font-bold text-xs text-slate-900 text-right truncate border border-slate-200/60">
+                            {formatINR(rowAmount)}
+                          </div>
+                        </td>
 
-                    {/* Row 3: Commercial Quantities & Rates */}
-                    <div className="grid grid-cols-2 sm:grid-cols-6 gap-2 text-xs pt-1 border-t border-slate-200">
-                      <div>
-                        <label className="block font-semibold text-slate-700 mb-0.5">Quantity</label>
-                        <input
-                          type="number"
-                          step="any"
-                          value={item.quantity}
-                          onChange={(e) => handleItemChange(idx, 'quantity', parseFloat(e.target.value) || 0)}
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 font-bold font-mono text-slate-900 outline-none focus:border-red-500"
-                        />
-                      </div>
+                        {/* 7. Action */}
+                        <td className="py-2 px-2 align-top text-center w-10">
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveItem(idx)}
+                            title="Delete row"
+                            className="p-1.5 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors mt-0.5"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
 
-                      <div>
-                        <label className="block font-semibold text-slate-700 mb-0.5">Unit</label>
-                        <select
-                          value={item.unit}
-                          onChange={(e) => handleItemChange(idx, 'unit', e.target.value as UnitType)}
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 font-semibold text-slate-800 outline-none"
-                        >
-                          <option value="PCS">PCS</option>
-                          <option value="MTR">MTR</option>
-                          <option value="KG">KG</option>
-                          <option value="MT">MT</option>
-                          <option value="SET">SET</option>
-                          <option value="NOS">NOS</option>
-                          <option value="LOT">LOT</option>
-                          <option value="MM">MM</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block font-semibold text-slate-700 mb-0.5">Rate (₹)</label>
-                        <input
-                          type="number"
-                          step="any"
-                          value={item.rate}
-                          onChange={(e) => handleItemChange(idx, 'rate', parseFloat(e.target.value) || 0)}
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 font-mono font-semibold text-slate-900 outline-none focus:border-red-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block font-semibold text-slate-700 mb-0.5">Discount %</label>
-                        <input
-                          type="number"
-                          step="any"
-                          value={item.discountPercent}
-                          onChange={(e) => handleItemChange(idx, 'discountPercent', parseFloat(e.target.value) || 0)}
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 font-mono text-slate-800 outline-none"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block font-semibold text-slate-700 mb-0.5">GST %</label>
-                        <select
-                          value={item.gstRate}
-                          onChange={(e) => handleItemChange(idx, 'gstRate', parseFloat(e.target.value) || 18)}
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 font-semibold text-slate-800 outline-none"
-                        >
-                          <option value="18">18% (Standard Metal)</option>
-                          <option value="12">12%</option>
-                          <option value="28">28%</option>
-                          <option value="5">5%</option>
-                          <option value="0">0% (Nil / Exempt)</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block font-semibold text-slate-700 mb-0.5">Line Total (₹)</label>
-                        <div className="px-2 py-1.5 bg-slate-200/70 rounded-lg font-mono font-bold text-slate-900 text-right truncate">
-                          {formatINR(net)}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+            {/* Bottom Keyboard Hint */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center text-[11px] text-slate-400 px-1">
+              <p>
+                <strong className="text-slate-600 font-medium">Quick Workflow:</strong> Paste description → <kbd className="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono text-[10px] text-slate-600">Tab</kbd> to Qty → <kbd className="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono text-[10px] text-slate-600">Tab</kbd> to Unit → <kbd className="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono text-[10px] text-slate-600">Tab</kbd> to Rate → <kbd className="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono text-[10px] text-slate-600">Enter</kbd> to add next row.
+              </p>
+              <button
+                type="button"
+                onClick={() => handleAddItem(true)}
+                className="text-red-600 hover:text-red-700 font-bold hover:underline mt-1 sm:mt-0"
+              >
+                + Add another item
+              </button>
             </div>
           </div>
 
@@ -1314,11 +1405,10 @@ export const QuotationEditorPage: React.FC = () => {
                 </div>
                 <div>
                   <label className="block font-semibold text-slate-700 mb-0.5">
-                    GSTIN <span className="text-red-500">*</span>
+                    GSTIN <span className="text-slate-400 font-normal text-xs">(Optional)</span>
                   </label>
                   <input
                     type="text"
-                    required
                     maxLength={15}
                     value={newCustGstin}
                     onChange={(e) => setNewCustGstin(e.target.value.toUpperCase())}
@@ -1411,6 +1501,57 @@ export const QuotationEditorPage: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Quick Bulk Paste Modal */}
+      {isBulkPasteOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+          <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ClipboardList className="w-4 h-4 text-red-600" />
+                <h3 className="text-sm font-bold text-slate-900">Bulk Paste Product Descriptions</h3>
+              </div>
+              <button
+                onClick={() => setIsBulkPasteOpen(false)}
+                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-4 space-y-3">
+              <p className="text-xs text-slate-600">
+                Paste multiple lines from WhatsApp, Excel, or email. Each non-empty line will be added as a separate quotation row.
+              </p>
+              <textarea
+                rows={7}
+                autoFocus
+                value={bulkPasteText}
+                onChange={(e) => setBulkPasteText(e.target.value)}
+                placeholder={`SS 304 Seamless Pipe, 2 inch NB, SCH 40, ASTM A312 TP304, 6M\nStainless Steel Flanges, ASTM A182 F304, Class 150, 4 inch, RF\nSS 316L Round Bar, 50mm Dia, ASTM A276, 3M`}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-mono text-slate-900 outline-none focus:bg-white focus:border-red-500 leading-relaxed"
+              />
+            </div>
+
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setIsBulkPasteOpen(false)}
+                className="px-3.5 py-2 text-slate-600 hover:bg-slate-200/60 rounded-xl font-semibold text-xs"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleApplyBulkPaste}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs shadow-md shadow-red-600/20"
+              >
+                Insert Rows
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -44,5 +44,18 @@ for (const file of files) {
   }
 }
 
+// 6. Also sync unpacked app to local AppData installation if present so local EXE immediately updates
+const localAppDir = path.join(os.homedir(), 'AppData', 'Local', 'Programs', 'quotation-software');
+const unpackedDir = path.join(tempOutDir, 'win-unpacked');
+if (fs.existsSync(localAppDir) && fs.existsSync(unpackedDir)) {
+  console.log('\n5. Updating local installed application folder...');
+  try {
+    fs.cpSync(unpackedDir, localAppDir, { recursive: true, force: true });
+    console.log('   ✓ Local installed desktop app updated successfully!');
+  } catch (err) {
+    console.log('   (Note: Could not copy directly to local installed folder, installer in ./release can be run manually)');
+  }
+}
+
 console.log('\n=== BUILD COMPLETED SUCCESSFULLY! ===');
 console.log(`Installer is ready at: ${path.join(projectReleaseDir, 'Jubilant Metal and Alloys – Quotation Billing Setup.exe')}\n`);

@@ -93,6 +93,63 @@ export function isSameState(stateA: string, stateB: string): boolean {
 }
 
 /**
+ * Resolves 2-digit Indian GST State Code from state name or GSTIN
+ */
+export function getStateCodeByName(stateName: string, gstin?: string): string {
+  if (gstin && gstin.trim().length >= 2) {
+    const code = gstin.trim().substring(0, 2);
+    if (!isNaN(Number(code))) return code;
+  }
+
+  if (!stateName) return '27';
+  const clean = stateName.trim().toLowerCase().replace(/[^a-z]/g, '');
+
+  const stateToCode: Record<string, string> = {
+    jammuandkashmir: '01',
+    jammukashmir: '01',
+    himachalpradesh: '02',
+    punjab: '03',
+    chandigarh: '04',
+    uttarakhand: '05',
+    haryana: '06',
+    delhi: '07',
+    rajasthan: '08',
+    uttarpradesh: '09',
+    bihar: '10',
+    sikkim: '11',
+    arunachalpradesh: '12',
+    nagaland: '13',
+    manipur: '14',
+    mizoram: '15',
+    tripura: '16',
+    meghalaya: '17',
+    assam: '18',
+    westbengal: '19',
+    bengal: '19',
+    jharkhand: '20',
+    odisha: '21',
+    orissa: '21',
+    chhattisgarh: '22',
+    madhyapradesh: '23',
+    gujarat: '24',
+    damananddiu: '26',
+    dadraandnagarhaveli: '26',
+    maharashtra: '27',
+    karnataka: '29',
+    goa: '30',
+    kerala: '32',
+    tamilnadu: '33',
+    puducherry: '34',
+    pondicherry: '34',
+    telangana: '36',
+    andhrapradesh: '37',
+    ladakh: '38',
+  };
+
+  return stateToCode[clean] || '27';
+}
+
+/**
  * Executes full quotation commercial & tax calculations
  */
 export function calculateQuotation(input: CalculationInput): CalculationResult {
@@ -109,7 +166,7 @@ export function calculateQuotation(input: CalculationInput): CalculationResult {
     const quantity = Number(item.quantity) || 0;
     const rate = Number(item.rate) || 0;
     const discountPercent = Number(item.discountPercent) || 0;
-    const gstRate = Number(item.gstRate) || 18;
+    const gstRate = item.gstRate !== undefined && !isNaN(Number(item.gstRate)) ? Number(item.gstRate) : 18;
 
     const grossAmount = round2(quantity * rate);
     const discountAmount = round2((grossAmount * discountPercent) / 100);
@@ -208,13 +265,13 @@ export function round2(num: number): number {
 }
 
 export function formatINR(amount: number): string {
-  if (isNaN(amount)) return '₹0.00';
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
+  if (isNaN(amount) || amount === null || amount === undefined) return '₹0.00';
+  const formatted = new Intl.NumberFormat('en-IN', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(amount);
+  }).format(Math.abs(amount));
+  const sign = amount < 0 ? '-' : '';
+  return `${sign}₹${formatted}`;
 }
 
 /**

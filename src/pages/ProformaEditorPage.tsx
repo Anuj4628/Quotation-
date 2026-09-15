@@ -18,9 +18,10 @@ import {
   Eye,
   Calendar,
   MessageSquare,
+  ClipboardList,
 } from 'lucide-react';
 import { storage } from '../services/storage';
-import { calculateQuotation, formatINR } from '../utils/calculator';
+import { calculateQuotation, formatINR, getStateCodeByName } from '../utils/calculator';
 import {
   Customer,
   Product,
@@ -31,6 +32,7 @@ import {
 import { useToast } from '../context/ToastContext';
 import { useAuth } from '../context/AuthContext';
 import { ProformaDocument } from '../components/proforma/ProformaDocument';
+import { UnitSelector } from '../components/common/UnitSelector';
 
 export const ProformaEditorPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -136,14 +138,14 @@ export const ProformaEditorPage: React.FC = () => {
   >([
     {
       id: `item-${Date.now()}`,
-      productName: 'SS 316L Seamless Pipe',
-      description: 'ASTM A312 TP316L, 2" NB SCH 40, Pickled Finish, Solution Annealed',
-      material: 'Stainless Steel',
-      grade: 'ASTM A312 TP316L',
-      size: '2" NB',
-      schedule: 'SCH 40',
-      thickness: '3.91 mm',
-      standard: 'ASTM A312',
+      productName: 'SS 316L Seamless Pipe, 2 inch NB, SCH 40, ASTM A312 TP316L, 3.91 MM, 6 Meter Length',
+      description: 'SS 316L Seamless Pipe, 2 inch NB, SCH 40, ASTM A312 TP316L, 3.91 MM, 6 Meter Length',
+      material: '',
+      grade: '',
+      size: '',
+      schedule: '',
+      thickness: '',
+      standard: '',
       quantity: 50,
       unit: 'MTR',
       rate: 1450,
@@ -152,6 +154,10 @@ export const ProformaEditorPage: React.FC = () => {
       hsnCode: '73044100',
     },
   ]);
+
+  const [defaultGstRate, setDefaultGstRate] = useState<number>(18);
+  const [isBulkPasteOpen, setIsBulkPasteOpen] = useState(false);
+  const [bulkPasteText, setBulkPasteText] = useState('');
 
   // Extra Charges
   const [freightAmount, setFreightAmount] = useState<number>(0);
@@ -234,27 +240,44 @@ export const ProformaEditorPage: React.FC = () => {
         setShipToPinCode(existing.shipToPinCode || '');
         setShipToPhone(existing.shipToPhone || '');
 
-        // Set items
+        // Set items with backward data compatibility
         if (existing.items && existing.items.length > 0) {
           setItems(
-            existing.items.map((it) => ({
-              id: it.id,
-              productId: it.productId,
-              productName: it.productName,
-              description: it.description,
-              material: it.material,
-              grade: it.grade,
-              size: it.size,
-              schedule: it.schedule || '',
-              thickness: it.thickness || '',
-              standard: it.standard || '',
-              quantity: it.quantity,
-              unit: it.unit,
-              rate: it.rate,
-              discountPercent: it.discountPercent,
-              gstRate: it.gstRate,
-              hsnCode: it.hsnCode,
-            }))
+            existing.items.map((it, idx) => {
+              let desc = (it.description || '').trim();
+              if (!desc) {
+                const parts = [
+                  it.productName,
+                  it.material,
+                  it.grade,
+                  it.size,
+                  it.schedule,
+                  it.thickness,
+                  it.standard,
+                ].filter(Boolean);
+                desc = parts.join(', ');
+              } else if (it.productName && !desc.toLowerCase().includes(it.productName.toLowerCase())) {
+                desc = `${it.productName} - ${desc}`;
+              }
+              return {
+                id: it.id || `item-${Date.now()}-${idx}`,
+                productId: it.productId,
+                productName: it.productName || desc.split('\n')[0] || 'Industrial Item',
+                description: desc,
+                material: it.material || '',
+                grade: it.grade || '',
+                size: it.size || '',
+                schedule: it.schedule || '',
+                thickness: it.thickness || '',
+                standard: it.standard || '',
+                quantity: Number(it.quantity) || 1,
+                unit: it.unit || 'PCS',
+                rate: Number(it.rate) || 0,
+                discountPercent: Number(it.discountPercent) || 0,
+                gstRate: Number(it.gstRate) ?? 18,
+                hsnCode: it.hsnCode || '7304',
+              };
+            })
           );
         }
       }
@@ -316,7 +339,12 @@ export const ProformaEditorPage: React.FC = () => {
       : (shipToState || (selectedCustomer ? selectedCustomer.state : company.state));
 
     return calculateQuotation({
-      items,
+      items: items.map((it, idx) => ({
+        ...it,
+        srNo: idx + 1,
+        productName: it.description.trim().split('\n')[0] || it.productName.trim() || 'Item',
+        description: it.description.trim() || it.productName.trim(),
+      })),
       companyState: company.state,
       customerState: effectiveState,
       freightAmount,
@@ -341,12 +369,13 @@ export const ProformaEditorPage: React.FC = () => {
   // --------------------------------------------------------------------------
   // Item Handlers
   // --------------------------------------------------------------------------
-  const handleAddItem = () => {
+  const handleAddItem = (focusNext = true) => {
+    const newId = `item-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
     const newItem = {
-      id: `item-${Date.now()}`,
+      id: newId,
       productName: '',
       description: '',
-      material: 'Stainless Steel',
+      material: '',
       grade: '',
       size: '',
       schedule: '',
@@ -356,15 +385,40 @@ export const ProformaEditorPage: React.FC = () => {
       unit: 'PCS' as UnitType,
       rate: 0,
       discountPercent: 0,
-      gstRate: 18,
+      gstRate: defaultGstRate,
       hsnCode: '7304',
     };
     setItems((prev) => [...prev, newItem]);
+    if (focusNext) {
+      setTimeout(() => {
+        const el = document.getElementById(`desc-input-${newId}`);
+        el?.focus();
+      }, 50);
+    }
   };
 
   const handleRemoveItem = (index: number) => {
     if (items.length <= 1) {
-      error('Cannot Remove', 'Proforma Invoice must have at least one line item');
+      const newId = `item-${Date.now()}`;
+      setItems([
+        {
+          id: newId,
+          productName: '',
+          description: '',
+          material: '',
+          grade: '',
+          size: '',
+          schedule: '',
+          thickness: '',
+          standard: '',
+          quantity: 1,
+          unit: 'PCS' as UnitType,
+          rate: 0,
+          discountPercent: 0,
+          gstRate: defaultGstRate,
+          hsnCode: '7304',
+        },
+      ]);
       return;
     }
     setItems((prev) => prev.filter((_, i) => i !== index));
@@ -372,7 +426,7 @@ export const ProformaEditorPage: React.FC = () => {
 
   const handleDuplicateItem = (index: number) => {
     const orig = items[index];
-    const copy = { ...orig, id: `item-${Date.now()}` };
+    const copy = { ...orig, id: `item-${Date.now()}-${Math.random().toString(36).slice(2, 6)}` };
     const next = [...items];
     next.splice(index + 1, 0, copy);
     setItems(next);
@@ -386,13 +440,66 @@ export const ProformaEditorPage: React.FC = () => {
     });
   };
 
+  // Bulk Paste Handler
+  const handleApplyBulkPaste = () => {
+    if (!bulkPasteText.trim()) {
+      setIsBulkPasteOpen(false);
+      return;
+    }
+    const lines = bulkPasteText
+      .split('\n')
+      .map((l) => l.trim())
+      .filter(Boolean);
+
+    if (lines.length === 0) {
+      setIsBulkPasteOpen(false);
+      return;
+    }
+
+    const newRows = lines.map((line, idx) => ({
+      id: `item-${Date.now()}-${idx}-${Math.random().toString(36).slice(2, 6)}`,
+      productName: line,
+      description: line,
+      material: '',
+      grade: '',
+      size: '',
+      schedule: '',
+      thickness: '',
+      standard: '',
+      quantity: 1,
+      unit: 'PCS' as UnitType,
+      rate: 0,
+      discountPercent: 0,
+      gstRate: defaultGstRate,
+      hsnCode: '7304',
+    }));
+
+    setItems((prev) => {
+      if (prev.length === 1 && !prev[0].description.trim() && !prev[0].productName.trim() && prev[0].rate === 0) {
+        return newRows;
+      }
+      return [...prev, ...newRows];
+    });
+
+    setBulkPasteText('');
+    setIsBulkPasteOpen(false);
+    success('Items Added', `Added ${newRows.length} item rows from paste`);
+  };
+
+  const handleGlobalGstChange = (newRate: number) => {
+    setDefaultGstRate(newRate);
+    setItems((prev) => prev.map((it) => ({ ...it, gstRate: newRate })));
+    success('Tax Rate Updated', `GST set to ${newRate}% for proforma items`);
+  };
+
   // Add Product from Catalog
   const handleSelectProduct = (prod: Product) => {
+    const fullDesc = [prod.name, prod.material, prod.grade, prod.size, prod.description].filter(Boolean).join(', ');
     const newItem = {
       id: `item-${Date.now()}`,
       productId: prod.id,
       productName: prod.name,
-      description: prod.description,
+      description: fullDesc,
       material: prod.material,
       grade: prod.grade,
       size: prod.size || '',
@@ -414,25 +521,28 @@ export const ProformaEditorPage: React.FC = () => {
   // Quick Customer Creation
   const handleCreateCustomerSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newCustName || !newCustGstin) {
-      error('Missing fields', 'Company name and GSTIN are required');
+    if (!newCustName.trim()) {
+      error('Missing fields', 'Company name is required');
       return;
     }
 
+    const resolvedStateCode = getStateCodeByName(newCustState, newCustGstin);
+
     const created = storage.saveCustomer({
       customerCode: `CUST-JMA-${Date.now().toString().slice(-4)}`,
-      companyName: newCustName,
+      companyName: newCustName.trim(),
       contactPerson: newCustPerson || 'Procurement In-Charge',
       email: newCustEmail || 'purchase@company.com',
       phone: newCustPhone || '+91 98000 00000',
-      gstin: newCustGstin.toUpperCase(),
+      gstin: newCustGstin ? newCustGstin.toUpperCase().trim() : '',
+      pan: (newCustGstin && newCustGstin.trim().length >= 12) ? newCustGstin.trim().substring(2, 12) : '',
       billingAddress: newCustAddress || 'Industrial Area',
       shippingAddress: newCustAddress || 'Industrial Area',
       city: newCustCity || 'Mumbai',
       state: newCustState,
-      stateCode: newCustGstin.substring(0, 2),
+      stateCode: resolvedStateCode,
       country: 'India',
-      pinCode: newCustPin,
+      pinCode: newCustPin || '400001',
       paymentTerms: '30 Days Net',
       creditLimit: 1000000,
     });
@@ -467,9 +577,9 @@ export const ProformaEditorPage: React.FC = () => {
       return;
     }
 
-    const emptyName = items.some((it) => !it.productName.trim());
-    if (emptyName) {
-      error('Validation Error', 'All item rows must have a Product Name');
+    const emptyDesc = items.some((it) => !it.description.trim() && !it.productName.trim());
+    if (emptyDesc) {
+      error('Validation Error', 'All item rows must have a Product & Material Specification');
       return;
     }
 
@@ -913,227 +1023,227 @@ export const ProformaEditorPage: React.FC = () => {
               )}
             </div>
 
-            {/* SECTION 2: Line Items & Metal Specifications */}
+            {/* SECTION 2: Product & Material Specification Table (Simplified Fast Entry) */}
             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-soft space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2">
                   <Package className="w-4 h-4 text-red-600" />
                   <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
-                    2. Product & Metal Specifications
+                    2. Product & Material Specifications
                   </h2>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center flex-wrap gap-2">
+                  {/* Global GST Rate Selector */}
+                  <div className="flex items-center gap-1.5 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
+                    <span className="text-[11px] font-semibold text-slate-500">GST:</span>
+                    <select
+                      value={defaultGstRate}
+                      onChange={(e) => handleGlobalGstChange(parseFloat(e.target.value) || 0)}
+                      className="bg-transparent font-bold text-xs text-slate-900 outline-none cursor-pointer"
+                      title="Change GST rate for proforma items"
+                    >
+                      <option value="18">18% GST (Standard)</option>
+                      <option value="0">0% (Exempt)</option>
+                      <option value="12">12% GST</option>
+                      <option value="28">28% GST</option>
+                      <option value="5">5% GST</option>
+                    </select>
+                  </div>
+
                   <button
                     type="button"
                     onClick={() => setIsProductPickerOpen(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors"
                   >
                     <Package className="w-3.5 h-3.5 text-red-600" />
-                    <span>From Product Catalog</span>
+                    <span>From Catalog</span>
                   </button>
+
                   <button
                     type="button"
-                    onClick={handleAddItem}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-xs"
+                    onClick={() => setIsBulkPasteOpen(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors"
+                    title="Bulk paste multiple items from clipboard"
                   >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Add Item</span>
+                    <ClipboardList className="w-3.5 h-3.5 text-slate-600" />
+                    <span>Bulk Paste</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleAddItem(true)}
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-sm shadow-red-600/20 transition-all"
+                    title="Add blank row (Shortcut: Press Enter on Rate or GST)"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>+ Add Row</span>
                   </button>
                 </div>
               </div>
 
-              {/* Items Table Form */}
-              <div className="space-y-4">
-                {items.map((item, idx) => (
-                  <div
-                    key={item.id}
-                    className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3 relative hover:border-slate-300 transition-colors"
-                  >
-                    {/* Item Row Header */}
-                    <div className="flex items-center justify-between pb-2 border-b border-slate-200/80">
-                      <div className="flex items-center gap-2">
-                        <span className="w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center">
-                          {idx + 1}
-                        </span>
-                        <span className="text-xs font-bold text-slate-700">Line Item #{idx + 1}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => handleDuplicateItem(idx)}
-                          className="p-1 text-slate-400 hover:text-slate-600 rounded"
-                          title="Duplicate item"
-                        >
-                          <Copy className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveItem(idx)}
-                          className="p-1 text-slate-400 hover:text-red-600 rounded"
-                          title="Remove item"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
+              {/* Tally-Style Fast Entry Table */}
+              <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+                <table className="w-full text-left border-collapse min-w-[760px]">
+                  <thead>
+                    <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                      <th className="py-2.5 px-3 w-12 text-center">SR. NO.</th>
+                      <th className="py-2.5 px-3">PRODUCT & MATERIAL SPECIFICATION</th>
+                      <th className="py-2.5 px-3 w-24 text-right">QTY</th>
+                      <th className="py-2.5 px-3 w-24 text-left">UNIT</th>
+                      <th className="py-2.5 px-3 w-32 text-right">RATE (₹)</th>
+                      <th className="py-2.5 px-3 w-24 text-center">GST %</th>
+                      <th className="py-2.5 px-3 w-36 text-right">AMOUNT (₹)</th>
+                      <th className="py-2.5 px-2 w-10 text-center"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-xs">
+                    {items.map((item, idx) => {
+                      const baseAmount = (Number(item.quantity) || 0) * (Number(item.rate) || 0);
+                      const gstRateVal = item.gstRate ?? defaultGstRate;
+                      const gstAmount = baseAmount * (gstRateVal / 100);
+                      const finalAmount = baseAmount + gstAmount;
 
-                    {/* Product Name & Description */}
-                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
-                      <div className="sm:col-span-8">
-                        <label className="block text-[10px] font-semibold text-slate-600 uppercase mb-1">
-                          Product / Item Name <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          value={item.productName}
-                          onChange={(e) => handleItemChange(idx, 'productName', e.target.value)}
-                          placeholder="e.g. SS 316L Seamless Pipe"
-                          className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-900 focus:outline-none focus:border-red-500"
-                        />
-                      </div>
-                      <div className="sm:col-span-4">
-                        <label className="block text-[10px] font-semibold text-slate-600 uppercase mb-1">
-                          HSN Code
-                        </label>
-                        <input
-                          type="text"
-                          value={item.hsnCode}
-                          onChange={(e) => handleItemChange(idx, 'hsnCode', e.target.value)}
-                          placeholder="7304"
-                          className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-mono text-slate-800"
-                        />
-                      </div>
-                    </div>
+                      return (
+                        <tr key={item.id} className="hover:bg-slate-50/60 transition-colors group">
+                          {/* 1. SR. NO. */}
+                          <td className="py-2.5 px-3 text-center align-top font-mono font-bold text-xs text-slate-400 pt-3.5">
+                            {idx + 1}
+                          </td>
 
-                    {/* Technical Specifications (Grade, Size, Schedule, Material) */}
-                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                      <div>
-                        <label className="block text-[9px] font-semibold text-slate-500 uppercase mb-0.5">Material</label>
-                        <input
-                          type="text"
-                          value={item.material}
-                          onChange={(e) => handleItemChange(idx, 'material', e.target.value)}
-                          placeholder="Stainless Steel"
-                          className="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[9px] font-semibold text-slate-500 uppercase mb-0.5">Grade</label>
-                        <input
-                          type="text"
-                          value={item.grade}
-                          onChange={(e) => handleItemChange(idx, 'grade', e.target.value)}
-                          placeholder="TP 316L"
-                          className="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[9px] font-semibold text-slate-500 uppercase mb-0.5">Size / Dimension</label>
-                        <input
-                          type="text"
-                          value={item.size}
-                          onChange={(e) => handleItemChange(idx, 'size', e.target.value)}
-                          placeholder="2 inch NB"
-                          className="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[9px] font-semibold text-slate-500 uppercase mb-0.5">Schedule</label>
-                        <input
-                          type="text"
-                          value={item.schedule}
-                          onChange={(e) => handleItemChange(idx, 'schedule', e.target.value)}
-                          placeholder="SCH 40"
-                          className="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[9px] font-semibold text-slate-500 uppercase mb-0.5">Thickness</label>
-                        <input
-                          type="text"
-                          value={item.thickness}
-                          onChange={(e) => handleItemChange(idx, 'thickness', e.target.value)}
-                          placeholder="3.91 mm"
-                          className="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs"
-                        />
-                      </div>
-                    </div>
+                          {/* 2. PRODUCT & MATERIAL SPECIFICATION */}
+                          <td className="py-2 px-3 align-top">
+                            <textarea
+                              id={`desc-input-${item.id}`}
+                              rows={Math.max(1, Math.min(6, (item.description.match(/\n/g) || []).length + 1))}
+                              value={item.description}
+                              onChange={(e) => handleItemChange(idx, 'description', e.target.value)}
+                              placeholder="Paste complete product description (e.g. SS 316L Seamless Pipe, 2 inch NB, SCH 40, ASTM A312 TP316L, 3.91 MM, 6 Meter Length)..."
+                              className="w-full bg-white border border-slate-200 focus:border-red-500 focus:ring-1 focus:ring-red-500 rounded-lg p-2 text-xs font-medium text-slate-900 placeholder:text-slate-400 outline-none resize-y min-h-[38px] transition-all leading-relaxed"
+                            />
+                          </td>
 
-                    {/* Quantity, Unit, Rate, Discount, GST & Row Total */}
-                    <div className="grid grid-cols-2 sm:grid-cols-6 gap-2 pt-1 border-t border-slate-200/60 items-end">
-                      <div>
-                        <label className="block text-[9px] font-semibold text-slate-600 uppercase mb-0.5">Qty</label>
-                        <input
-                          type="number"
-                          min="0.01"
-                          step="any"
-                          value={item.quantity}
-                          onChange={(e) => handleItemChange(idx, 'quantity', parseFloat(e.target.value) || 0)}
-                          className="w-full bg-white border border-slate-200 rounded px-2 py-1.5 text-xs font-bold text-slate-900"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[9px] font-semibold text-slate-600 uppercase mb-0.5">Unit</label>
-                        <select
-                          value={item.unit}
-                          onChange={(e) => handleItemChange(idx, 'unit', e.target.value as UnitType)}
-                          className="w-full bg-white border border-slate-200 rounded px-1.5 py-1.5 text-xs font-medium"
-                        >
-                          <option value="PCS">PCS</option>
-                          <option value="MTR">MTR</option>
-                          <option value="KGS">KGS</option>
-                          <option value="TON">TON</option>
-                          <option value="FEET">FEET</option>
-                          <option value="NOS">NOS</option>
-                          <option value="SET">SET</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-[9px] font-semibold text-slate-600 uppercase mb-0.5">Rate (₹)</label>
-                        <input
-                          type="number"
-                          min="0"
-                          step="any"
-                          value={item.rate}
-                          onChange={(e) => handleItemChange(idx, 'rate', parseFloat(e.target.value) || 0)}
-                          className="w-full bg-white border border-slate-200 rounded px-2 py-1.5 text-xs font-mono font-bold text-slate-900"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[9px] font-semibold text-slate-600 uppercase mb-0.5">Disc %</label>
-                        <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          step="any"
-                          value={item.discountPercent}
-                          onChange={(e) => handleItemChange(idx, 'discountPercent', parseFloat(e.target.value) || 0)}
-                          className="w-full bg-white border border-slate-200 rounded px-2 py-1.5 text-xs text-emerald-700 font-bold"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[9px] font-semibold text-slate-600 uppercase mb-0.5">GST %</label>
-                        <select
-                          value={item.gstRate}
-                          onChange={(e) => handleItemChange(idx, 'gstRate', parseFloat(e.target.value) || 18)}
-                          className="w-full bg-white border border-slate-200 rounded px-1.5 py-1.5 text-xs font-mono"
-                        >
-                          <option value={18}>18%</option>
-                          <option value={12}>12%</option>
-                          <option value={5}>5%</option>
-                          <option value={28}>28%</option>
-                          <option value={0}>0% (Exempt)</option>
-                        </select>
-                      </div>
-                      <div className="text-right">
-                        <span className="block text-[9px] font-semibold text-slate-400 uppercase">Item Amount</span>
-                        <span className="text-xs font-bold font-mono text-slate-900">
-                          {formatINR((item.quantity * item.rate * (1 - (item.discountPercent || 0) / 100)) * (1 + (item.gstRate || 0) / 100))}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                          {/* 3. QTY */}
+                          <td className="py-2 px-3 align-top w-24">
+                            <input
+                              type="number"
+                              step="any"
+                              min="0"
+                              value={item.quantity === 0 ? '' : item.quantity}
+                              onChange={(e) =>
+                                handleItemChange(idx, 'quantity', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)
+                              }
+                              placeholder="1"
+                              className="w-full bg-white border border-slate-200 focus:border-red-500 focus:ring-1 focus:ring-red-500 rounded-lg px-2.5 py-2 text-xs font-mono font-semibold text-right text-slate-900 outline-none transition-all"
+                            />
+                          </td>
+
+                          {/* 4. UNIT */}
+                          <td className="py-2 px-3 align-top w-28">
+                            <UnitSelector
+                              id={`unit-input-${item.id}`}
+                              value={item.unit}
+                              onChange={(newUnit) => handleItemChange(idx, 'unit', newUnit)}
+                              onEnterNext={() => {
+                                document.getElementById(`rate-input-${item.id}`)?.focus();
+                              }}
+                            />
+                          </td>
+
+                          {/* 5. RATE */}
+                          <td className="py-2 px-3 align-top w-32">
+                            <div className="relative">
+                              <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[11px] font-mono text-slate-400">
+                                ₹
+                              </span>
+                              <input
+                                id={`rate-input-${item.id}`}
+                                type="number"
+                                step="any"
+                                min="0"
+                                value={item.rate === 0 ? '' : item.rate}
+                                onChange={(e) =>
+                                  handleItemChange(idx, 'rate', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)
+                                }
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    if (idx === items.length - 1) {
+                                      handleAddItem(true);
+                                    } else {
+                                      const nextId = items[idx + 1]?.id;
+                                      document.getElementById(`desc-input-${nextId}`)?.focus();
+                                    }
+                                  }
+                                }}
+                                placeholder="0.00"
+                                className="w-full bg-white border border-slate-200 focus:border-red-500 focus:ring-1 focus:ring-red-500 rounded-lg pl-6 pr-2.5 py-2 text-xs font-mono font-semibold text-right text-slate-900 outline-none transition-all"
+                              />
+                            </div>
+                          </td>
+
+                          {/* 6. GST % */}
+                          <td className="py-2 px-3 align-top w-24">
+                            <select
+                              value={item.gstRate ?? defaultGstRate}
+                              onChange={(e) => handleItemChange(idx, 'gstRate', parseFloat(e.target.value) || 0)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  if (idx === items.length - 1) {
+                                    handleAddItem(true);
+                                  } else {
+                                    const nextId = items[idx + 1]?.id;
+                                    document.getElementById(`desc-input-${nextId}`)?.focus();
+                                  }
+                                }
+                              }}
+                              className="w-full bg-white border border-slate-200 focus:border-red-500 focus:ring-1 focus:ring-red-500 rounded-lg px-2 py-2 text-xs font-semibold text-slate-800 outline-none transition-all"
+                            >
+                              <option value={18}>18%</option>
+                              <option value={12}>12%</option>
+                              <option value={5}>5%</option>
+                              <option value={28}>28%</option>
+                              <option value={0}>0%</option>
+                            </select>
+                          </td>
+
+                          {/* 7. AMOUNT */}
+                          <td className="py-2 px-3 align-top w-36">
+                            <div className="px-2.5 py-2 bg-slate-100/80 rounded-lg font-mono font-bold text-xs text-slate-900 text-right truncate border border-slate-200/60">
+                              {formatINR(finalAmount)}
+                            </div>
+                          </td>
+
+                          {/* 8. Action */}
+                          <td className="py-2 px-2 align-top text-center w-10">
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveItem(idx)}
+                              title="Delete row"
+                              className="p-1.5 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors mt-0.5"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Bottom Keyboard Hint & Add Row Control */}
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center text-[11px] text-slate-400 px-1">
+                <p>
+                  <strong className="text-slate-600 font-medium">Fast Workflow:</strong> Paste specs → <kbd className="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono text-[10px] text-slate-600">Tab</kbd> to Qty → <kbd className="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono text-[10px] text-slate-600">Tab</kbd> to Unit → <kbd className="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono text-[10px] text-slate-600">Tab</kbd> to Rate → <kbd className="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono text-[10px] text-slate-600">Enter</kbd> to add next row.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => handleAddItem(true)}
+                  className="text-red-600 hover:text-red-700 font-bold hover:underline mt-1 sm:mt-0"
+                >
+                  + Add another item
+                </button>
               </div>
             </div>
 
@@ -1518,13 +1628,12 @@ export const ProformaEditorPage: React.FC = () => {
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="block text-[11px] font-semibold text-slate-600 mb-1">GSTIN *</label>
+                <label className="block text-[11px] font-semibold text-slate-600 mb-1">GSTIN (Optional)</label>
                 <input
                   type="text"
-                  required
                   value={newCustGstin}
                   onChange={(e) => setNewCustGstin(e.target.value.toUpperCase())}
-                  placeholder="27AABCU..."
+                  placeholder="27AABCU... (Optional)"
                   className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-mono"
                 />
               </div>
@@ -1585,6 +1694,57 @@ export const ProformaEditorPage: React.FC = () => {
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {/* Quick Bulk Paste Modal */}
+      {isBulkPasteOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+          <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <ClipboardList className="w-4 h-4 text-red-600" />
+                <h3 className="text-sm font-bold text-slate-900">Bulk Paste Product Descriptions</h3>
+              </div>
+              <button
+                onClick={() => setIsBulkPasteOpen(false)}
+                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-4 space-y-3">
+              <p className="text-xs text-slate-600">
+                Paste multiple lines from WhatsApp, Excel, or email. Each non-empty line will be added as a separate proforma row.
+              </p>
+              <textarea
+                rows={7}
+                autoFocus
+                value={bulkPasteText}
+                onChange={(e) => setBulkPasteText(e.target.value)}
+                placeholder={`SS 316L Seamless Pipe, 2 inch NB, SCH 40, ASTM A312 TP316L, 6M\nStainless Steel Flanges, ASTM A182 F316L, Class 150, 4 inch, RF\nSS 316L Round Bar, 50mm Dia, ASTM A276, 3M`}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-mono text-slate-900 outline-none focus:bg-white focus:border-red-500 leading-relaxed"
+              />
+            </div>
+
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setIsBulkPasteOpen(false)}
+                className="px-3.5 py-2 text-slate-600 hover:bg-slate-200/60 rounded-xl font-semibold text-xs"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleApplyBulkPaste}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs shadow-md shadow-red-600/20"
+              >
+                Insert Rows
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

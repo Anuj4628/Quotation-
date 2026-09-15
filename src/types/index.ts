@@ -45,7 +45,7 @@ export interface ProductCategory {
   itemCount?: number;
 }
 
-export type UnitType = 'PCS' | 'KG' | 'MT' | 'MTR' | 'MM' | 'SET' | 'LOT' | 'NOS';
+export type UnitType = 'PCS' | 'KG' | 'MT' | 'MTR' | 'MM' | 'SET' | 'LOT' | 'NOS' | string;
 
 export interface Product {
   id: string;

@@ -18,7 +18,7 @@ import {
 import { storage } from '../services/storage';
 import { Customer } from '../types';
 import { useToast } from '../context/ToastContext';
-import { formatINR } from '../utils/calculator';
+import { formatINR, getStateCodeByName } from '../utils/calculator';
 
 export const CustomersPage: React.FC = () => {
   const navigate = useNavigate();
@@ -130,12 +130,12 @@ export const CustomersPage: React.FC = () => {
 
   const handleSaveSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!companyName.trim() || !gstin.trim()) {
-      error('Validation Error', 'Company Name and GSTIN are required');
+    if (!companyName.trim()) {
+      error('Validation Error', 'Company Name is required');
       return;
     }
 
-    const stateCode = gstin.substring(0, 2);
+    const stateCode = getStateCodeByName(state, gstin);
 
     storage.saveCustomer({
       ...(editingCustomer ? { id: editingCustomer.id } : {}),
@@ -146,7 +146,7 @@ export const CustomersPage: React.FC = () => {
       phone,
       whatsapp,
       gstin: gstin.toUpperCase(),
-      pan: pan ? pan.toUpperCase() : gstin.substring(2, 12),
+      pan: pan ? pan.toUpperCase() : (gstin && gstin.length >= 12 ? gstin.substring(2, 12) : ''),
       billingAddress,
       shippingAddress: shippingAddress || billingAddress,
       city,
@@ -406,11 +406,10 @@ export const CustomersPage: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">
-                    GSTIN (15 Digits) <span className="text-red-500">*</span>
+                    GSTIN (15 Digits) <span className="text-slate-400 font-normal text-xs">(Optional)</span>
                   </label>
                   <input
                     type="text"
-                    required
                     maxLength={15}
                     value={gstin}
                     onChange={(e) => setGstin(e.target.value.toUpperCase())}
