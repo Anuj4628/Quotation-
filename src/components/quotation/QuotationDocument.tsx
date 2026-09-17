@@ -47,17 +47,22 @@ export const QuotationDocument: React.FC<QuotationDocumentProps> = ({
   // Resolve official brand logo: custom upload takes precedence, otherwise use official Jubilant brand logo
   const logoSrc = resolveLogoUrl(company?.logo);
 
+  // Helper to format address without irregular spacing around commas
+  const cleanAddressText = (text?: string) => (text ? text.replace(/\s*,\s*/g, ', ').trim() : '');
+
   // 1. Primary Header Banner
   const renderHeader = () => (
     <div className="flex justify-between items-start pb-4 border-b-2 border-red-600 gap-4">
       {/* Left: Brand Logo & Title */}
-      <div className="flex flex-col items-start gap-1 max-w-[360px] min-w-0">
-        <img
-          src={logoSrc}
-          alt={company.name || 'JUBILANT METAL AND ALLOYS'}
-          className="h-12 w-auto max-w-[240px] object-contain shrink-0"
-          crossOrigin="anonymous"
-        />
+      <div className="flex flex-col items-start gap-1 max-w-[260px] shrink-0">
+        <div className="bg-white rounded flex items-center">
+          <img
+            src={logoSrc}
+            alt={company.name || 'JUBILANT METAL AND ALLOYS'}
+            className="h-14 w-auto max-w-[260px] object-contain shrink-0"
+            crossOrigin="anonymous"
+          />
+        </div>
         {company.name && !company.name.toLowerCase().includes('jubilant') && (
           <h2 className="text-sm font-extrabold text-slate-900 tracking-tight font-display uppercase leading-tight">
             {company.name}
@@ -69,11 +74,15 @@ export const QuotationDocument: React.FC<QuotationDocumentProps> = ({
       </div>
 
       {/* Right: Registered Office & Tax IDs */}
-      <div className="text-right text-[10px] sm:text-[11px] text-slate-600 space-y-0.5 leading-snug shrink-0 max-w-[340px]">
-        <p className="font-semibold text-slate-900 leading-tight">{company.addressLine1}</p>
-        {company.addressLine2 && <p className="leading-tight">{company.addressLine2}</p>}
+      <div className="text-right text-[10px] sm:text-[10.5px] text-slate-600 space-y-0.5 leading-snug shrink-0 max-w-[460px]">
+        <p className="font-semibold text-slate-900 leading-tight">
+          {cleanAddressText(company.addressLine1)}
+        </p>
+        {company.addressLine2 && (
+          <p className="leading-tight">{cleanAddressText(company.addressLine2)}</p>
+        )}
         <p className="leading-tight">
-          {company.city}, {company.state} - {company.pinCode}, {company.country}
+          {cleanAddressText(`${company.city}, ${company.state} - ${company.pinCode}, ${company.country}`)}
         </p>
         <p className="leading-tight">
           <span className="text-slate-500">Tel:</span>{' '}
@@ -83,9 +92,14 @@ export const QuotationDocument: React.FC<QuotationDocumentProps> = ({
           <span className="text-slate-500">Email:</span>{' '}
           <span className="font-medium text-slate-800">{company.email}</span>
         </p>
-        <div className="pt-1 flex items-center justify-end gap-1.5 font-mono text-[9.5px] sm:text-[10px] font-bold text-slate-800">
+        <div className="pt-1.5 flex items-center justify-end gap-1.5 font-mono text-[9px] sm:text-[9.5px] font-bold text-slate-800">
           <span className="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded leading-none">GSTIN: {company.gstin}</span>
-          <span className="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded leading-none">PAN: {company.pan}</span>
+          {company.pan && company.pan.trim() ? (
+            <span className="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded leading-none">PAN: {company.pan}</span>
+          ) : null}
+          {company.cin && company.cin.trim() ? (
+            <span className="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded leading-none">CIN: {company.cin}</span>
+          ) : null}
         </div>
       </div>
     </div>
@@ -486,12 +500,14 @@ export const QuotationDocument: React.FC<QuotationDocumentProps> = ({
   const renderContinuationHeader = (pageNumber: number, totalPages: number) => (
     <div className="flex justify-between items-center pb-3 border-b-2 border-red-600 mb-4">
       <div className="flex items-center gap-3">
-        <img
-          src={logoSrc}
-          alt={company.name || 'Jubilant Metal and Alloys'}
-          className="h-8 w-auto object-contain"
-          crossOrigin="anonymous"
-        />
+        <div className="bg-white rounded flex items-center">
+          <img
+            src={logoSrc}
+            alt={company.name || 'Jubilant Metal and Alloys'}
+            className="h-9 w-auto max-w-[180px] object-contain shrink-0"
+            crossOrigin="anonymous"
+          />
+        </div>
         <div>
           {company.name && !company.name.toLowerCase().includes('jubilant') && (
             <h3 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider font-display">

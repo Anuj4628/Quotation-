@@ -280,7 +280,7 @@ export const SettingsPage: React.FC = () => {
               <img
                 src={resolveLogoUrl(company.logo)}
                 alt="Logo preview"
-                className="h-12 w-auto object-contain bg-white p-2 rounded-lg border border-slate-200"
+                className="h-14 w-auto max-w-[260px] object-contain bg-white p-2 rounded-lg border border-slate-200"
               />
               <div className="flex-1 text-center sm:text-left">
                 <p className="font-bold text-slate-800">Company Brand Logo</p>
@@ -333,19 +333,22 @@ export const SettingsPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">PAN Number</label>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  PAN Number <span className="text-slate-400 font-normal text-xs">(Optional)</span>
+                </label>
                 <input
                   type="text"
-                  required
                   maxLength={10}
-                  value={company.pan}
+                  value={company.pan || ''}
                   onChange={(e) => setCompany({ ...company, pan: e.target.value.toUpperCase() })}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-slate-900 outline-none focus:bg-white focus:border-red-500"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">CIN (Corporate Identity)</label>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  CIN (Corporate Identity) <span className="text-slate-400 font-normal text-xs">(Optional)</span>
+                </label>
                 <input
                   type="text"
                   value={company.cin || ''}

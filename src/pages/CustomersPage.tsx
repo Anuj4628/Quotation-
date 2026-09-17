@@ -109,21 +109,21 @@ export const CustomersPage: React.FC = () => {
 
   const openEditModal = (c: Customer) => {
     setEditingCustomer(c);
-    setCode(c.customerCode);
-    setCompanyName(c.companyName);
-    setContactPerson(c.contactPerson);
-    setEmail(c.email);
-    setPhone(c.phone);
+    setCode(c.customerCode || '');
+    setCompanyName(c.companyName || '');
+    setContactPerson(c.contactPerson || '');
+    setEmail(c.email || '');
+    setPhone(c.phone || '');
     setWhatsapp(c.whatsapp || '');
-    setGstin(c.gstin);
+    setGstin(c.gstin || '');
     setPan(c.pan || '');
-    setBillingAddress(c.billingAddress);
-    setShippingAddress(c.shippingAddress || c.billingAddress);
-    setCity(c.city);
-    setState(c.state);
-    setPinCode(c.pinCode);
-    setPaymentTerms(c.paymentTerms);
-    setCreditLimit(c.creditLimit);
+    setBillingAddress(c.billingAddress || '');
+    setShippingAddress(c.shippingAddress || c.billingAddress || '');
+    setCity(c.city || 'Mumbai');
+    setState(c.state || 'Maharashtra');
+    setPinCode(c.pinCode || '400001');
+    setPaymentTerms(c.paymentTerms || '30 Days Net');
+    setCreditLimit(c.creditLimit || 0);
     setNotes(c.notes || '');
     setIsModalOpen(true);
   };
@@ -135,36 +135,47 @@ export const CustomersPage: React.FC = () => {
       return;
     }
 
-    const stateCode = getStateCodeByName(state, gstin);
+    try {
+      const stateCode = getStateCodeByName(state, gstin);
 
-    storage.saveCustomer({
-      ...(editingCustomer ? { id: editingCustomer.id } : {}),
-      customerCode: code,
-      companyName,
-      contactPerson,
-      email,
-      phone,
-      whatsapp,
-      gstin: gstin.toUpperCase(),
-      pan: pan ? pan.toUpperCase() : (gstin && gstin.length >= 12 ? gstin.substring(2, 12) : ''),
-      billingAddress,
-      shippingAddress: shippingAddress || billingAddress,
-      city,
-      state,
-      stateCode,
-      country: 'India',
-      pinCode,
-      paymentTerms,
-      creditLimit: Number(creditLimit) || 0,
-      notes,
-    });
+      const savedCust = storage.saveCustomer({
+        ...(editingCustomer ? { id: editingCustomer.id } : {}),
+        customerCode: code || (editingCustomer ? editingCustomer.customerCode : ''),
+        companyName: companyName.trim(),
+        contactPerson: contactPerson || '',
+        designation: editingCustomer?.designation || '',
+        email: email || '',
+        phone: phone || '',
+        whatsapp: whatsapp || (editingCustomer?.whatsapp || ''),
+        gstin: (gstin || '').toUpperCase(),
+        pan: pan ? pan.toUpperCase() : (gstin && gstin.length >= 12 ? gstin.substring(2, 12).toUpperCase() : ''),
+        billingAddress: billingAddress || '',
+        shippingAddress: shippingAddress || billingAddress || '',
+        city: city || 'Mumbai',
+        state: state || 'Maharashtra',
+        stateCode,
+        country: 'India',
+        pinCode: pinCode || '400001',
+        paymentTerms: paymentTerms || '30 Days Net',
+        creditLimit: Number(creditLimit) || 0,
+        notes: notes || (editingCustomer?.notes || ''),
+      });
 
-    success(
-      editingCustomer ? 'Customer Updated' : 'Customer Added',
-      `${companyName} saved successfully`
-    );
-    setIsModalOpen(false);
-    setRefreshKey((k) => k + 1);
+      if (!savedCust) {
+        throw new Error('Save customer operation failed');
+      }
+
+      success(
+        editingCustomer ? 'Customer Updated' : 'Customer Added',
+        `${companyName} saved successfully`
+      );
+      setIsModalOpen(false);
+      setEditingCustomer(null);
+      setRefreshKey((k) => k + 1);
+    } catch (err: any) {
+      console.error('Error saving customer:', err);
+      error('Save Failed', err?.message || 'Failed to update customer details');
+    }
   };
 
   const handleDelete = (id: string, name: string) => {
@@ -340,7 +351,7 @@ export const CustomersPage: React.FC = () => {
               </button>
             </div>
 
-            <form onSubmit={handleSaveSubmit} className="p-6 overflow-y-auto space-y-4 text-xs">
+            <form onSubmit={handleSaveSubmit} noValidate className="p-6 overflow-y-auto space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="sm:col-span-2">
                   <label className="block font-semibold text-slate-700 mb-1">

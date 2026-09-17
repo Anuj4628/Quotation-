@@ -68,11 +68,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div>
         <div className="flex items-center justify-between p-4 border-b border-slate-800/80">
           <div className="flex items-center gap-3 overflow-hidden">
-            <img
-              src={DEFAULT_LOGO}
-              alt="Jubilant Metal and Alloys"
-              className="h-9 w-auto max-w-[180px] object-contain shrink-0"
-            />
+            <div className="bg-white rounded-xl px-2.5 py-1.5 shadow-sm flex items-center justify-center border border-white/10">
+              <img
+                src={DEFAULT_LOGO}
+                alt="Jubilant Metal and Alloys"
+                className={collapsed ? "h-7 w-7 object-contain" : "h-8 w-auto max-w-[165px] object-contain shrink-0"}
+              />
+            </div>
           </div>
           {/* Desktop collapse toggle */}
           <button

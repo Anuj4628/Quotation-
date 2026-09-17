@@ -46,7 +46,7 @@ export const LoginPage: React.FC = () => {
           <img
             src={DEFAULT_LOGO}
             alt="Jubilant Metal and Alloys"
-            className="h-12 w-auto object-contain mx-auto"
+            className="h-14 w-auto max-w-[280px] object-contain mx-auto"
           />
         </div>
         <h2 className="text-xl sm:text-2xl font-display font-extrabold text-white tracking-tight">

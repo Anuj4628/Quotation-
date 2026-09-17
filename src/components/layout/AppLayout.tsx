@@ -46,9 +46,10 @@ export const AppLayout: React.FC = () => {
               <Menu className="w-5 h-5" />
             </button>
 
-            {/* Mobile Logo Fallback */}
             <div className="lg:hidden flex items-center gap-2">
-              <img src={DEFAULT_LOGO} alt="Jubilant Metal" className="h-7 w-auto" />
+              <div className="bg-white rounded-lg px-2.5 py-1 border border-slate-200 shadow-sm flex items-center">
+                <img src={DEFAULT_LOGO} alt="Jubilant Metal" className="h-7 w-auto max-w-[150px] object-contain shrink-0" />
+              </div>
             </div>
 
             {/* Global Search Bar */}

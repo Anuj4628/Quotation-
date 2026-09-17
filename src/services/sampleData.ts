@@ -18,7 +18,7 @@ export const INITIAL_COMPANY: CompanyProfile = {
   id: 'comp-jubilant-01',
   name: 'JUBILANT METAL AND ALLOYS',
   tagline: 'Stockist, Manufacturer & Global Exporters of High Nickel Alloys, Stainless Steel & Pipes',
-  logo: '/logo3.png',
+  logo: '/New logo.png',
   gstin: '27AABCJ4589K1Z5',
   pan: 'AABCJ4589K',
   cin: 'U27100MH2012PTC231456',
