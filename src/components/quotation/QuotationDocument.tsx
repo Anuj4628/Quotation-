@@ -3,6 +3,7 @@ import { Quotation, CompanyProfile } from '../../types';
 import { formatINR } from '../../utils/calculator';
 import { storage } from '../../services/storage';
 import { resolveLogoUrl, resolveSignatureUrl, resolveStampUrl } from '../../utils/assetResolver';
+import { BRAND_PARTNERS } from '../../utils/brandAssets';
 
 interface QuotationDocumentProps {
   quotation: Quotation;
@@ -434,69 +435,102 @@ export const QuotationDocument: React.FC<QuotationDocumentProps> = ({
     </div>
   );
 
-  // 8. Authorized Signatory Area (Stamp + Signature stacked)
+  // 8. Authorized Signatory Area & Brands We Deal In
   const renderSignatoryBlock = () => (
-    <div className="flex justify-between items-end pt-2 pb-2 text-xs">
-      <div className="text-slate-500 text-[10px] space-y-0.5 max-w-sm">
-        <p className="font-semibold text-slate-700">Commercial Validity & Acceptance</p>
-        <p>This quotation is valid until {quotation.validUntil}. Standard warranty & inspection clauses apply.</p>
-        <p>Issued by Jubilant Metal and Alloys. E. & O.E.</p>
-      </div>
+    <div className="pt-2 pb-1 border-t border-slate-200 mt-2 text-xs">
+      <div className="flex justify-between items-stretch gap-6">
+        {/* Left: Brands We Deal In (occupying empty space above Commercial Validity) */}
+        <div className="flex-1 flex flex-col justify-between max-w-[490px] min-w-0">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-700">
+                BRANDS WE DEAL IN:
+              </span>
+              <div className="h-[1px] bg-slate-200 flex-1" />
+            </div>
 
-      <div className="flex flex-col items-center text-center">
-        <p className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">For</p>
-        <p className="font-bold text-slate-900 text-xs uppercase tracking-wider mb-1">
-          {company.name || 'JUBILANT METAL AND ALLOYS'}
-        </p>
+            <div className="grid grid-cols-3 gap-x-4 gap-y-2.5 items-center justify-items-center">
+              {BRAND_PARTNERS.map((brand) => (
+                <div key={brand.id} className="flex items-center justify-center w-full h-11">
+                  <img
+                    src={brand.src}
+                    alt={brand.name}
+                    className="max-h-11 w-auto max-w-[145px] object-contain"
+                    crossOrigin="anonymous"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
 
-        <div className="flex flex-col items-center justify-center py-1.5 min-h-[90px] gap-1.5">
-          {/* Stamp Image */}
-          {stampEnabled && stampUrl && (
-            <img
-              src={stampUrl}
-              alt="Company Stamp"
-              className={`object-contain select-none transition-all ${stampSize === 'sm'
-                ? 'h-16 w-16'
-                : stampSize === 'lg'
-                  ? 'h-24 w-24'
-                  : 'h-20 w-20'
-                }`}
-            />
-          )}
-
-          {/* Signature Image */}
-          {signatureEnabled && signatureUrl && (
-            <img
-              src={signatureUrl}
-              alt="Authorized Signature"
-              className={`object-contain select-none transition-all ${signatureSize === 'sm'
-                ? 'h-11 max-w-[160px]'
-                : signatureSize === 'lg'
-                  ? 'h-18 max-w-[240px]'
-                  : 'h-14 max-w-[200px]'
-                }`}
-            />
-          )}
-
-          {/* Fallback spacing if neither is enabled */}
-          {(!stampEnabled || !stampUrl) && (!signatureEnabled || !signatureUrl) && (
-            <div className="h-14" />
-          )}
+          {/* Commercial Validity & Acceptance */}
+          <div className="text-slate-500 text-[9.5px] space-y-0.5 pt-2 border-t border-slate-100 mt-2">
+            <p className="font-semibold text-slate-700">Commercial Validity & Acceptance</p>
+            <p>This quotation is valid until {quotation.validUntil}. Standard warranty & inspection clauses apply.</p>
+            <p>Issued by Jubilant Metal and Alloys. E. & O.E.</p>
+          </div>
         </div>
 
-        <div className="border-t border-slate-400 pt-1 px-6 text-center min-w-[200px] mt-1">
-          <span className="font-bold text-slate-800 block text-xs">Authorized Signatory</span>
-          {signatoryDesignation && (
-            <span className="text-[10px] text-slate-500 block">
-              {signatoryDesignation}
-            </span>
-          )}
+        {/* Right: Authorized Signatory (Stamp + Signature) */}
+        <div className="flex flex-col items-center text-center shrink-0 min-w-[210px] justify-between">
+          <div>
+            <p className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">For</p>
+            <p className="font-bold text-slate-900 text-xs uppercase tracking-wider mb-1">
+              {company.name || 'JUBILANT METAL AND ALLOYS'}
+            </p>
+
+            <div className="flex flex-col items-center justify-center py-1 min-h-[90px] gap-1">
+              {/* Stamp Image */}
+              {stampEnabled && stampUrl && (
+                <img
+                  src={stampUrl}
+                  alt="Company Stamp"
+                  className={`object-contain select-none transition-all ${
+                    stampSize === 'sm'
+                      ? 'h-16 w-16'
+                      : stampSize === 'lg'
+                        ? 'h-24 w-24'
+                        : 'h-20 w-20'
+                  }`}
+                />
+              )}
+
+              {/* Signature Image */}
+              {signatureEnabled && signatureUrl && (
+                <img
+                  src={signatureUrl}
+                  alt="Authorized Signature"
+                  className={`object-contain select-none transition-all ${
+                    signatureSize === 'sm'
+                      ? 'h-11 max-w-[160px]'
+                      : signatureSize === 'lg'
+                        ? 'h-18 max-w-[240px]'
+                        : 'h-14 max-w-[200px]'
+                  }`}
+                />
+              )}
+
+              {/* Fallback spacing if neither is enabled */}
+              {(!stampEnabled || !stampUrl) && (!signatureEnabled || !signatureUrl) && (
+                <div className="h-14" />
+              )}
+            </div>
+          </div>
+
+          <div className="border-t border-slate-400 pt-1 px-6 text-center min-w-[200px] mt-1">
+            <span className="font-bold text-slate-800 block text-xs">Authorized Signatory</span>
+            {signatoryDesignation && (
+              <span className="text-[10px] text-slate-500 block">
+                {signatoryDesignation}
+              </span>
+            )}
+          </div>
         </div>
       </div>
     </div>
   );
 
-  // 9. Document Continuation Header (For Page 2+)
+  // 10. Document Continuation Header (For Page 2+)
   const renderContinuationHeader = (pageNumber: number, totalPages: number) => (
     <div className="flex justify-between items-center pb-3 border-b-2 border-red-600 mb-4">
       <div className="flex items-center gap-3">
