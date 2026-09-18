@@ -8,9 +8,9 @@ import jindalSteelLogo from '../assets/Our Valued Customer/brand-jindal-steel-po
 import jindalSawLogo from '../assets/Our Valued Customer/brand-jindal-saw.png';
 
 // Individual brand assets provided in project assets
-import jindalStainlessLogo from '../assets/Our Valued Customer/WhatsApp Image 2026-09-17 at 19.29.42 (2).jpeg';
-import msSeamlessLogo from '../assets/Our Valued Customer/WhatsApp Image 2026-09-17 at 19.29.42.jpeg';
-import virajProfileLogo from '../assets/Our Valued Customer/WhatsApp Image 2026-09-17 at 19.29.42 (1).jpeg';
+import jindalStainlessLogo from '../assets/Our Valued Customer/brand-jindal-stainless.png';
+import msSeamlessLogo from '../assets/Our Valued Customer/brand-maharashtra-seamless.png';
+import virajProfileLogo from '../assets/Our Valued Customer/brand-viraj-profiles.png';
 
 export interface BrandPartner {
   id: string;
