@@ -1,5 +1,15 @@
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
+
+// Secure Password Hashing Helpers (PBKDF2 SHA-512 with 10,000 iterations & cryptographic salt)
+export function hashPassword(password: string, salt: string): string {
+  return crypto.pbkdf2Sync(password, salt, 10000, 64, 'sha512').toString('hex');
+}
+
+export function generateSalt(): string {
+  return crypto.randomBytes(16).toString('hex');
+}
 
 // Types corresponding to application models
 export interface DBQuotationItem {
@@ -328,11 +338,24 @@ export class DatabaseManager {
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         email TEXT UNIQUE,
-        role TEXT,
+        username TEXT UNIQUE,
+        password_hash TEXT,
+        password_salt TEXT,
+        role TEXT DEFAULT 'admin',
         phone TEXT,
         avatar TEXT,
         isActive INTEGER DEFAULT 1,
         createdAt TEXT
+      );
+
+      CREATE TABLE IF NOT EXISTS sessions (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        token TEXT UNIQUE NOT NULL,
+        created_at TEXT NOT NULL,
+        expires_at TEXT NOT NULL,
+        last_activity TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       );
 
       CREATE TABLE IF NOT EXISTS product_categories (
@@ -642,6 +665,17 @@ export class DatabaseManager {
 
     this.exec(schema);
 
+    // Self-healing migrations for user auth columns
+    try {
+      this.run("ALTER TABLE users ADD COLUMN username TEXT");
+    } catch (e) {}
+    try {
+      this.run("ALTER TABLE users ADD COLUMN password_hash TEXT");
+    } catch (e) {}
+    try {
+      this.run("ALTER TABLE users ADD COLUMN password_salt TEXT");
+    } catch (e) {}
+
     // Self-healing migrations for settings columns
     try {
       this.run("ALTER TABLE settings ADD COLUMN piPrefix TEXT DEFAULT 'JMA-PI'");
@@ -649,6 +683,41 @@ export class DatabaseManager {
     try {
       this.run("ALTER TABLE settings ADD COLUMN piSequenceNumber INTEGER DEFAULT 501");
     } catch (e) {}
+
+    // Ensure strictly 1 Administrator account and purge demo/test accounts
+    this.cleanupAndEnsureSingleAdmin();
+  }
+
+  private cleanupAndEnsureSingleAdmin() {
+    try {
+      // 1. Permanently remove known demo and non-admin test accounts
+      this.run("DELETE FROM users WHERE id IN ('user-02', 'user-03', 'user-04') OR role != 'admin' OR LOWER(email) LIKE '%demo%' OR LOWER(name) LIKE '%demo%' OR LOWER(name) LIKE '%test%'");
+
+      // 2. Check if primary Administrator account exists
+      let admin = this.queryOne("SELECT * FROM users WHERE role = 'admin' OR username = 'admin' OR id = 'user-01' LIMIT 1");
+      const defaultPassword = 'admin123'; // Production handover password
+      if (!admin) {
+        const salt = generateSalt();
+        const hash = hashPassword(defaultPassword, salt);
+        const now = new Date().toISOString();
+        this.run(
+          `INSERT INTO users (id, name, email, username, password_hash, password_salt, role, phone, avatar, isActive, createdAt)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          ['user-01', 'Administrator', 'admin@jubilantmetal.com', 'admin', hash, salt, 'admin', '+91 98201 45890', null, 1, now]
+        );
+      } else {
+        const salt = generateSalt();
+        const hash = hashPassword(defaultPassword, salt);
+        this.run(
+          `UPDATE users SET username = 'admin', role = 'admin', isActive = 1, password_hash = ?, password_salt = ? WHERE id = ?`,
+          [hash, salt, admin.id]
+        );
+        // Remove any secondary users if they accidentally exist
+        this.run("DELETE FROM users WHERE id != ?", [admin.id]);
+      }
+    } catch (e) {
+      console.error('[DatabaseManager] Error enforcing single admin:', e);
+    }
   }
 
   private seedInitialDataIfEmpty() {
@@ -683,19 +752,18 @@ export class DatabaseManager {
       );
     }
 
-    // 2. Users
+    // 2. Users (Strictly single Administrator account)
     const userCount = this.queryOne('SELECT count(*) as c FROM users')?.c || 0;
     if (userCount === 0) {
-      console.log('[DatabaseManager] Seeding initial users...');
-      const users = [
-        ['user-01', 'Rajesh Sharma', 'admin@jubilantmetal.com', 'admin', '+91 98201 45890', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150', 1, '2026-01-10T10:00:00Z'],
-        ['user-02', 'Vikram Mehta', 'vikram.m@jubilantmetal.com', 'sales_manager', '+91 98202 33411', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150', 1, '2026-01-15T11:30:00Z'],
-        ['user-03', 'Anjali Desai', 'anjali.d@jubilantmetal.com', 'sales_executive', '+91 98203 77890', 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150', 1, '2026-02-01T09:00:00Z'],
-        ['user-04', 'Amit Patel', 'viewer@jubilantmetal.com', 'viewer', '+91 98204 11223', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150', 1, '2026-02-10T14:20:00Z'],
-      ];
-      for (const u of users) {
-        this.run('INSERT INTO users (id, name, email, role, phone, avatar, isActive, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', u);
-      }
+      console.log('[DatabaseManager] Seeding single production administrator...');
+      const salt = generateSalt();
+      const hash = hashPassword('admin123', salt);
+      const now = new Date().toISOString();
+      this.run(
+        `INSERT INTO users (id, name, email, username, password_hash, password_salt, role, phone, avatar, isActive, createdAt)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ['user-01', 'Administrator', 'admin@jubilantmetal.com', 'admin', hash, salt, 'admin', '+91 98201 45890', null, 1, now]
+      );
     }
 
     // 3. Categories
@@ -850,11 +918,14 @@ export class DatabaseManager {
   }
 
   // ============================================================================
-  // Users & Auth
+  // Users & Authentication
   // ============================================================================
   public getUsers(): any[] {
     const list = this.queryAll('SELECT * FROM users ORDER BY createdAt ASC');
-    return list.map(u => ({ ...u, isActive: Boolean(u.isActive) }));
+    return list.map(u => {
+      const { password_hash, password_salt, ...safeUser } = u;
+      return { ...safeUser, isActive: Boolean(safeUser.isActive) };
+    });
   }
 
   public getCurrentUser(): any {
@@ -867,21 +938,146 @@ export class DatabaseManager {
     if (!user) return null;
     const updated = { ...user, ...updates };
     this.run(
-      `UPDATE users SET name = ?, email = ?, role = ?, phone = ?, avatar = ?, isActive = ? WHERE id = ?`,
-      [updated.name, updated.email, updated.role, updated.phone, updated.avatar, updated.isActive ? 1 : 0, id]
+      `UPDATE users SET name = ?, email = ?, username = ?, role = ?, phone = ?, avatar = ?, isActive = ? WHERE id = ?`,
+      [
+        updated.name,
+        updated.email,
+        updated.username || user.username || 'admin',
+        updated.role || user.role || 'admin',
+        updated.phone,
+        updated.avatar,
+        updated.isActive ? 1 : 0,
+        id,
+      ]
     );
-    return updated;
+    const { password_hash, password_salt, ...safeUser } = updated;
+    return safeUser;
   }
 
   public createUser(user: any): any {
     const id = `user-${Date.now()}`;
     const now = new Date().toISOString();
+    const salt = generateSalt();
+    const hash = hashPassword(user.password || 'admin123', salt);
+    // Ensure unique username to satisfy SQLite UNIQUE constraint
+    let desiredUsername = (user.username || (user.email ? user.email.split('@')[0] : '')).trim().toLowerCase();
+    if (!desiredUsername) {
+      desiredUsername = `user_${Date.now().toString().slice(-4)}`;
+    }
+    const conflict = this.queryOne('SELECT id FROM users WHERE LOWER(username) = ?', [desiredUsername]);
+    if (conflict) {
+      desiredUsername = `${desiredUsername}_${Date.now().toString().slice(-4)}`;
+    }
+    const role = user.role || 'admin';
     this.run(
-      `INSERT INTO users (id, name, email, role, phone, avatar, isActive, createdAt)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [id, user.name, user.email, user.role, user.phone, user.avatar, user.isActive ? 1 : 0, now]
+      `INSERT INTO users (id, name, email, username, password_hash, password_salt, role, phone, avatar, isActive, createdAt)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [id, user.name, user.email, desiredUsername, hash, salt, role, user.phone, user.avatar, user.isActive ? 1 : 0, now]
     );
-    return { ...user, id, createdAt: now };
+    return { ...user, id, username: desiredUsername, role, createdAt: now };
+  }
+
+  public loginAdmin(username: string, password: string): { success: boolean; token?: string; user?: any; error?: string } {
+    if (!username || !password) {
+      return { success: false, error: 'Username and password are required.' };
+    }
+    const cleanUser = username.trim().toLowerCase();
+    const admin = this.queryOne(
+      'SELECT * FROM users WHERE (LOWER(username) = ? OR LOWER(email) = ?) AND isActive = 1 LIMIT 1',
+      [cleanUser, cleanUser]
+    );
+
+    if (!admin || !admin.password_hash || !admin.password_salt) {
+      return { success: false, error: 'Invalid username or password.' };
+    }
+
+    const computedHash = hashPassword(password, admin.password_salt);
+    if (computedHash !== admin.password_hash) {
+      return { success: false, error: 'Invalid username or password.' };
+    }
+
+    // Generate secure session token
+    const token = crypto.randomBytes(32).toString('hex');
+    const sessionId = `sess-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
+    const now = new Date();
+    const createdAt = now.toISOString();
+    const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 days sliding window
+
+    this.run(
+      `INSERT INTO sessions (id, user_id, token, created_at, expires_at, last_activity)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [sessionId, admin.id, token, createdAt, expiresAt, createdAt]
+    );
+
+    const { password_hash, password_salt, ...safeUser } = admin;
+    return {
+      success: true,
+      token,
+      user: { ...safeUser, isActive: Boolean(safeUser.isActive) },
+    };
+  }
+
+  public verifySession(token: string): { valid: boolean; user?: any } {
+    if (!token) return { valid: false };
+
+    const session = this.queryOne('SELECT * FROM sessions WHERE token = ?', [token]);
+    if (!session) return { valid: false };
+
+    const now = new Date();
+    if (new Date(session.expires_at) < now) {
+      this.run('DELETE FROM sessions WHERE id = ?', [session.id]);
+      return { valid: false };
+    }
+
+    // Refresh sliding session window (30 days from now)
+    const newExpiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    this.run(
+      'UPDATE sessions SET last_activity = ?, expires_at = ? WHERE id = ?',
+      [now.toISOString(), newExpiresAt, session.id]
+    );
+
+    const user = this.queryOne('SELECT * FROM users WHERE id = ? AND isActive = 1', [session.user_id]);
+    if (!user) return { valid: false };
+
+    const { password_hash, password_salt, ...safeUser } = user;
+    return {
+      valid: true,
+      user: { ...safeUser, isActive: Boolean(safeUser.isActive) },
+    };
+  }
+
+  public logoutSession(token: string): boolean {
+    if (!token) return true;
+    this.run('DELETE FROM sessions WHERE token = ?', [token]);
+    return true;
+  }
+
+  public changeAdminPassword(oldPassword: string, newPassword: string): { success: boolean; error?: string } {
+    if (!oldPassword || !newPassword) {
+      return { success: false, error: 'Both current and new passwords are required.' };
+    }
+    if (newPassword.length < 4) {
+      return { success: false, error: 'New password must be at least 4 characters long.' };
+    }
+
+    const admin = this.queryOne("SELECT * FROM users WHERE role = 'admin' LIMIT 1");
+    if (!admin) {
+      return { success: false, error: 'Administrator account not found.' };
+    }
+
+    const currentHash = hashPassword(oldPassword, admin.password_salt);
+    if (currentHash !== admin.password_hash) {
+      return { success: false, error: 'Current password is incorrect.' };
+    }
+
+    const newSalt = generateSalt();
+    const newHash = hashPassword(newPassword, newSalt);
+    this.run(
+      'UPDATE users SET password_hash = ?, password_salt = ? WHERE id = ?',
+      [newHash, newSalt, admin.id]
+    );
+
+    return { success: true };
   }
 
   // ============================================================================

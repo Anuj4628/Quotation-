@@ -475,7 +475,7 @@ sales@jubilantmetal.com
 
         {/* Hidden off-screen document rendered with exact document data for PDF capture */}
         <div
-          className="fixed -left-[9999px] top-0 pointer-events-none opacity-100"
+          className="fixed left-0 top-0 pointer-events-none opacity-100 -z-50"
           style={{ width: '794px' }}
           aria-hidden="true"
         >

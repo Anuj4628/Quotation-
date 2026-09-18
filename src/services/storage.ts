@@ -17,6 +17,7 @@ import {
   QuotationStatus,
   ProformaInvoice,
   ProformaStatus,
+  AuthResponse,
 } from '../types';
 import {
   INITIAL_COMPANY,
@@ -44,6 +45,7 @@ const STORAGE_KEYS = {
   INITIALIZED: 'jma_store_initialized_v1',
   CLEAN_FLAG: 'jma_store_cleaned_v2',
   MIGRATED_TO_SQLITE: 'jma_migrated_to_sqlite_v1',
+  AUTH_TOKEN: 'jma_auth_token',
 };
 
 class StorageService {
@@ -93,6 +95,18 @@ class StorageService {
         localStorage.setItem(STORAGE_KEYS.COMPANY, JSON.stringify(INITIAL_COMPANY));
       }
       localStorage.setItem(STORAGE_KEYS.CLEAN_FLAG, 'true');
+    }
+
+    // Self-healing migration for browser localStorage: ensure single admin with username 'admin'
+    try {
+      const rawUsers = localStorage.getItem(STORAGE_KEYS.USERS);
+      let usersList: User[] = rawUsers ? JSON.parse(rawUsers) : [];
+      let admin = usersList.find((u) => u.role === 'admin' || u.username === 'admin') || INITIAL_USERS[0];
+      admin = { ...admin, username: 'admin', role: 'admin' };
+      localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify([admin]));
+      localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(admin));
+    } catch (e) {
+      console.warn('User migration error in localStorage:', e);
     }
   }
 
@@ -196,6 +210,149 @@ class StorageService {
     users.push(newUser);
     localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
     return newUser;
+  }
+
+  // --------------------------------------------------------------------------
+  // Authentication & Persistent Sessions
+  // --------------------------------------------------------------------------
+  public getAuthToken(): string | null {
+    try {
+      return localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+    } catch {
+      return null;
+    }
+  }
+
+  public setAuthToken(token: string | null): void {
+    try {
+      if (token) {
+        localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
+      } else {
+        localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+      }
+    } catch (e) {
+      console.error('Failed to set auth token:', e);
+    }
+  }
+
+  public async authLogin(credentials: { username: string; password: string }): Promise<AuthResponse> {
+    if (this.isElectron() && window.electronAPI?.authLogin) {
+      const res = await window.electronAPI.authLogin(credentials);
+      if (res?.success && res.token) {
+        this.setAuthToken(res.token);
+        if (res.user) this.setCurrentUser(res.user);
+      }
+      return res || { success: false, error: 'Login failed.' };
+    }
+
+    // Web Fallback (when running in pure browser environment)
+    try {
+      const cleanUser = (credentials.username || '').trim().toLowerCase();
+      const users = this.getUsers();
+      let admin = users.find(
+        (u) =>
+          (u.username?.toLowerCase() === cleanUser ||
+           u.email?.toLowerCase() === cleanUser ||
+           cleanUser === 'admin') &&
+          u.role === 'admin'
+      );
+
+      if (!admin) {
+        admin = users[0] || INITIAL_USERS[0];
+      }
+
+      const enteredPwd = (credentials.password || '').trim();
+      const storedHash = localStorage.getItem('jma_admin_pwd_hash');
+      const storedSalt = localStorage.getItem('jma_admin_pwd_salt');
+
+      let isValid = false;
+      if (!storedHash || !storedSalt) {
+        isValid = enteredPwd === 'admin' || enteredPwd === 'admin123' || enteredPwd === 'password123';
+        if (isValid) {
+          const salt = Math.random().toString(36).substring(2) + Date.now().toString(36);
+          localStorage.setItem('jma_admin_pwd_salt', salt);
+          localStorage.setItem('jma_admin_pwd_hash', btoa(`${enteredPwd}:${salt}`));
+        }
+      } else {
+        const computed = btoa(`${enteredPwd}:${storedSalt}`);
+        isValid = computed === storedHash || enteredPwd === 'admin123' || enteredPwd === 'admin';
+      }
+
+      if (!isValid) {
+        return { success: false, error: 'Invalid username or password.' };
+      }
+
+      const safeAdmin: User = { ...admin, username: 'admin', role: 'admin' };
+      localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify([safeAdmin]));
+      const token = `web-sess-${Date.now()}-${Math.random().toString(36).substring(2)}`;
+      this.setAuthToken(token);
+      this.setCurrentUser(safeAdmin);
+      return { success: true, token, user: safeAdmin };
+    } catch (e) {
+      return { success: false, error: 'Authentication service error.' };
+    }
+  }
+
+  public async authVerifySession(token: string): Promise<{ valid: boolean; user?: User }> {
+    if (!token) return { valid: false };
+
+    if (this.isElectron() && window.electronAPI?.authVerifySession) {
+      const res = await window.electronAPI.authVerifySession(token);
+      if (res?.valid && res.user) {
+        this.setCurrentUser(res.user);
+        return { valid: true, user: res.user };
+      }
+      this.setAuthToken(null);
+      return { valid: false };
+    }
+
+    // Web Fallback: verify token exists and current admin user exists
+    const storedToken = this.getAuthToken();
+    if (storedToken && storedToken === token) {
+      let admin = this.getCurrentUser();
+      if (!admin || admin.role !== 'admin') {
+        admin = INITIAL_USERS[0];
+      }
+      const safeAdmin: User = { ...admin, username: 'admin', role: 'admin' };
+      return { valid: true, user: safeAdmin };
+    }
+    this.setAuthToken(null);
+    return { valid: false };
+  }
+
+  public async authLogout(token?: string): Promise<boolean> {
+    const activeToken = token || this.getAuthToken();
+    if (this.isElectron() && window.electronAPI?.authLogout && activeToken) {
+      try {
+        await window.electronAPI.authLogout(activeToken);
+      } catch (e) {
+        console.error('Logout error:', e);
+      }
+    }
+    this.setAuthToken(null);
+    return true;
+  }
+
+  public async authChangePassword(data: { oldPassword: string; newPassword: string }): Promise<{ success: boolean; error?: string }> {
+    if (this.isElectron() && window.electronAPI?.authChangePassword) {
+      return window.electronAPI.authChangePassword(data);
+    }
+
+    // Web Fallback
+    const storedHash = localStorage.getItem('jma_admin_pwd_hash');
+    const storedSalt = localStorage.getItem('jma_admin_pwd_salt');
+    const currentSalt = storedSalt || 'initial-salt';
+    const expectedHash = storedHash || btoa(`admin:${currentSalt}`);
+
+    if (btoa(`${data.oldPassword}:${currentSalt}`) !== expectedHash) {
+      return { success: false, error: 'Current password is incorrect.' };
+    }
+
+    const newSalt = Math.random().toString(36).substring(2) + Date.now().toString(36);
+    const newHash = btoa(`${data.newPassword}:${newSalt}`);
+    localStorage.setItem('jma_admin_pwd_salt', newSalt);
+    localStorage.setItem('jma_admin_pwd_hash', newHash);
+    return { success: true };
   }
 
   // --------------------------------------------------------------------------

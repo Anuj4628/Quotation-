@@ -1,13 +1,15 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User, UserRole } from '../types';
+import { User, UserRole, AuthResponse } from '../types';
 import { storage } from '../services/storage';
 
 interface AuthContextValue {
   user: User;
   users: User[];
-  login: (email: string, role?: UserRole) => boolean;
-  logout: () => void;
-  switchRole: (role: UserRole) => void;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  login: (username: string, password: string) => Promise<AuthResponse>;
+  logout: () => Promise<void>;
+  switchRole?: (role: UserRole) => void;
   hasPermission: (permission: PermissionKey) => boolean;
 }
 
@@ -58,38 +60,65 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User>(() => storage.getCurrentUser());
   const [users, setUsers] = useState<User[]>(() => storage.getUsers());
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  // Initialize and verify persistent session on application start
   useEffect(() => {
-    storage.setCurrentUser(user);
-  }, [user]);
+    let isMounted = true;
 
-  const login = (email: string, role?: UserRole): boolean => {
-    const allUsers = storage.getUsers();
-    let found = allUsers.find((u) => u.email.toLowerCase() === email.toLowerCase());
-    if (!found && role) {
-      found = allUsers.find((u) => u.role === role);
+    async function initSession() {
+      try {
+        const token = storage.getAuthToken();
+        if (token) {
+          const verification = await storage.authVerifySession(token);
+          if (isMounted) {
+            if (verification.valid && verification.user) {
+              setUser(verification.user);
+              setIsAuthenticated(true);
+              setUsers(storage.getUsers());
+            } else {
+              storage.setAuthToken(null);
+              setIsAuthenticated(false);
+            }
+          }
+        } else {
+          if (isMounted) {
+            setIsAuthenticated(false);
+          }
+        }
+      } catch (err) {
+        console.error('Session initialization error:', err);
+        if (isMounted) {
+          setIsAuthenticated(false);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
     }
-    if (found) {
-      setUser(found);
-      storage.setCurrentUser(found);
-      return true;
+
+    initSession();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const login = async (username: string, password: string): Promise<AuthResponse> => {
+    const res = await storage.authLogin({ username, password });
+    if (res.success && res.user) {
+      setUser(res.user);
+      setIsAuthenticated(true);
+      setUsers(storage.getUsers());
     }
-    return false;
+    return res;
   };
 
-  const logout = () => {
-    // switch to first viewer or default
-    const viewers = users.find((u) => u.role === 'viewer') || users[0];
-    setUser(viewers);
-    storage.setCurrentUser(viewers);
-  };
-
-  const switchRole = (role: UserRole) => {
-    const targetUser = users.find((u) => u.role === role);
-    if (targetUser) {
-      setUser(targetUser);
-      storage.setCurrentUser(targetUser);
-    }
+  const logout = async (): Promise<void> => {
+    await storage.authLogout();
+    setIsAuthenticated(false);
   };
 
   const hasPermission = (permission: PermissionKey): boolean => {
@@ -98,7 +127,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, users, login, logout, switchRole, hasPermission }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        users,
+        isAuthenticated,
+        isLoading,
+        login,
+        logout,
+        hasPermission,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

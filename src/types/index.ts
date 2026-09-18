@@ -8,11 +8,19 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  username?: string;
   role: UserRole;
   phone?: string;
   avatar?: string;
   isActive: boolean;
   createdAt: string;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  token?: string;
+  user?: User;
+  error?: string;
 }
 
 export interface CompanyProfile {

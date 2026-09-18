@@ -15,6 +15,7 @@ import {
   Image as ImageIcon,
   Stamp,
   Eye,
+  EyeOff,
   RefreshCw,
 } from 'lucide-react';
 import { storage } from '../services/storage';
@@ -24,7 +25,7 @@ import { resolveLogoUrl, resolveSignatureUrl, resolveStampUrl } from '../utils/a
 
 export const SettingsPage: React.FC = () => {
   const { success, error } = useToast();
-  const [activeTab, setActiveTab] = useState<'company' | 'quotation' | 'signatory' | 'bank' | 'data'>('company');
+  const [activeTab, setActiveTab] = useState<'company' | 'quotation' | 'signatory' | 'bank' | 'security' | 'data'>('company');
 
   // 1. Company Profile State
   const [company, setCompany] = useState<CompanyProfile>(() => storage.getCompany());
@@ -46,6 +47,47 @@ export const SettingsPage: React.FC = () => {
     isDefault: false,
   });
   const [isBankModalOpen, setIsBankModalOpen] = useState(false);
+
+  // 4. Administrator Password Change State
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showOldPwd, setShowOldPwd] = useState(false);
+  const [showNewPwd, setShowNewPwd] = useState(false);
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!oldPassword || !newPassword) {
+      error('Validation Error', 'Current and new passwords are required');
+      return;
+    }
+    if (newPassword.length < 4) {
+      error('Validation Error', 'New password must be at least 4 characters long');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      error('Validation Error', 'New password and confirmation do not match');
+      return;
+    }
+
+    setIsUpdatingPassword(true);
+    try {
+      const res = await storage.authChangePassword({ oldPassword, newPassword });
+      if (res.success) {
+        success('Password Changed', 'Administrator password updated successfully');
+        setOldPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+      } else {
+        error('Password Error', res.error || 'Failed to update password');
+      }
+    } catch (err) {
+      error('Error', 'Failed to update password');
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
 
   // Save Company Profile
   const handleSaveCompany = (e: React.FormEvent) => {
@@ -247,6 +289,7 @@ export const SettingsPage: React.FC = () => {
           { id: 'quotation', label: 'Quotation Numbering & Defaults', icon: FileText },
           { id: 'signatory', label: 'Authorized Signature & Stamp', icon: Stamp },
           { id: 'bank', label: 'Bank Remittance Accounts', icon: Landmark },
+          { id: 'security', label: 'Admin Security & Password', icon: ShieldCheck },
           { id: 'data', label: 'Data Management & Reset', icon: Download },
         ].map((tab) => {
           const Icon = tab.icon;
@@ -1272,7 +1315,7 @@ export const SettingsPage: React.FC = () => {
               Reset Database to Clean State
             </h2>
             <p className="text-red-700">
-              Clear all quotation records and reset customer database to 1 single demo company (<strong>Demo Engineering Corporation Pvt Ltd</strong>). Your Jubilant Metal and Alloys company settings, logo, bank accounts, and 20 industrial metal products will be preserved intact.
+              Clear all quotation records and reset customer database to a completely clean state. Your Jubilant Metal and Alloys company settings, logo, bank accounts, and industrial metal products will be preserved intact.
             </p>
             <button
               type="button"
@@ -1282,6 +1325,114 @@ export const SettingsPage: React.FC = () => {
               <RotateCcw className="w-4 h-4" />
               <span>Reset Database to Clean State</span>
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* TAB: Admin Security & Password */}
+      {activeTab === 'security' && (
+        <div className="space-y-6">
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-soft space-y-4 text-xs">
+            <div>
+              <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+                Production Administrator Security
+              </h2>
+              <p className="text-slate-500 text-[11px] mt-0.5">
+                Manage the master Administrator credentials for this quotation workstation.
+              </p>
+            </div>
+
+            {/* Account Info Card */}
+            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-red-100 border border-red-200 flex items-center justify-center text-red-600 font-bold text-sm">
+                  A
+                </div>
+                <div>
+                  <p className="font-bold text-slate-800 text-sm">Administrator</p>
+                  <p className="text-slate-500 font-mono text-xs">Username: <span className="font-bold text-slate-700">admin</span></p>
+                </div>
+              </div>
+              <span className="px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200">
+                Active Production Account
+              </span>
+            </div>
+
+            {/* Password Change Form */}
+            <form onSubmit={handleChangePassword} className="space-y-4 pt-2">
+              <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2">
+                Change Master Password
+              </h3>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Current Password *</label>
+                  <div className="relative">
+                    <input
+                      type={showOldPwd ? 'text' : 'password'}
+                      required
+                      value={oldPassword}
+                      onChange={(e) => setOldPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 pr-9 text-slate-900 outline-none focus:bg-white focus:border-red-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowOldPwd(!showOldPwd)}
+                      tabIndex={-1}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
+                    >
+                      {showOldPwd ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">New Password *</label>
+                  <div className="relative">
+                    <input
+                      type={showNewPwd ? 'text' : 'password'}
+                      required
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 pr-9 text-slate-900 outline-none focus:bg-white focus:border-red-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPwd(!showNewPwd)}
+                      tabIndex={-1}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
+                    >
+                      {showNewPwd ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Confirm New Password *</label>
+                  <input
+                    type="password"
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 outline-none focus:bg-white focus:border-red-500"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <button
+                  type="submit"
+                  disabled={isUpdatingPassword}
+                  className="flex items-center gap-1.5 px-5 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold rounded-xl shadow-md shadow-red-600/20 transition-all cursor-pointer"
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{isUpdatingPassword ? 'Updating...' : 'Update Password'}</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -14,6 +14,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   updateUser: (id: string, updates: any) => ipcRenderer.sendSync('db:updateUser', id, updates),
   createUser: (user: any) => ipcRenderer.sendSync('db:createUser', user),
 
+  // Authentication & Session Management
+  authLogin: (credentials: { username: string; password: string }) => ipcRenderer.invoke('auth:login', credentials),
+  authVerifySession: (token: string) => ipcRenderer.invoke('auth:verifySession', token),
+  authLogout: (token: string) => ipcRenderer.invoke('auth:logout', token),
+  authChangePassword: (data: { oldPassword: string; newPassword: string }) => ipcRenderer.invoke('auth:changePassword', data),
+
   // Categories
   getCategories: () => ipcRenderer.sendSync('db:getCategories'),
   saveCategory: (cat: any) => ipcRenderer.sendSync('db:saveCategory', cat),

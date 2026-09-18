@@ -106,9 +106,9 @@ export const AppLayout: React.FC = () => {
             {/* Current Role Badge */}
             <div className="hidden lg:flex items-center gap-2 pl-3 border-l border-slate-200">
               <div className="text-right">
-                <p className="text-xs font-bold text-slate-900 leading-tight">{user.name}</p>
+                <p className="text-xs font-bold text-slate-900 leading-tight">{user?.name || 'Administrator'}</p>
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-red-700 bg-red-50 px-1.5 py-0.5 rounded">
-                  {user.role.replace('_', ' ')}
+                  {user?.role ? user.role.replace('_', ' ') : 'Administrator'}
                 </span>
               </div>
             </div>

@@ -61,8 +61,13 @@ export async function createQuotationPDF({
       })
     );
 
+    // Wait for document fonts to be fully loaded so all font metrics are exact
+    if (typeof document !== 'undefined' && document.fonts) {
+      await document.fonts.ready;
+    }
+
     // Small delay to ensure all DOM layout and child assets are painted
-    await new Promise((resolve) => setTimeout(resolve, 80));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     // Check if the document contains discrete .a4-page elements
     const pageElements = Array.from(element.querySelectorAll<HTMLElement>('.a4-page'));
@@ -93,6 +98,8 @@ export async function createQuotationPDF({
           logging: false,
           backgroundColor: '#ffffff',
           windowWidth: 794,
+          scrollX: 0,
+          scrollY: 0,
         });
 
         pageEl.style.width = prevWidth;
@@ -131,6 +138,8 @@ export async function createQuotationPDF({
       logging: false,
       backgroundColor: '#ffffff',
       windowWidth: 794,
+      scrollX: 0,
+      scrollY: 0,
     });
 
     element.style.width = prevWidth;

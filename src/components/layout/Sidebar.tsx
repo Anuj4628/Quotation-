@@ -16,7 +16,6 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
-  UserCheck,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { UserRole } from '../../types';
@@ -35,7 +34,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   mobileOpen,
   setMobileOpen,
 }) => {
-  const { user, logout, switchRole } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   const navItems = [
@@ -53,13 +52,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { label: 'Settings', icon: Settings, path: '/settings' },
   ];
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
-  const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    switchRole(e.target.value as UserRole);
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login', { replace: true });
   };
 
   const content = (
@@ -118,32 +113,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </nav>
       </div>
 
-      {/* Bottom Profile & Role Switcher */}
+      {/* Bottom Profile & Logout */}
       <div className="p-3 border-t border-slate-800/80 bg-slate-950/80">
-        {!collapsed && (
-          <div className="mb-2 px-1">
-            <div className="flex items-center justify-between text-xs text-slate-400 mb-1">
-              <span className="flex items-center gap-1 font-medium">
-                <UserCheck className="w-3.5 h-3.5 text-red-400" /> Demo Role
-              </span>
-              <span className="text-[10px] uppercase font-bold text-slate-400 bg-slate-800 px-1.5 py-0.5 rounded">
-                Live
-              </span>
-            </div>
-            <select
-              value={user.role}
-              onChange={handleRoleChange}
-              className="w-full bg-slate-900 text-xs font-semibold text-slate-200 border border-slate-700 rounded-lg px-2 py-1.5 outline-none focus:border-red-500 cursor-pointer"
-            >
-              <option value="admin">Administrator (Full Access)</option>
-              <option value="sales_manager">Sales Manager</option>
-              <option value="sales_executive">Sales Executive</option>
-              <option value="viewer">Viewer (Read Only)</option>
-            </select>
-          </div>
-        )}
-
-        {/* User Card */}
+        {/* Administrator Profile Card */}
         <div
           className={`flex items-center justify-between p-2 rounded-xl bg-slate-900/90 border border-slate-800 ${
             collapsed ? 'flex-col gap-2 p-1.5' : ''
@@ -151,21 +123,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
         >
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 rounded-full bg-red-600/20 border border-red-500/40 flex items-center justify-center text-red-400 font-bold text-xs shrink-0">
-              {user.name.charAt(0)}
+              {user?.name ? user.name.charAt(0) : 'A'}
             </div>
             {!collapsed && (
               <div className="min-w-0">
-                <p className="text-xs font-bold text-slate-200 truncate">{user.name}</p>
-                <p className="text-[11px] text-slate-400 capitalize truncate">
-                  {user.role.replace('_', ' ')}
+                <p className="text-xs font-bold text-slate-200 truncate">{user?.name || 'Administrator'}</p>
+                <p className="text-[10px] font-semibold text-red-400 uppercase tracking-wider truncate">
+                  Administrator
                 </p>
               </div>
             )}
           </div>
           <button
             onClick={handleLogout}
-            title="Logout"
-            className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors"
+            title="Logout of workstation"
+            className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
           >
             <LogOut className="w-4 h-4" />
           </button>

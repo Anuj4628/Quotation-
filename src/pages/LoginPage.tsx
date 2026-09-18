@@ -2,41 +2,54 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { Shield, Lock, Mail, ArrowRight, CheckCircle2 } from 'lucide-react';
-import { UserRole } from '../types';
+import { User, Lock, Eye, EyeOff, Loader2, ArrowRight, AlertCircle } from 'lucide-react';
 import { DEFAULT_LOGO } from '../utils/assetResolver';
 
 export const LoginPage: React.FC = () => {
-  const [email, setEmail] = useState('admin@jubilantmetal.com');
-  const [password, setPassword] = useState('password123');
-  const { login, switchRole } = useAuth();
-  const { success, error } = useToast();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const { login } = useAuth();
+  const { success } = useToast();
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) {
-      error('Error', 'Please enter your work email');
+    setErrorMessage(null);
+
+    const cleanUsername = username.trim();
+    if (!cleanUsername) {
+      setErrorMessage('Please enter your username.');
       return;
     }
-    const loggedIn = login(email);
-    if (loggedIn) {
-      success('Welcome back', `Logged in successfully to Jubilant ERP`);
-      navigate('/dashboard');
-    } else {
-      error('Login failed', 'User with this email not found. Please select a quick demo user.');
-    }
-  };
 
-  const handleQuickLogin = (role: UserRole, demoEmail: string) => {
-    switchRole(role);
-    success('Quick Role Switched', `Logged in as ${role.replace('_', ' ').toUpperCase()}`);
-    navigate('/dashboard');
+    if (!password) {
+      setErrorMessage('Please enter your password.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await login(cleanUsername, password);
+      if (res.success) {
+        success('Welcome back', 'Logged in successfully to Jubilant ERP');
+        navigate('/dashboard', { replace: true });
+      } else {
+        setErrorMessage(res.error || 'Invalid username or password.');
+      }
+    } catch (err) {
+      setErrorMessage('Unable to connect to authentication service. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Background Subtle Gradient Blobs */}
+    <div className="min-h-screen bg-slate-900 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden select-none">
+      {/* Background Subtle Ambient Glow */}
       <div className="absolute -top-40 -right-40 w-96 h-96 bg-red-600/15 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-slate-800/40 rounded-full blur-3xl pointer-events-none" />
 
@@ -53,128 +66,106 @@ export const LoginPage: React.FC = () => {
           Quotation & Billing Management System
         </h2>
         <p className="mt-1 text-xs text-slate-400">
-          Internal B2B Commercial Enterprise Portal
+          Commercial Enterprise Portal
         </p>
       </div>
 
       <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md z-10">
         <div className="bg-slate-950/90 py-8 px-6 sm:px-10 shadow-2xl rounded-2xl border border-slate-800 backdrop-blur-xl">
+          {/* Error Message Alert */}
+          {errorMessage && (
+            <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center gap-2.5 text-red-400 text-xs animate-fade-in">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
           <form className="space-y-4" onSubmit={handleLogin}>
+            {/* Username */}
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
-                Work Email Address
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                Username
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
-                  <Mail className="w-4 h-4" />
+                  <User className="w-4 h-4" />
                 </div>
                 <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@jubilantmetal.com"
+                  type="text"
+                  value={username}
+                  onChange={(e) => {
+                    setUsername(e.target.value);
+                    if (errorMessage) setErrorMessage(null);
+                  }}
+                  placeholder="admin"
+                  autoFocus
+                  autoComplete="username"
                   required
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                  disabled={isSubmitting}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 disabled:opacity-60 transition-colors"
                 />
               </div>
             </div>
 
+            {/* Password with Show / Hide Toggle */}
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
-                Security Password
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                Password
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
                   <Lock className="w-4 h-4" />
                 </div>
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    if (errorMessage) setErrorMessage(null);
+                  }}
+                  placeholder="••••••••"
+                  autoComplete="current-password"
                   required
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                  disabled={isSubmitting}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-10 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 disabled:opacity-60 transition-colors font-mono text-xs tracking-wider"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={-1}
+                  title={showPassword ? 'Hide password' : 'Show password'}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-300 transition-colors"
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-xs">
-              <label className="flex items-center text-slate-400 cursor-pointer">
-                <input
-                  type="checkbox"
-                  defaultChecked
-                  className="rounded bg-slate-900 border-slate-700 text-red-600 focus:ring-red-500 mr-2"
-                />
-                Remember this workstation
-              </label>
-              <span className="text-red-400 hover:text-red-300 cursor-pointer">
-                Forgot password?
-              </span>
+            {/* Submit Button */}
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-semibold text-sm shadow-lg shadow-red-600/30 transition-all hover:shadow-red-600/50 disabled:opacity-70 cursor-pointer disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Signing in...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>LOGIN</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
             </div>
-
-            <button
-              type="submit"
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-semibold text-sm shadow-lg shadow-red-600/30 transition-all hover:shadow-red-600/50"
-            >
-              <span>Sign In to Dashboard</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
           </form>
-
-          {/* Quick Demo Role Switcher */}
-          <div className="mt-6 pt-6 border-t border-slate-800">
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2.5 text-center">
-              Quick 1-Click Evaluation Logins:
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('admin', 'admin@jubilantmetal.com')}
-                className="flex items-center justify-between p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-left text-xs transition-colors"
-              >
-                <div>
-                  <p className="font-bold text-slate-200">Administrator</p>
-                  <p className="text-[10px] text-slate-500">Full System Access</p>
-                </div>
-                <CheckCircle2 className="w-4 h-4 text-red-500" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('sales_manager', 'vikram.m@jubilantmetal.com')}
-                className="flex items-center justify-between p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-left text-xs transition-colors"
-              >
-                <div>
-                  <p className="font-bold text-slate-200">Sales Manager</p>
-                  <p className="text-[10px] text-slate-500">Quotes & Catalog</p>
-                </div>
-                <CheckCircle2 className="w-4 h-4 text-blue-500" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('sales_executive', 'anjali.d@jubilantmetal.com')}
-                className="flex items-center justify-between p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-left text-xs transition-colors"
-              >
-                <div>
-                  <p className="font-bold text-slate-200">Sales Executive</p>
-                  <p className="text-[10px] text-slate-500">Quotes & Drafting</p>
-                </div>
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('viewer', 'viewer@jubilantmetal.com')}
-                className="flex items-center justify-between p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-left text-xs transition-colors"
-              >
-                <div>
-                  <p className="font-bold text-slate-200">Auditor / Viewer</p>
-                  <p className="text-[10px] text-slate-500">Read-only Reports</p>
-                </div>
-                <CheckCircle2 className="w-4 h-4 text-slate-400" />
-              </button>
-            </div>
-          </div>
         </div>
 
         <p className="mt-6 text-center text-xs text-slate-500">
@@ -184,3 +175,5 @@ export const LoginPage: React.FC = () => {
     </div>
   );
 };
+
+export default LoginPage;

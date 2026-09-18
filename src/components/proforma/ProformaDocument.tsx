@@ -140,22 +140,22 @@ export const ProformaDocument: React.FC<ProformaDocumentProps> = ({
   const renderMetaGrid = () => (
     <div className="grid grid-cols-4 gap-2.5 p-2.5 bg-slate-50 rounded-lg border border-slate-200 text-xs mb-3 print:bg-white print:border-slate-300">
       <div>
-        <span className="text-slate-500 block text-[9px] font-bold uppercase tracking-wider">PI Date</span>
-        <span className="font-bold text-slate-900 text-xs">{proforma.proformaDate}</span>
+        <span className="text-slate-500 block text-[9px] font-bold uppercase tracking-wider mb-0.5">PI Date</span>
+        <span className="font-bold text-slate-900 text-xs leading-tight block">{proforma.proformaDate}</span>
       </div>
       <div>
-        <span className="text-slate-500 block text-[9px] font-bold uppercase tracking-wider">Valid Until</span>
-        <span className="font-bold text-slate-900 text-xs">{proforma.validUntil}</span>
+        <span className="text-slate-500 block text-[9px] font-bold uppercase tracking-wider mb-0.5">Valid Until</span>
+        <span className="font-bold text-slate-900 text-xs leading-tight block">{proforma.validUntil}</span>
       </div>
       <div>
-        <span className="text-slate-500 block text-[9px] font-bold uppercase tracking-wider">Buyer PO / Ref</span>
-        <span className="font-bold text-slate-900 text-xs truncate block" title={proforma.customerReference}>
+        <span className="text-slate-500 block text-[9px] font-bold uppercase tracking-wider mb-0.5">Buyer PO / Ref</span>
+        <span className="font-bold text-slate-900 text-xs leading-tight break-words block" title={proforma.customerReference}>
           {proforma.customerReference || 'Direct Order'}
         </span>
       </div>
       <div>
-        <span className="text-slate-500 block text-[9px] font-bold uppercase tracking-wider">Prepared By</span>
-        <span className="font-bold text-slate-900 text-xs truncate block">
+        <span className="text-slate-500 block text-[9px] font-bold uppercase tracking-wider mb-0.5">Prepared By</span>
+        <span className="font-bold text-slate-900 text-xs leading-tight break-words block">
           {proforma.preparedBy || proforma.createdByName || 'Sales Operations'}
         </span>
       </div>
@@ -180,12 +180,12 @@ export const ProformaDocument: React.FC<ProformaDocumentProps> = ({
             <p className="font-bold text-red-600 uppercase tracking-wider text-[10px] mb-1">
               Buyer / Bill To Details:
             </p>
-            <p className="font-bold text-sm text-slate-900 leading-snug">{proforma.customerName}</p>
+            <p className="font-bold text-sm text-slate-900 leading-snug break-words">{proforma.customerName}</p>
             {proforma.customerContactPerson && (
-              <p className="text-slate-700 text-xs font-medium">Attn: {proforma.customerContactPerson}</p>
+              <p className="text-slate-700 text-xs font-medium break-words">Attn: {proforma.customerContactPerson}</p>
             )}
-            <p className="text-slate-600 text-[11px] leading-tight">{proforma.billingAddress}</p>
-            <p className="text-slate-600 text-[11px]">
+            <p className="text-slate-600 text-[11px] leading-tight break-words">{proforma.billingAddress}</p>
+            <p className="text-slate-600 text-[11px] break-words">
               {proforma.customerCity}, {proforma.customerState} - {proforma.customerPinCode}
             </p>
             {proforma.customerPhone && (
@@ -208,12 +208,12 @@ export const ProformaDocument: React.FC<ProformaDocumentProps> = ({
             <p className="font-bold text-red-600 uppercase tracking-wider text-[10px] mb-1">
               Consignee / Ship To Details:
             </p>
-            <p className="font-bold text-sm text-slate-900 leading-snug">{shipToName}</p>
+            <p className="font-bold text-sm text-slate-900 leading-snug break-words">{shipToName}</p>
             {shipToContact && (
-              <p className="text-slate-700 text-xs font-medium">Attn: {shipToContact}</p>
+              <p className="text-slate-700 text-xs font-medium break-words">Attn: {shipToContact}</p>
             )}
-            <p className="text-slate-600 text-[11px] leading-tight">{shipToAddr}</p>
-            <p className="text-slate-600 text-[11px]">
+            <p className="text-slate-600 text-[11px] leading-tight break-words">{shipToAddr}</p>
+            <p className="text-slate-600 text-[11px] break-words">
               {shipCity}, {shipState} - {shipPin}
             </p>
             {shipPhone && (

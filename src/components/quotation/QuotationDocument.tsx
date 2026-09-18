@@ -150,23 +150,23 @@ export const QuotationDocument: React.FC<QuotationDocumentProps> = ({
   const renderMetaGrid = () => (
     <div className="grid grid-cols-4 gap-2.5 p-2.5 bg-slate-50 rounded-lg border border-slate-200 text-xs mb-3 print:bg-white print:border-slate-300">
       <div>
-        <span className="text-slate-500 block text-[9px] font-bold uppercase tracking-wider">Quotation Date</span>
-        <span className="font-bold text-slate-900 text-xs">{quotation.quotationDate}</span>
+        <span className="text-slate-500 block text-[9px] font-bold uppercase tracking-wider mb-0.5">Quotation Date</span>
+        <span className="font-bold text-slate-900 text-xs leading-tight block">{quotation.quotationDate}</span>
       </div>
       <div>
-        <span className="text-slate-500 block text-[9px] font-bold uppercase tracking-wider">Valid Until</span>
-        <span className="font-bold text-slate-900 text-xs">{quotation.validUntil}</span>
+        <span className="text-slate-500 block text-[9px] font-bold uppercase tracking-wider mb-0.5">Valid Until</span>
+        <span className="font-bold text-slate-900 text-xs leading-tight block">{quotation.validUntil}</span>
       </div>
       <div>
-        <span className="text-slate-500 block text-[9px] font-bold uppercase tracking-wider">Buyer Enquiry Ref</span>
-        <span className="font-bold text-slate-900 text-xs truncate block" title={quotation.customerReference}>
+        <span className="text-slate-500 block text-[9px] font-bold uppercase tracking-wider mb-0.5">Buyer Enquiry Ref</span>
+        <span className="font-bold text-slate-900 text-xs leading-tight break-words block" title={quotation.customerReference}>
           {quotation.customerReference || 'Direct Request'}
         </span>
       </div>
       <div>
-        <span className="text-slate-500 block text-[9px] font-bold uppercase tracking-wider">Prepared By</span>
-        <span className="font-bold text-slate-900 text-xs truncate block">
-          {quotation.salesperson || quotation.createdByName}
+        <span className="text-slate-500 block text-[9px] font-bold uppercase tracking-wider mb-0.5">Prepared By</span>
+        <span className="font-bold text-slate-900 text-xs leading-tight break-words block">
+          {quotation.salesperson || quotation.createdByName || 'Sales Operations'}
         </span>
       </div>
     </div>
@@ -181,12 +181,12 @@ export const QuotationDocument: React.FC<QuotationDocumentProps> = ({
           <p className="font-bold text-red-600 uppercase tracking-wider text-[10px] mb-1">
             Buyer / Bill To Details:
           </p>
-          <p className="font-bold text-sm text-slate-900 leading-snug">{quotation.customerName}</p>
+          <p className="font-bold text-sm text-slate-900 leading-snug break-words">{quotation.customerName}</p>
           {quotation.customerContactPerson && (
-            <p className="text-slate-700 text-xs font-medium">Attn: {quotation.customerContactPerson}</p>
+            <p className="text-slate-700 text-xs font-medium break-words">Attn: {quotation.customerContactPerson}</p>
           )}
-          <p className="text-slate-600 text-[11px] leading-tight">{quotation.billingAddress}</p>
-          <p className="text-slate-600 text-[11px]">
+          <p className="text-slate-600 text-[11px] leading-tight break-words">{quotation.billingAddress}</p>
+          <p className="text-slate-600 text-[11px] break-words">
             {quotation.customerCity}, {quotation.customerState} - {quotation.customerPinCode}
           </p>
         </div>
@@ -208,8 +208,8 @@ export const QuotationDocument: React.FC<QuotationDocumentProps> = ({
           <p className="font-bold text-red-600 uppercase tracking-wider text-[10px] mb-1">
             Consignee / Delivery Address:
           </p>
-          <p className="font-bold text-sm text-slate-900 leading-snug">{quotation.customerName}</p>
-          <p className="text-slate-600 text-[11px] leading-tight">
+          <p className="font-bold text-sm text-slate-900 leading-snug break-words">{quotation.customerName}</p>
+          <p className="text-slate-600 text-[11px] leading-tight break-words">
             {quotation.shippingAddress || quotation.billingAddress}
           </p>
         </div>

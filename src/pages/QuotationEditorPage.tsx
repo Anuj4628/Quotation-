@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   FileText,
   Plus,
@@ -40,6 +40,8 @@ export const QuotationEditorPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const isEditMode = Boolean(id);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const queryCustomerId = searchParams.get('customerId');
   const { success, error } = useToast();
   const { user } = useAuth();
 
@@ -211,6 +213,31 @@ export const QuotationEditorPage: React.FC = () => {
           setSelectedCustomer(cust);
           setShippingAddress(existing.shippingAddress || cust.billingAddress);
           setSameAsBilling(existing.shippingAddress === cust.billingAddress);
+        } else if (existing.customerName) {
+          const fallbackCust: Customer = {
+            id: existing.customerId || 'cust-direct',
+            customerCode: 'CUST-REF',
+            companyName: existing.customerName,
+            contactPerson: existing.customerContactPerson || '',
+            email: existing.customerEmail || '',
+            phone: existing.customerPhone || '',
+            gstin: existing.customerGstin || '',
+            pan: existing.customerPan || '',
+            billingAddress: existing.billingAddress || '',
+            shippingAddress: existing.shippingAddress || existing.billingAddress || '',
+            city: existing.customerCity || 'Mumbai',
+            state: existing.customerState || 'Maharashtra',
+            stateCode: existing.customerStateCode || '27',
+            country: 'India',
+            pinCode: existing.customerPinCode || '400001',
+            paymentTerms: existing.paymentTerms || '30 Days Net',
+            creditLimit: 0,
+            createdAt: existing.createdAt || new Date().toISOString(),
+            updatedAt: existing.updatedAt || new Date().toISOString(),
+          };
+          setSelectedCustomer(fallbackCust);
+          setShippingAddress(existing.shippingAddress || existing.billingAddress || '');
+          setSameAsBilling(existing.shippingAddress === existing.billingAddress);
         }
 
         // Set items
@@ -229,9 +256,8 @@ export const QuotationEditorPage: React.FC = () => {
                   it.standard,
                 ].filter(Boolean);
                 desc = parts.join(', ');
-              } else if (it.productName && !desc.toLowerCase().includes(it.productName.toLowerCase())) {
-                desc = `${it.productName} - ${desc}`;
               }
+
               return {
                 id: it.id || `item-${Date.now()}-${idx}`,
                 productId: it.productId,
@@ -254,8 +280,17 @@ export const QuotationEditorPage: React.FC = () => {
           );
         }
       }
+    } else if (!isEditMode && queryCustomerId) {
+      const cust = storage.getCustomerById(queryCustomerId);
+      if (cust) {
+        setSelectedCustomerId(cust.id);
+        setSelectedCustomer(cust);
+        setShippingAddress(cust.shippingAddress || cust.billingAddress);
+        setPaymentTerms(cust.paymentTerms || settings.defaultPaymentTerms);
+        setSameAsBilling(true);
+      }
     }
-  }, [isEditMode, id]);
+  }, [isEditMode, id, queryCustomerId]);
 
   // Handle Customer Change
   const handleCustomerSelect = (custId: string) => {

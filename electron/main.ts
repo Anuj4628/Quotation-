@@ -137,6 +137,20 @@ function registerIpcHandlers() {
   safeSync('db:updateUser', (_e, id, updates) => dbManager.updateUser(id, updates), null);
   safeSync('db:createUser', (_e, user) => dbManager.createUser(user), null);
 
+  // Authentication & Persistent Sessions
+  safeHandle('auth:login', async (_e, credentials: { username: string; password: string }) => {
+    return dbManager.loginAdmin(credentials.username, credentials.password);
+  });
+  safeHandle('auth:verifySession', async (_e, token: string) => {
+    return dbManager.verifySession(token);
+  });
+  safeHandle('auth:logout', async (_e, token: string) => {
+    return { success: dbManager.logoutSession(token) };
+  });
+  safeHandle('auth:changePassword', async (_e, data: { oldPassword: string; newPassword: string }) => {
+    return dbManager.changeAdminPassword(data.oldPassword, data.newPassword);
+  });
+
   // Categories
   safeSync('db:getCategories', () => dbManager.getCategories(), []);
   safeSync('db:saveCategory', (_e, cat) => dbManager.saveCategory(cat), null);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   FileText,
   Plus,
@@ -38,6 +38,8 @@ export const ProformaEditorPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const isEditMode = Boolean(id);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const queryCustomerId = searchParams.get('customerId');
   const { success, error } = useToast();
   const { user } = useAuth();
 
@@ -227,6 +229,29 @@ export const ProformaEditorPage: React.FC = () => {
         const cust = storage.getCustomerById(existing.customerId);
         if (cust) {
           setSelectedCustomer(cust);
+        } else if (existing.customerName) {
+          const fallbackCust: Customer = {
+            id: existing.customerId || 'cust-direct',
+            customerCode: 'CUST-REF',
+            companyName: existing.customerName,
+            contactPerson: existing.customerContactPerson || '',
+            email: existing.customerEmail || '',
+            phone: existing.customerPhone || '',
+            gstin: existing.customerGstin || '',
+            pan: existing.customerPan || '',
+            billingAddress: existing.billingAddress || '',
+            shippingAddress: existing.shippingAddress || existing.billingAddress || '',
+            city: existing.customerCity || 'Mumbai',
+            state: existing.customerState || 'Maharashtra',
+            stateCode: existing.customerStateCode || '27',
+            country: 'India',
+            pinCode: existing.customerPinCode || '400001',
+            paymentTerms: existing.paymentTerms || '30 Days Net',
+            creditLimit: 0,
+            createdAt: existing.createdAt || new Date().toISOString(),
+            updatedAt: existing.updatedAt || new Date().toISOString(),
+          };
+          setSelectedCustomer(fallbackCust);
         }
 
         // Ship To fields
@@ -281,8 +306,24 @@ export const ProformaEditorPage: React.FC = () => {
           );
         }
       }
+    } else if (!isEditMode && queryCustomerId) {
+      const cust = storage.getCustomerById(queryCustomerId);
+      if (cust) {
+        setSelectedCustomerId(cust.id);
+        setSelectedCustomer(cust);
+        setShippingAddress(cust.shippingAddress || cust.billingAddress);
+        setPaymentTerms(cust.paymentTerms || settings.defaultPaymentTerms);
+        setShipToCompany(cust.companyName);
+        setShipToContact(cust.contactPerson || '');
+        setShipToCity(cust.city || 'Mumbai');
+        setShipToState(cust.state || 'Maharashtra');
+        setShipToStateCode(cust.stateCode || '27');
+        setShipToPinCode(cust.pinCode || '400001');
+        setShipToPhone(cust.phone || '');
+        setSameAsBilling(true);
+      }
     }
-  }, [isEditMode, id]);
+  }, [isEditMode, id, queryCustomerId]);
 
   // Handle Customer Change
   const handleCustomerSelect = (custId: string) => {

@@ -39,41 +39,12 @@ export const INITIAL_USERS: User[] = [
     id: 'user-01',
     name: 'Rajesh Sharma',
     email: 'admin@jubilantmetal.com',
+    username: 'admin',
     role: 'admin',
     phone: '+91 98201 45890',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
     isActive: true,
     createdAt: '2026-01-10T10:00:00Z',
-  },
-  {
-    id: 'user-02',
-    name: 'Vikram Mehta',
-    email: 'vikram.m@jubilantmetal.com',
-    role: 'sales_manager',
-    phone: '+91 98202 33411',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    isActive: true,
-    createdAt: '2026-01-15T11:30:00Z',
-  },
-  {
-    id: 'user-03',
-    name: 'Anjali Desai',
-    email: 'anjali.d@jubilantmetal.com',
-    role: 'sales_executive',
-    phone: '+91 98203 77890',
-    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
-    isActive: true,
-    createdAt: '2026-02-01T09:00:00Z',
-  },
-  {
-    id: 'user-04',
-    name: 'Amit Patel',
-    email: 'viewer@jubilantmetal.com',
-    role: 'viewer',
-    phone: '+91 98204 11223',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-    isActive: true,
-    createdAt: '2026-02-15T14:20:00Z',
   },
 ];
 
@@ -606,32 +577,7 @@ export const INITIAL_PRODUCTS: Product[] = [
   },
 ];
 
-export const INITIAL_CUSTOMERS: Customer[] = [
-  {
-    id: 'cust-demo-01',
-    customerCode: 'CUST-DEMO-01',
-    companyName: 'Demo Engineering Corporation Pvt Ltd',
-    contactPerson: 'Sanjay Deshmukh',
-    designation: 'Head of Procurement & Materials',
-    email: 'purchase@demoengineering.com',
-    phone: '+91 22 6705 4000',
-    whatsapp: '+91 98200 12345',
-    gstin: '27AABCD1234E1Z5',
-    pan: 'AABCD1234E',
-    billingAddress: 'Plot No. 101, Industrial Corridor, MIDC',
-    shippingAddress: 'Plot No. 101, Industrial Corridor, MIDC',
-    city: 'Mumbai',
-    state: 'Maharashtra',
-    stateCode: '27',
-    country: 'India',
-    pinCode: '400001',
-    paymentTerms: '30 Days Net',
-    creditLimit: 5000000,
-    notes: 'Single demo client company retained for test quotation generation.',
-    createdAt: '2026-09-01T09:00:00Z',
-    updatedAt: '2026-09-01T09:00:00Z',
-  },
-];
+export const INITIAL_CUSTOMERS: Customer[] = [];
 
 export const INITIAL_BANK_ACCOUNTS: BankAccount[] = [
   {

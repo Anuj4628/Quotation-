@@ -25,6 +25,10 @@ export interface ElectronDBAPI {
   setCurrentUser: (user: User) => void;
   updateUser: (id: string, updates: Partial<User>) => User | null;
   createUser: (user: Omit<User, 'id' | 'createdAt'>) => User;
+  authLogin: (credentials: { username: string; password: string }) => Promise<{ success: boolean; token?: string; user?: User; error?: string }>;
+  authVerifySession: (token: string) => Promise<{ valid: boolean; user?: User }>;
+  authLogout: (token: string) => Promise<{ success: boolean }>;
+  authChangePassword: (data: { oldPassword: string; newPassword: string }) => Promise<{ success: boolean; error?: string }>;
 
   // Categories
   getCategories: () => ProductCategory[];

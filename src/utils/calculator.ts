@@ -366,11 +366,17 @@ export function numberToWordsIndian(amount: number): string {
     parts.push(convertThreeDigits(remaining));
   }
 
-  let result = 'Rupees ' + parts.join(' ').trim();
-
-  if (decPart > 0) {
-    result += ' and ' + convertTwoDigits(decPart) + ' Paise';
+  let result = '';
+  if (parts.length > 0) {
+    result = 'Rupees ' + parts.join(' ').trim();
+    if (decPart > 0) {
+      result += ' and ' + convertTwoDigits(decPart) + ' Paise';
+    }
+  } else if (decPart > 0) {
+    result = 'Rupees ' + convertTwoDigits(decPart) + ' Paise';
+  } else {
+    return 'Rupees Zero Only';
   }
 
-  return result + ' Only';
+  return result.trim() + ' Only';
 }

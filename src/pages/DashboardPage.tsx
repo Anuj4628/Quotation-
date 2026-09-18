@@ -585,7 +585,7 @@ export const DashboardPage: React.FC = () => {
 
       {/* Hidden container for printing/PDF export if triggered from table */}
       {printingQuotation && (
-        <div className="fixed -left-[9999px] top-0">
+        <div className="fixed left-0 top-0 pointer-events-none opacity-100 -z-50" style={{ width: '794px' }}>
           <QuotationDocument quotation={printingQuotation} id="hidden-print-doc" />
         </div>
       )}
