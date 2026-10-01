@@ -442,3 +442,24 @@ app.on('window-all-closed', () => {
     app.quit();
   }
 });
+
+app.on('before-quit', () => {
+  try {
+    if (dbManager) {
+      dbManager.close();
+    }
+  } catch (e) {
+    logApp('ERROR', 'Error flushing database on before-quit', e);
+  }
+});
+
+app.on('will-quit', () => {
+  try {
+    if (dbManager) {
+      dbManager.close();
+    }
+  } catch (e) {
+    logApp('ERROR', 'Error flushing database on will-quit', e);
+  }
+});
+

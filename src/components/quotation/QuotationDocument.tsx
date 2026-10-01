@@ -11,6 +11,15 @@ interface QuotationDocumentProps {
   id?: string;
 }
 
+const DEFAULT_QUOTATION_TERMS = [
+  'Prices: EX-WORKS',
+  'Delivery: READY STOCK',
+  'Loading / Packing: EXTRA',
+  'Taxes: GST EXTRA 18%',
+  'Payment: 100% ADVANCE AGAINST PERFORMA INVOICE',
+  'Validity: 08 DAYS',
+];
+
 export const QuotationDocument: React.FC<QuotationDocumentProps> = ({
   quotation,
   company = storage.getCompany(),
@@ -29,6 +38,21 @@ export const QuotationDocument: React.FC<QuotationDocumentProps> = ({
   const signatureSize = quotation.signatureSize || settings.signatureSize || 'md';
   const stampSize = quotation.stampSize || settings.stampSize || 'md';
   const signatoryDesignation = quotation.signatoryDesignation || settings.signatoryDesignation || 'Commercial & Technical Operations';
+
+  // Resolve quotation terms:
+  // Use client's required terms if none provided, or if existing terms match legacy 15-day template
+  const rawTerms =
+    quotation.termsAndConditions && quotation.termsAndConditions.length > 0
+      ? quotation.termsAndConditions
+      : DEFAULT_QUOTATION_TERMS;
+
+  const isLegacyDefault =
+    rawTerms.length >= 7 &&
+    rawTerms.some((t) => t.includes('Taloja') || t.includes('Kalamboli') || t.includes('LME'));
+
+  const termsToRender = isLegacyDefault
+    ? DEFAULT_QUOTATION_TERMS
+    : rawTerms.map((t) => (/\b15\s*days\b/i.test(t) ? 'Validity: 08 DAYS' : t));
 
   // Determine pagination:
   // A single page is only used if there's 1 item and short terms (<= 3), so everything comfortably fits on 1 A4 page.
@@ -397,17 +421,33 @@ export const QuotationDocument: React.FC<QuotationDocumentProps> = ({
       <div className="col-span-7 bg-slate-50/70 p-3 rounded-lg border border-slate-200 flex flex-col justify-between print:bg-white">
         <div>
           <p className="font-bold text-red-600 uppercase tracking-wider text-[10px] mb-1.5">
-            Terms & Conditions of Sale:
+            TERMS & CONDITIONS:
           </p>
-          <ol className="list-decimal pl-3.5 space-y-1 text-slate-700 text-[10px] leading-relaxed">
-            {quotation.termsAndConditions && quotation.termsAndConditions.length > 0 ? (
-              quotation.termsAndConditions.map((term, i) => (
-                <li key={i}>{term}</li>
-              ))
-            ) : (
-              <li>Payment as per agreed commercial contract. Materials subject to prior sale.</li>
-            )}
-          </ol>
+          <ul className="space-y-1 text-slate-800 text-[10px] leading-relaxed">
+            {termsToRender.map((term, i) => {
+              const cleanTerm = term.replace(/^[•➢\-*]\s*/, '').trim();
+              const colonIdx = cleanTerm.indexOf(':');
+              if (colonIdx !== -1) {
+                const label = cleanTerm.slice(0, colonIdx + 1);
+                const value = cleanTerm.slice(colonIdx + 1);
+                return (
+                  <li key={i} className="flex items-start gap-1.5">
+                    <span className="text-slate-600 font-bold select-none shrink-0 leading-tight">•</span>
+                    <span className="leading-tight">
+                      <strong className="font-semibold text-slate-900">{label}</strong>
+                      {value}
+                    </span>
+                  </li>
+                );
+              }
+              return (
+                <li key={i} className="flex items-start gap-1.5">
+                  <span className="text-slate-600 font-bold select-none shrink-0 leading-tight">•</span>
+                  <span className="font-medium text-slate-800 leading-tight">{cleanTerm}</span>
+                </li>
+              );
+            })}
+          </ul>
         </div>
       </div>
 

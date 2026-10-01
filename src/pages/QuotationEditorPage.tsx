@@ -63,7 +63,7 @@ export const QuotationEditorPage: React.FC = () => {
   );
   const [validUntil, setValidUntil] = useState(() => {
     const d = new Date();
-    d.setDate(d.getDate() + (settings.defaultValidityDays || 15));
+    d.setDate(d.getDate() + (settings.defaultValidityDays || 8));
     return d.toISOString().split('T')[0];
   });
   const [referenceNumber, setReferenceNumber] = useState('');
@@ -81,7 +81,17 @@ export const QuotationEditorPage: React.FC = () => {
   });
   const [terms, setTerms] = useState<string[]>(() => {
     const def = termsTemplates.find((t) => t.isDefault) || termsTemplates[0];
-    return def ? [...def.terms] : [];
+    if (def && !def.terms.some((t) => t.includes('15 days') || t.includes('Ex-works Taloja'))) {
+      return [...def.terms];
+    }
+    return [
+      'Prices: EX-WORKS',
+      'Delivery: READY STOCK',
+      'Loading / Packing: EXTRA',
+      'Taxes: GST EXTRA 18%',
+      'Payment: 100% ADVANCE AGAINST PERFORMA INVOICE',
+      'Validity: 08 DAYS',
+    ];
   });
 
   // Signature & Stamp snapshot state
@@ -310,7 +320,18 @@ export const QuotationEditorPage: React.FC = () => {
     setSelectedTermsTemplateId(tmplId);
     const found = termsTemplates.find((t) => t.id === tmplId);
     if (found) {
-      setTerms([...found.terms]);
+      if (found.terms.some((t) => t.includes('15 days') || t.includes('Ex-works Taloja'))) {
+        setTerms([
+          'Prices: EX-WORKS',
+          'Delivery: READY STOCK',
+          'Loading / Packing: EXTRA',
+          'Taxes: GST EXTRA 18%',
+          'Payment: 100% ADVANCE AGAINST PERFORMA INVOICE',
+          'Validity: 08 DAYS',
+        ]);
+      } else {
+        setTerms([...found.terms]);
+      }
     }
   };
 
@@ -804,7 +825,17 @@ export const QuotationEditorPage: React.FC = () => {
                 <input
                   type="date"
                   value={quotationDate}
-                  onChange={(e) => setQuotationDate(e.target.value)}
+                  onChange={(e) => {
+                    const newDate = e.target.value;
+                    setQuotationDate(newDate);
+                    if (newDate) {
+                      const d = new Date(newDate);
+                      if (!isNaN(d.getTime())) {
+                        d.setDate(d.getDate() + (settings.defaultValidityDays || 8));
+                        setValidUntil(d.toISOString().split('T')[0]);
+                      }
+                    }
+                  }}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 focus:bg-white focus:border-red-500 outline-none"
                 />
               </div>

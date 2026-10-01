@@ -30,12 +30,12 @@ export const TemplatesPage: React.FC = () => {
     setEditingTemplate(null);
     setTitle('');
     setTerms([
-      'PRICE BASIS: Ex-works Taloja Godown, Navi Mumbai.',
-      'TAXES & DUTIES: GST as applicable at prevailing government rates.',
-      'DELIVERY: Ready stock subject to prior sale.',
-      'TEST CERTIFICATE: MTC will be provided according to EN 10204 Type 3.1.',
-      'PAYMENT TERMS: 100% against Proforma Invoice prior to dispatch.',
-      'VALIDITY: 15 days from date of quotation.',
+      'Prices: EX-WORKS',
+      'Delivery: READY STOCK',
+      'Loading / Packing: EXTRA',
+      'Taxes: GST EXTRA 18%',
+      'Payment: 100% ADVANCE AGAINST PERFORMA INVOICE',
+      'Validity: 08 DAYS',
     ]);
     setIsDefault(false);
     setIsModalOpen(true);

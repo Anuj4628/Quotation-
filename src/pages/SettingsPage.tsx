@@ -621,7 +621,7 @@ export const SettingsPage: React.FC = () => {
                   type="number"
                   value={qSettings.defaultValidityDays}
                   onChange={(e) =>
-                    setQSettings({ ...qSettings, defaultValidityDays: parseInt(e.target.value) || 15 })
+                    setQSettings({ ...qSettings, defaultValidityDays: parseInt(e.target.value) || 8 })
                   }
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 outline-none"
                 />

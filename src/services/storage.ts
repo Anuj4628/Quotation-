@@ -48,6 +48,12 @@ const STORAGE_KEYS = {
   AUTH_TOKEN: 'jma_auth_token',
 };
 
+let storageIdCounter = 0;
+function generateStorageId(prefix: string): string {
+  storageIdCounter = (storageIdCounter + 1) % 1000000;
+  return `${prefix}-${Date.now()}-${storageIdCounter}-${Math.random().toString(36).substring(2, 7)}`;
+}
+
 class StorageService {
   constructor() {
     this.initStore();
@@ -107,6 +113,46 @@ class StorageService {
       localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(admin));
     } catch (e) {
       console.warn('User migration error in localStorage:', e);
+    }
+
+    // Ensure Terms & Conditions templates and defaultValidityDays (8 days) are up-to-date
+    try {
+      const rawTerms = localStorage.getItem(STORAGE_KEYS.TERMS_TEMPLATES);
+      if (rawTerms) {
+        const termsList: TermsTemplate[] = JSON.parse(rawTerms);
+        let changed = false;
+        termsList.forEach((tmpl) => {
+          if (
+            tmpl.isDefault ||
+            tmpl.id === 'terms-01' ||
+            tmpl.terms.some((t) => t.includes('15 days') || t.includes('Ex-works Taloja'))
+          ) {
+            tmpl.terms = [
+              'Prices: EX-WORKS',
+              'Delivery: READY STOCK',
+              'Loading / Packing: EXTRA',
+              'Taxes: GST EXTRA 18%',
+              'Payment: 100% ADVANCE AGAINST PERFORMA INVOICE',
+              'Validity: 08 DAYS',
+            ];
+            changed = true;
+          }
+        });
+        if (changed) {
+          localStorage.setItem(STORAGE_KEYS.TERMS_TEMPLATES, JSON.stringify(termsList));
+        }
+      }
+
+      const rawSettings = localStorage.getItem(STORAGE_KEYS.SETTINGS);
+      if (rawSettings) {
+        const settingsObj = JSON.parse(rawSettings);
+        if (settingsObj.defaultValidityDays === 15 || !settingsObj.defaultValidityDays) {
+          settingsObj.defaultValidityDays = 8;
+          localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settingsObj));
+        }
+      }
+    } catch (e) {
+      console.warn('Terms/Settings migration error in localStorage:', e);
     }
   }
 
@@ -204,7 +250,7 @@ class StorageService {
     const users = this.getUsers();
     const newUser: User = {
       ...user,
-      id: `user-${Date.now()}`,
+      id: generateStorageId('user'),
       createdAt: new Date().toISOString(),
     };
     users.push(newUser);
@@ -386,7 +432,7 @@ class StorageService {
     }
     const newCat: ProductCategory = {
       ...cat,
-      id: `cat-${Date.now()}`,
+      id: generateStorageId('cat'),
       slug: cat.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
     };
     list.push(newCat);
@@ -437,7 +483,7 @@ class StorageService {
     }
     const newProd: Product = {
       ...prod,
-      id: `prod-${Date.now()}`,
+      id: generateStorageId('prod'),
       createdAt: now,
       updatedAt: now,
     };
@@ -454,7 +500,7 @@ class StorageService {
     if (!prod) return null;
     const duplicated: Product = {
       ...prod,
-      id: `prod-${Date.now()}`,
+      id: generateStorageId('prod'),
       productCode: `${prod.productCode}-CPY`,
       name: `${prod.name} (Copy)`,
       createdAt: new Date().toISOString(),
@@ -509,7 +555,7 @@ class StorageService {
     }
     const newCust: Customer = {
       ...cust,
-      id: `cust-${Date.now()}`,
+      id: generateStorageId('cust'),
       customerCode: cust.customerCode || `CUST-JMA-${list.length + 1}`,
       createdAt: now,
       updatedAt: now,
@@ -555,7 +601,7 @@ class StorageService {
         return list[idx];
       }
     }
-    const newBank: BankAccount = { ...bank, id: `bank-${Date.now()}` };
+    const newBank: BankAccount = { ...bank, id: generateStorageId('bank') };
     list.push(newBank);
     localStorage.setItem(STORAGE_KEYS.BANK_ACCOUNTS, JSON.stringify(list));
     return newBank;
@@ -572,7 +618,14 @@ class StorageService {
 
   public getTermsTemplates(): TermsTemplate[] {
     if (this.isElectron()) {
-      return window.electronAPI!.getTermsTemplates() || INITIAL_TERMS_TEMPLATES;
+      const templates = window.electronAPI!.getTermsTemplates() || INITIAL_TERMS_TEMPLATES;
+      return templates.map((tmpl) => ({
+        ...tmpl,
+        terms:
+          tmpl.isDefault && tmpl.terms.some((t: string) => t.includes('15 days') || t.includes('Ex-works Taloja'))
+            ? [...INITIAL_TERMS_TEMPLATES[0].terms]
+            : tmpl.terms,
+      }));
     }
     const raw = localStorage.getItem(STORAGE_KEYS.TERMS_TEMPLATES);
     return raw ? JSON.parse(raw) : INITIAL_TERMS_TEMPLATES;
@@ -594,7 +647,7 @@ class StorageService {
         return list[idx];
       }
     }
-    const newTmpl: TermsTemplate = { ...tmpl, id: `terms-${Date.now()}` };
+    const newTmpl: TermsTemplate = { ...tmpl, id: generateStorageId('terms') };
     list.push(newTmpl);
     localStorage.setItem(STORAGE_KEYS.TERMS_TEMPLATES, JSON.stringify(list));
     return newTmpl;
@@ -606,11 +659,15 @@ class StorageService {
   public getSettings(): QuotationSettings {
     if (this.isElectron()) {
       const s = window.electronAPI?.getSettings();
-      return { ...INITIAL_SETTINGS, ...(s || {}) };
+      const merged = { ...INITIAL_SETTINGS, ...(s || {}) };
+      if (merged.defaultValidityDays === 15) merged.defaultValidityDays = 8;
+      return merged;
     }
     const raw = localStorage.getItem(STORAGE_KEYS.SETTINGS);
     const stored = raw ? JSON.parse(raw) : {};
-    return { ...INITIAL_SETTINGS, ...stored };
+    const merged = { ...INITIAL_SETTINGS, ...stored };
+    if (merged.defaultValidityDays === 15) merged.defaultValidityDays = 8;
+    return merged;
   }
 
   public updateSettings(settings: Partial<QuotationSettings>): QuotationSettings {
@@ -679,7 +736,7 @@ class StorageService {
           statusHistory: [
             ...(q.statusHistory || []),
             {
-              id: `hist-exp-${Date.now()}`,
+              id: generateStorageId('hist-exp'),
               status: 'expired' as QuotationStatus,
               previousStatus: q.status,
               note: 'Automatically marked as expired after validity date passed',
@@ -723,7 +780,7 @@ class StorageService {
 
         if (statusChanged) {
           newHistory.push({
-            id: `hist-${Date.now()}`,
+            id: generateStorageId('hist'),
             status: quotation.status,
             previousStatus: existing.status,
             note: `Status updated from ${existing.status.toUpperCase()} to ${quotation.status.toUpperCase()}`,
@@ -745,12 +802,12 @@ class StorageService {
     }
 
     // New quotation creation
-    const newId = `quot-${Date.now()}`;
+    const newId = generateStorageId('quot');
     const initialHistory = quotation.statusHistory && quotation.statusHistory.length > 0
       ? quotation.statusHistory
       : [
           {
-            id: `hist-${Date.now()}`,
+            id: generateStorageId('hist'),
             status: quotation.status || 'draft',
             note: 'Quotation created in system',
             updatedByName: currentUser.name,
@@ -795,13 +852,13 @@ class StorageService {
     const nextNumber = this.getNextQuotationNumber();
     const now = new Date();
     const today = now.toISOString().split('T')[0];
-    const validUntilDate = new Date(now.setDate(now.getDate() + 15)).toISOString().split('T')[0];
+    const validUntilDate = new Date(now.setDate(now.getDate() + 8)).toISOString().split('T')[0];
     const currentUser = this.getCurrentUser();
     const settings = this.getSettings();
 
     const duplicated: Quotation = {
       ...orig,
-      id: `quot-${Date.now()}`,
+      id: generateStorageId('quot'),
       quotationNumber: nextNumber,
       quotationDate: today,
       validUntil: validUntilDate,
@@ -817,7 +874,7 @@ class StorageService {
       signatoryDesignation: orig.signatoryDesignation || settings.signatoryDesignation || 'Commercial & Technical Operations',
       statusHistory: [
         {
-          id: `hist-${Date.now()}`,
+          id: generateStorageId('hist'),
           status: 'draft',
           note: `Duplicated from quotation ${orig.quotationNumber}`,
           updatedByName: currentUser.name,
@@ -852,7 +909,7 @@ class StorageService {
     const updatedHistory = [
       ...(existing.statusHistory || []),
       {
-        id: `hist-${Date.now()}`,
+        id: generateStorageId('hist'),
         status,
         previousStatus: existing.status,
         note: note || `Status changed to ${status.toUpperCase()}`,
@@ -946,7 +1003,7 @@ class StorageService {
 
         if (statusChanged) {
           newHistory.push({
-            id: `hist-${Date.now()}`,
+            id: generateStorageId('hist'),
             status: proforma.status,
             previousStatus: existing.status,
             note: `Status updated from ${existing.status.toUpperCase()} to ${proforma.status.toUpperCase()}`,
@@ -968,12 +1025,12 @@ class StorageService {
     }
 
     // New proforma invoice
-    const newId = `pi-${Date.now()}`;
+    const newId = generateStorageId('pi');
     const initialHistory = proforma.statusHistory && proforma.statusHistory.length > 0
       ? proforma.statusHistory
       : [
           {
-            id: `hist-${Date.now()}`,
+            id: generateStorageId('hist'),
             status: proforma.status || 'draft',
             note: 'Proforma Invoice generated in system',
             updatedByName: currentUser.name,
@@ -1018,13 +1075,13 @@ class StorageService {
     const nextNumber = this.getNextProformaNumber();
     const now = new Date();
     const today = now.toISOString().split('T')[0];
-    const validUntilDate = new Date(now.setDate(now.getDate() + 15)).toISOString().split('T')[0];
+    const validUntilDate = new Date(now.setDate(now.getDate() + 8)).toISOString().split('T')[0];
     const currentUser = this.getCurrentUser();
     const settings = this.getSettings();
 
     const duplicated: ProformaInvoice = {
       ...orig,
-      id: `pi-${Date.now()}`,
+      id: generateStorageId('pi'),
       piNumber: nextNumber,
       piDate: today,
       validUntil: validUntilDate,
@@ -1040,7 +1097,7 @@ class StorageService {
       signatoryDesignation: orig.signatoryDesignation ?? settings.signatoryDesignation,
       statusHistory: [
         {
-          id: `hist-${Date.now()}`,
+          id: generateStorageId('hist'),
           status: 'draft',
           note: `Duplicated from proforma ${orig.piNumber}`,
           updatedByName: currentUser.name,
@@ -1049,7 +1106,7 @@ class StorageService {
       ],
       items: (orig.items || []).map((it, idx) => ({
         ...it,
-        id: `piitem-${Date.now()}-${idx}`,
+        id: generateStorageId('piitem'),
         srNo: idx + 1,
       })),
       createdBy: currentUser.id,
@@ -1080,7 +1137,7 @@ class StorageService {
     const newHistory = [
       ...(existing.statusHistory || []),
       {
-        id: `hist-${Date.now()}`,
+        id: generateStorageId('hist'),
         status,
         previousStatus: existing.status,
         note: note || `Status updated from ${existing.status.toUpperCase()} to ${status.toUpperCase()}`,

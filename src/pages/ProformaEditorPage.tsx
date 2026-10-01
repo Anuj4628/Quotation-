@@ -64,13 +64,13 @@ export const ProformaEditorPage: React.FC = () => {
   );
   const [validUntil, setValidUntil] = useState(() => {
     const d = new Date();
-    d.setDate(d.getDate() + (settings.defaultValidityDays || 15));
+    d.setDate(d.getDate() + (settings.defaultValidityDays || 8));
     return d.toISOString().split('T')[0];
   });
   const [customerReference, setCustomerReference] = useState('');
   const [preparedBy, setPreparedBy] = useState(user.name);
-  const [paymentTerms, setPaymentTerms] = useState(settings.defaultPaymentTerms || '30% Advance, Balance before Dispatch');
-  const [deliveryTerms, setDeliveryTerms] = useState(settings.defaultDeliveryTerms || 'Ex-Works Mumbai, Freight Extra');
+  const [paymentTerms, setPaymentTerms] = useState(settings.defaultPaymentTerms || '100% ADVANCE AGAINST PERFORMA INVOICE');
+  const [deliveryTerms, setDeliveryTerms] = useState(settings.defaultDeliveryTerms || 'READY STOCK');
   const [expectedDeliveryDate, setExpectedDeliveryDate] = useState('');
   const [otherComments, setOtherComments] = useState('');
 
@@ -84,11 +84,16 @@ export const ProformaEditorPage: React.FC = () => {
   });
   const [terms, setTerms] = useState<string[]>(() => {
     const def = termsTemplates.find((t) => t.isDefault) || termsTemplates[0];
-    return def ? [...def.terms] : [
-      '100% advance against Proforma Invoice or as per mutually agreed terms.',
-      'Prices quoted are valid for 15 days from the date of this Proforma Invoice.',
-      'Delivery schedule starts from the date of confirmed PO and receipt of advance payment.',
-      'Material Test Certificates (EN 10204 3.1) will be provided alongside dispatch.',
+    if (def && !def.terms.some((t) => t.includes('15 days') || t.includes('Ex-works Taloja'))) {
+      return [...def.terms];
+    }
+    return [
+      'Prices: EX-WORKS',
+      'Delivery: READY STOCK',
+      'Loading / Packing: EXTRA',
+      'Taxes: GST EXTRA 18%',
+      'Payment: 100% ADVANCE AGAINST PERFORMA INVOICE',
+      'Validity: 08 DAYS',
     ];
   });
 
@@ -366,7 +371,18 @@ export const ProformaEditorPage: React.FC = () => {
     setSelectedTermsTemplateId(tmplId);
     const found = termsTemplates.find((t) => t.id === tmplId);
     if (found) {
-      setTerms([...found.terms]);
+      if (found.terms.some((t) => t.includes('15 days') || t.includes('Ex-works Taloja'))) {
+        setTerms([
+          'Prices: EX-WORKS',
+          'Delivery: READY STOCK',
+          'Loading / Packing: EXTRA',
+          'Taxes: GST EXTRA 18%',
+          'Payment: 100% ADVANCE AGAINST PERFORMA INVOICE',
+          'Validity: 08 DAYS',
+        ]);
+      } else {
+        setTerms([...found.terms]);
+      }
     }
   };
 
@@ -1419,7 +1435,17 @@ export const ProformaEditorPage: React.FC = () => {
                   <input
                     type="date"
                     value={proformaDate}
-                    onChange={(e) => setProformaDate(e.target.value)}
+                    onChange={(e) => {
+                      const newDate = e.target.value;
+                      setProformaDate(newDate);
+                      if (newDate) {
+                        const d = new Date(newDate);
+                        if (!isNaN(d.getTime())) {
+                          d.setDate(d.getDate() + (settings.defaultValidityDays || 8));
+                          setValidUntil(d.toISOString().split('T')[0]);
+                        }
+                      }
+                    }}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-800"
                   />
                 </div>

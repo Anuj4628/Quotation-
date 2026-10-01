@@ -40,6 +40,12 @@ export interface DBQuotationItem {
   total_amount: number;
 }
 
+let globalIdCounter = 0;
+function generateUniqueId(prefix: string): string {
+  globalIdCounter = (globalIdCounter + 1) % 100000;
+  return `${prefix}-${Date.now()}-${globalIdCounter}-${Math.random().toString(36).substring(2, 7)}`;
+}
+
 export class DatabaseManager {
   private dbPath: string;
   private db: any = null;
@@ -54,11 +60,11 @@ export class DatabaseManager {
     currentYear: 2026,
     sequenceNumber: 1011,
     formatTemplate: '{PREFIX}-{YEAR}-{NUMBER}',
-    defaultValidityDays: 15,
+    defaultValidityDays: 8,
     defaultCurrency: 'INR',
     defaultCurrencySymbol: '₹',
-    defaultPaymentTerms: '30% Advance, balance against Proforma / LR prior to dispatch',
-    defaultDeliveryTerms: 'Ex-Works, Taloja MIDC Stockyard, Navi Mumbai',
+    defaultPaymentTerms: '100% ADVANCE AGAINST PERFORMA INVOICE',
+    defaultDeliveryTerms: 'READY STOCK',
     signatureUrl: '/signature.png',
     stampUrl: '/stamp.png',
     signatureEnabled: true,
@@ -179,6 +185,10 @@ export class DatabaseManager {
 
     const doSave = () => {
       try {
+        const parentDir = path.dirname(this.dbPath);
+        if (!fs.existsSync(parentDir)) {
+          fs.mkdirSync(parentDir, { recursive: true });
+        }
         const data = this.db.export();
         const buffer = Buffer.from(data);
         const tmpPath = `${this.dbPath}.tmp`;
@@ -210,6 +220,20 @@ export class DatabaseManager {
         doSave();
       }, 50);
     }
+  }
+
+  public flush(): void {
+    if (this.isWasm && this.db) {
+      this.saveWasmToDisk(true);
+    }
+  }
+
+  public close(): void {
+    if (this.saveTimeout) {
+      clearTimeout(this.saveTimeout);
+      this.saveTimeout = null;
+    }
+    this.flush();
   }
 
   private sanitizeParams(params: any[] = []): any[] {
@@ -450,7 +474,7 @@ export class DatabaseManager {
         currentYear INTEGER DEFAULT 2026,
         sequenceNumber INTEGER DEFAULT 1011,
         formatTemplate TEXT DEFAULT '{PREFIX}-{YEAR}-{NUMBER}',
-        defaultValidityDays INTEGER DEFAULT 15,
+        defaultValidityDays INTEGER DEFAULT 8,
         defaultCurrency TEXT DEFAULT 'INR',
         defaultCurrencySymbol TEXT DEFAULT '₹',
         defaultPaymentTerms TEXT,
@@ -844,17 +868,16 @@ export class DatabaseManager {
     if (termsCount === 0) {
       console.log('[DatabaseManager] Seeding default terms template...');
       const defaultTerms = [
-        'PRICE BASIS: Ex-Works our Taloja stockyard / warehouse. Freight, transit insurance, and port handling charges extra at actuals unless explicitly stated otherwise.',
-        'TAXATION: GST applicable extra as per prevailing government statutory rates at the time of invoicing (Presently 18% on industrial pipes, fittings, flanges, and raw metal stocks).',
-        'PAYMENT TERMS: 30% advance with formal Purchase Order confirmation, balance 70% against proforma invoice prior to dispatch / against LR copy through authorized bank.',
-        'DELIVERY SCHEDULE: Ready stock items dispatched within 2 to 3 working days from receipt of technically and commercially clear Purchase Order. Custom manufactured fittings / mill orders: 3 to 4 weeks.',
-        'MATERIAL TEST CERTIFICATES: Manufacturer EN 10204 3.1 Mill Test Certificate (MTC) with complete chemical analysis, mechanical properties, and PMI test report supplied free of cost along with delivery.',
-        'THIRD PARTY INSPECTION (TPI): Inspection by client or authorized TPI agencies (TUV, DNV, Lloyd\'s Register, Bureau Veritas, SGS) welcomed prior to dispatch at client cost.',
-        'VALIDITY: This commercial quotation is valid for 15 days from quotation date. Prices subject to raw metal LME surcharge fluctuation thereafter.',
+        'Prices: EX-WORKS',
+        'Delivery: READY STOCK',
+        'Loading / Packing: EXTRA',
+        'Taxes: GST EXTRA 18%',
+        'Payment: 100% ADVANCE AGAINST PERFORMA INVOICE',
+        'Validity: 08 DAYS',
       ];
       this.run(
         'INSERT INTO terms_templates (id, title, terms, isDefault) VALUES (?, ?, ?, ?)',
-        ['terms-01', 'Standard Industrial Supply Terms (Jubilant Metal & Alloys)', JSON.stringify(defaultTerms), 1]
+        ['terms-01', 'Standard Terms & Conditions', JSON.stringify(defaultTerms), 1]
       );
     }
 
@@ -871,11 +894,11 @@ export class DatabaseManager {
           2026,
           1011,
           '{PREFIX}-{YEAR}-{NUMBER}',
-          15,
+          8,
           'INR',
           '₹',
-          '30% Advance, balance against Proforma / LR prior to dispatch',
-          'Ex-Works, Taloja MIDC Stockyard, Navi Mumbai',
+          '100% ADVANCE AGAINST PERFORMA INVOICE',
+          'READY STOCK',
           '/signature.png',
           '/stamp.png',
           1,
@@ -886,6 +909,32 @@ export class DatabaseManager {
           'Commercial & Technical Operations',
         ]
       );
+    }
+
+    // Ensure existing databases update default terms & 8 days validity
+    try {
+      const defaultTemplate = this.queryOne("SELECT * FROM terms_templates WHERE id = 'terms-01' OR isDefault = 1 LIMIT 1");
+      if (defaultTemplate) {
+        const termsStr = typeof defaultTemplate.terms === 'string' ? defaultTemplate.terms : JSON.stringify(defaultTemplate.terms);
+        if (termsStr.includes('15 days') || termsStr.includes('PRICE BASIS: Ex-Works our Taloja') || termsStr.includes('Standard Industrial Supply Terms')) {
+          const updatedDefaultTerms = [
+            'Prices: EX-WORKS',
+            'Delivery: READY STOCK',
+            'Loading / Packing: EXTRA',
+            'Taxes: GST EXTRA 18%',
+            'Payment: 100% ADVANCE AGAINST PERFORMA INVOICE',
+            'Validity: 08 DAYS',
+          ];
+          this.run("UPDATE terms_templates SET title = 'Standard Terms & Conditions', terms = ? WHERE id = ?", [JSON.stringify(updatedDefaultTerms), defaultTemplate.id]);
+        }
+      }
+
+      const currentSettings = this.queryOne("SELECT defaultValidityDays FROM settings WHERE id = 'default'");
+      if (currentSettings && (currentSettings.defaultValidityDays === 15 || !currentSettings.defaultValidityDays)) {
+        this.run("UPDATE settings SET defaultValidityDays = 8 WHERE id = 'default'");
+      }
+    } catch (e) {
+      console.warn('[DatabaseManager] Terms/validity migration check:', e);
     }
 
     console.log('[DatabaseManager] Initial dataset verified and ready.');
@@ -955,7 +1004,7 @@ export class DatabaseManager {
   }
 
   public createUser(user: any): any {
-    const id = `user-${Date.now()}`;
+    const id = generateUniqueId('user');
     const now = new Date().toISOString();
     const salt = generateSalt();
     const hash = hashPassword(user.password || 'admin123', salt);
@@ -1104,7 +1153,7 @@ export class DatabaseManager {
         return { ...existing, ...cat };
       }
     }
-    const newId = `cat-${Date.now()}`;
+    const newId = generateUniqueId('cat');
     const slug = (cat.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
     this.run(
       `INSERT INTO product_categories (id, name, slug, description, icon, isActive) VALUES (?, ?, ?, ?, ?, ?)`,
@@ -1160,7 +1209,7 @@ export class DatabaseManager {
         return { ...existing, ...prod, updatedAt: now };
       }
     }
-    const newId = `prod-${Date.now()}`;
+    const newId = generateUniqueId('prod');
     this.run(
       `INSERT INTO products (
         id, productCode, name, categoryId, categoryName, subcategory,
@@ -1212,14 +1261,11 @@ export class DatabaseManager {
     const now = new Date().toISOString();
     try {
       const companyName = (cust.companyName || '').trim() || 'Valued Customer';
-      let code = (cust.customerCode || '').trim();
-      if (!code) {
-        code = `CUST-JMA-${Date.now().toString().slice(-4)}`;
-      }
 
       if (cust.id) {
         const existing = this.getCustomerById(cust.id);
         if (existing) {
+          let code = (cust.customerCode || '').trim() || existing.customerCode;
           // Check for code collision with another customer
           const conflict = this.queryOne('SELECT id FROM customers WHERE customerCode = ? AND id != ?', [code, cust.id]);
           if (conflict) {
@@ -1262,7 +1308,11 @@ export class DatabaseManager {
         }
       }
 
-      const newId = cust.id || `cust-${Date.now()}`;
+      let code = (cust.customerCode || '').trim();
+      if (!code) {
+        code = `CUST-JMA-${Date.now().toString().slice(-4)}`;
+      }
+      const newId = cust.id || generateUniqueId('cust');
       const conflict = this.queryOne('SELECT id FROM customers WHERE customerCode = ?', [code]);
       if (conflict) {
         code = `${code}-${Date.now().toString().slice(-4)}`;
@@ -1290,7 +1340,7 @@ export class DatabaseManager {
     } catch (err: any) {
       console.error('[DatabaseManager] Error in saveCustomer:', err);
       // Return safe fallback so renderer never gets undefined: undefined
-      const safeId = cust.id || `cust-${Date.now()}`;
+      const safeId = cust.id || generateUniqueId('cust');
       return {
         ...cust,
         id: safeId,
@@ -1329,7 +1379,7 @@ export class DatabaseManager {
         return { ...existing, ...bank };
       }
     }
-    const newId = `bank-${Date.now()}`;
+    const newId = generateUniqueId('bank');
     this.run(
       `INSERT INTO bank_accounts (id, bankName, accountName, accountNumber, ifscCode, branchName, upiId, swiftCode, isDefault)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -1367,7 +1417,7 @@ export class DatabaseManager {
         return { ...existing, ...tmpl };
       }
     }
-    const newId = `terms-${Date.now()}`;
+    const newId = generateUniqueId('terms');
     this.run(
       'INSERT INTO terms_templates (id, title, terms, isDefault) VALUES (?, ?, ?, ?)',
       [newId, tmpl.title, termsJson, tmpl.isDefault ? 1 : 0]
@@ -1417,6 +1467,7 @@ export class DatabaseManager {
       return {
         ...DatabaseManager.DEFAULT_SETTINGS,
         ...s,
+        defaultValidityDays: s.defaultValidityDays === 15 || !s.defaultValidityDays ? 8 : s.defaultValidityDays,
         prefix: s.prefix || DatabaseManager.DEFAULT_SETTINGS.prefix,
         currentYear: s.currentYear || DatabaseManager.DEFAULT_SETTINGS.currentYear,
         sequenceNumber: typeof s.sequenceNumber === 'number' ? s.sequenceNumber : DatabaseManager.DEFAULT_SETTINGS.sequenceNumber,
@@ -1469,7 +1520,7 @@ export class DatabaseManager {
           updated.currentYear || new Date().getFullYear(),
           updated.sequenceNumber || 1011,
           updated.formatTemplate || '{PREFIX}-{YEAR}-{NUMBER}',
-          updated.defaultValidityDays || 15,
+          updated.defaultValidityDays || 8,
           updated.defaultCurrency || 'INR',
           updated.defaultCurrencySymbol || '₹',
           updated.defaultPaymentTerms || '',
@@ -1598,7 +1649,7 @@ export class DatabaseManager {
     const now = new Date().toISOString();
     const currentUser = this.getCurrentUser() || { id: 'user-01', name: 'Rajesh Sharma' };
     const isNew = !quotation.id;
-    const quoteId = quotation.id || `quot-${Date.now()}`;
+    const quoteId = quotation.id || generateUniqueId('quot');
 
     let qNumber = (quotation.quotationNumber || '').trim();
     if (!qNumber) {
@@ -1613,13 +1664,13 @@ export class DatabaseManager {
     const customerId = quotation.customerId || 'cust-direct';
     const customerName = (quotation.customerName || '').trim() || 'Direct Industrial Client';
     const qDate = quotation.quotationDate || now.split('T')[0];
-    const vDate = quotation.validUntil || new Date(Date.now() + 15 * 86400000).toISOString().split('T')[0];
+    const vDate = quotation.validUntil || new Date(Date.now() + 8 * 86400000).toISOString().split('T')[0];
 
     let statusHistory = quotation.statusHistory || [];
     if (isNew && statusHistory.length === 0) {
       statusHistory = [
         {
-          id: `hist-${Date.now()}`,
+          id: generateUniqueId('hist'),
           status: quotation.status || 'draft',
           note: 'Quotation created in system',
           updatedByName: currentUser.name,
@@ -1632,7 +1683,7 @@ export class DatabaseManager {
         statusHistory = [
           ...(existing.statusHistory || []),
           {
-            id: `hist-${Date.now()}`,
+            id: generateUniqueId('hist'),
             status: quotation.status,
             previousStatus: existing.status,
             note: `Status updated to ${(quotation.status || 'draft').toUpperCase()}`,
@@ -1736,7 +1787,7 @@ export class DatabaseManager {
       const items = quotation.items || [];
       for (let i = 0; i < items.length; i++) {
         const it = items[i];
-        const itemId = it.id || `qitem-${Date.now()}-${i}`;
+        const itemId = it.id || generateUniqueId('qitem');
         this.run(
           `INSERT INTO quotation_items (
             id, quotationId, srNo, productId, productName, description,
@@ -1785,7 +1836,7 @@ export class DatabaseManager {
     const nextNumber = this.getNextQuotationNumber();
     const now = new Date();
     const today = now.toISOString().split('T')[0];
-    const validUntilDate = new Date(now.setDate(now.getDate() + 15)).toISOString().split('T')[0];
+    const validUntilDate = new Date(now.setDate(now.getDate() + 8)).toISOString().split('T')[0];
     const currentUser = this.getCurrentUser();
 
     const duplicated = {
@@ -1798,7 +1849,7 @@ export class DatabaseManager {
       referenceNumber: orig.referenceNumber ? `${orig.referenceNumber} (Rev)` : undefined,
       statusHistory: [
         {
-          id: `hist-${Date.now()}`,
+          id: generateUniqueId('hist'),
           status: 'draft',
           note: `Duplicated from quotation ${orig.quotationNumber}`,
           updatedByName: currentUser.name,
@@ -1896,7 +1947,7 @@ export class DatabaseManager {
     const now = new Date().toISOString();
     const currentUser = this.getCurrentUser() || { id: 'user-01', name: 'Rajesh Sharma' };
     const isNew = !proforma.id;
-    const piId = proforma.id || `pi-${Date.now()}`;
+    const piId = proforma.id || generateUniqueId('pi');
 
     let pNumber = (proforma.proformaNumber || proforma.piNumber || '').trim();
     if (!pNumber) {
@@ -1911,13 +1962,13 @@ export class DatabaseManager {
     const customerId = proforma.customerId || 'cust-direct';
     const customerName = (proforma.customerName || '').trim() || 'Direct Industrial Client';
     const pDate = proforma.proformaDate || proforma.piDate || now.split('T')[0];
-    const vDate = proforma.validUntil || new Date(Date.now() + 15 * 86400000).toISOString().split('T')[0];
+    const vDate = proforma.validUntil || new Date(Date.now() + 8 * 86400000).toISOString().split('T')[0];
 
     let statusHistory = proforma.statusHistory || [];
     if (isNew && statusHistory.length === 0) {
       statusHistory = [
         {
-          id: `hist-${Date.now()}`,
+          id: generateUniqueId('hist'),
           status: proforma.status || 'draft',
           note: 'Proforma Invoice generated in system',
           updatedByName: currentUser.name,
@@ -1930,7 +1981,7 @@ export class DatabaseManager {
         statusHistory = [
           ...(existing.statusHistory || []),
           {
-            id: `hist-${Date.now()}`,
+            id: generateUniqueId('hist'),
             status: proforma.status,
             previousStatus: existing.status,
             note: `Status updated to ${(proforma.status || 'draft').toUpperCase()}`,
@@ -2048,7 +2099,7 @@ export class DatabaseManager {
       const items = proforma.items || [];
       for (let i = 0; i < items.length; i++) {
         const it = items[i];
-        const itemId = it.id || `piitem-${Date.now()}-${i}`;
+        const itemId = it.id || generateUniqueId('piitem');
         this.run(
           `INSERT INTO proforma_invoice_items (
             id, proformaId, srNo, productId, productName, description,
@@ -2100,7 +2151,7 @@ export class DatabaseManager {
     const nextNumber = this.getNextProformaNumber();
     const now = new Date();
     const today = now.toISOString().split('T')[0];
-    const validUntilDate = new Date(now.setDate(now.getDate() + 15)).toISOString().split('T')[0];
+    const validUntilDate = new Date(now.setDate(now.getDate() + 8)).toISOString().split('T')[0];
     const currentUser = this.getCurrentUser();
 
     const duplicated = {
@@ -2116,7 +2167,7 @@ export class DatabaseManager {
       referenceNumber: orig.referenceNumber ? `${orig.referenceNumber} (Rev)` : undefined,
       statusHistory: [
         {
-          id: `hist-${Date.now()}`,
+          id: generateUniqueId('hist'),
           status: 'draft',
           note: `Duplicated from proforma invoice ${orig.piNumber}`,
           updatedByName: currentUser.name,
