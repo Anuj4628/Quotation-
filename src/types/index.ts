@@ -155,6 +155,7 @@ export interface QuotationSettings {
   stampSize?: 'sm' | 'md' | 'lg';
   signatoryName?: string;
   signatoryDesignation?: string;
+  defaultTheme?: string;
 }
 
 export type QuotationStatus =
@@ -279,6 +280,15 @@ export interface Quotation {
   stampSize?: 'sm' | 'md' | 'lg';
   signatoryName?: string;
   signatoryDesignation?: string;
+
+  // Quotation Theme & Multi-Currency Snapshot
+  themeId?: string;
+  originalCurrency?: string;
+  displayCurrency?: string;
+  exchangeRate?: number;
+  exchangeRateDate?: string;
+  isCustomRate?: boolean;
+  customRate?: number;
   
   createdBy: string;
   createdByName: string;

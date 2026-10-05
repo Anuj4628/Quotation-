@@ -71,10 +71,10 @@
     border: none !important;
   }
 
-  .a4-page {
+  .a4-page,
+  .a5-page {
     width: 100% !important;
     max-width: 100% !important;
-    min-height: calc(297mm - 16mm) !important;
     height: auto !important;
     margin: 0 !important;
     padding: 2mm 0 !important;
@@ -87,7 +87,16 @@
     break-inside: avoid !important;
   }
 
-  .a4-page:last-child {
+  .a4-page {
+    min-height: calc(297mm - 16mm) !important;
+  }
+
+  .a5-page {
+    min-height: calc(210mm - 12mm) !important;
+  }
+
+  .a4-page:last-child,
+  .a5-page:last-child {
     page-break-after: avoid !important;
     break-after: avoid !important;
   }

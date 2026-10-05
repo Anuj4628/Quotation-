@@ -543,6 +543,13 @@ export class DatabaseManager {
         stampSize TEXT DEFAULT 'md',
         signatoryName TEXT,
         signatoryDesignation TEXT,
+        themeId TEXT DEFAULT 'modern',
+        originalCurrency TEXT DEFAULT 'INR',
+        displayCurrency TEXT DEFAULT 'INR',
+        exchangeRate REAL DEFAULT 1,
+        exchangeRateDate TEXT,
+        isCustomRate INTEGER DEFAULT 0,
+        customRate REAL,
         createdBy TEXT,
         createdByName TEXT,
         createdAt TEXT NOT NULL,
@@ -706,6 +713,32 @@ export class DatabaseManager {
     } catch (e) {}
     try {
       this.run("ALTER TABLE settings ADD COLUMN piSequenceNumber INTEGER DEFAULT 501");
+    } catch (e) {}
+
+    // Self-healing migrations for quotation theme & multi-currency columns
+    try {
+      this.run("ALTER TABLE quotations ADD COLUMN themeId TEXT DEFAULT 'modern'");
+    } catch (e) {}
+    try {
+      this.run("ALTER TABLE quotations ADD COLUMN originalCurrency TEXT DEFAULT 'INR'");
+    } catch (e) {}
+    try {
+      this.run("ALTER TABLE quotations ADD COLUMN displayCurrency TEXT DEFAULT 'INR'");
+    } catch (e) {}
+    try {
+      this.run("ALTER TABLE quotations ADD COLUMN exchangeRate REAL DEFAULT 1");
+    } catch (e) {}
+    try {
+      this.run("ALTER TABLE quotations ADD COLUMN exchangeRateDate TEXT");
+    } catch (e) {}
+    try {
+      this.run("ALTER TABLE quotations ADD COLUMN isCustomRate INTEGER DEFAULT 0");
+    } catch (e) {}
+    try {
+      this.run("ALTER TABLE quotations ADD COLUMN customRate REAL");
+    } catch (e) {}
+    try {
+      this.run("ALTER TABLE settings ADD COLUMN defaultTheme TEXT DEFAULT 'modern'");
     } catch (e) {}
 
     // Ensure strictly 1 Administrator account and purge demo/test accounts
@@ -1620,6 +1653,13 @@ export class DatabaseManager {
       isInterstate: Boolean(q.isInterstate),
       signatureEnabled: Boolean(q.signatureEnabled),
       stampEnabled: Boolean(q.stampEnabled),
+      themeId: q.themeId || 'modern',
+      originalCurrency: q.originalCurrency || 'INR',
+      displayCurrency: q.displayCurrency || 'INR',
+      exchangeRate: typeof q.exchangeRate === 'number' ? q.exchangeRate : 1,
+      exchangeRateDate: q.exchangeRateDate || q.quotationDate,
+      isCustomRate: Boolean(q.isCustomRate),
+      customRate: q.customRate || undefined,
       termsAndConditions: q.termsAndConditions ? JSON.parse(q.termsAndConditions) : [],
       bankDetails: q.bankDetails ? JSON.parse(q.bankDetails) : undefined,
       statusHistory: q.statusHistory ? JSON.parse(q.statusHistory) : [],
@@ -1637,6 +1677,13 @@ export class DatabaseManager {
       isInterstate: Boolean(q.isInterstate),
       signatureEnabled: Boolean(q.signatureEnabled),
       stampEnabled: Boolean(q.stampEnabled),
+      themeId: q.themeId || 'modern',
+      originalCurrency: q.originalCurrency || 'INR',
+      displayCurrency: q.displayCurrency || 'INR',
+      exchangeRate: typeof q.exchangeRate === 'number' ? q.exchangeRate : 1,
+      exchangeRateDate: q.exchangeRateDate || q.quotationDate,
+      isCustomRate: Boolean(q.isCustomRate),
+      customRate: q.customRate || undefined,
       termsAndConditions: q.termsAndConditions ? JSON.parse(q.termsAndConditions) : [],
       bankDetails: q.bankDetails ? JSON.parse(q.bankDetails) : undefined,
       statusHistory: q.statusHistory ? JSON.parse(q.statusHistory) : [],
@@ -1715,8 +1762,10 @@ export class DatabaseManager {
             bankAccountId, bankDetails, status, notes, statusHistory,
             signatureUrl, stampUrl, signatureEnabled, stampEnabled,
             signatureSize, stampSize, signatoryName, signatoryDesignation,
+            themeId, originalCurrency, displayCurrency, exchangeRate, exchangeRateDate,
+            isCustomRate, customRate,
             createdBy, createdByName, createdAt, updatedAt
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             quoteId, qNumber, qDate, vDate,
             quotation.referenceNumber || null, quotation.customerReference || null, quotation.salesperson || currentUser.name,
@@ -1735,6 +1784,9 @@ export class DatabaseManager {
             quotation.signatureEnabled !== false ? 1 : 0, quotation.stampEnabled !== false ? 1 : 0,
             quotation.signatureSize || 'md', quotation.stampSize || 'md',
             quotation.signatoryName || 'Mohan Jha', quotation.signatoryDesignation || 'Commercial & Technical Operations',
+            quotation.themeId || 'modern', quotation.originalCurrency || 'INR', quotation.displayCurrency || 'INR',
+            typeof quotation.exchangeRate === 'number' ? quotation.exchangeRate : 1, quotation.exchangeRateDate || qDate,
+            quotation.isCustomRate ? 1 : 0, typeof quotation.customRate === 'number' ? quotation.customRate : null,
             currentUser.id, currentUser.name, now, now,
           ]
         );
@@ -1756,6 +1808,8 @@ export class DatabaseManager {
             bankDetails = ?, status = ?, notes = ?, statusHistory = ?,
             signatureUrl = ?, stampUrl = ?, signatureEnabled = ?, stampEnabled = ?,
             signatureSize = ?, stampSize = ?, signatoryName = ?, signatoryDesignation = ?,
+            themeId = ?, originalCurrency = ?, displayCurrency = ?, exchangeRate = ?,
+            exchangeRateDate = ?, isCustomRate = ?, customRate = ?,
             updatedAt = ?
            WHERE id = ?`,
           [
@@ -1776,6 +1830,9 @@ export class DatabaseManager {
             quotation.signatureEnabled !== false ? 1 : 0, quotation.stampEnabled !== false ? 1 : 0,
             quotation.signatureSize || 'md', quotation.stampSize || 'md',
             quotation.signatoryName || 'Mohan Jha', quotation.signatoryDesignation || 'Commercial & Technical Operations',
+            quotation.themeId || 'modern', quotation.originalCurrency || 'INR', quotation.displayCurrency || 'INR',
+            typeof quotation.exchangeRate === 'number' ? quotation.exchangeRate : 1, quotation.exchangeRateDate || qDate,
+            quotation.isCustomRate ? 1 : 0, typeof quotation.customRate === 'number' ? quotation.customRate : null,
             now, quoteId,
           ]
         );

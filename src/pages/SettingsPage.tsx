@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Settings as SettingsIcon,
   Building2,
@@ -22,6 +22,8 @@ import { storage } from '../services/storage';
 import { CompanyProfile, QuotationSettings, BankAccount } from '../types';
 import { useToast } from '../context/ToastContext';
 import { resolveLogoUrl, resolveSignatureUrl, resolveStampUrl } from '../utils/assetResolver';
+import { QUOTATION_THEMES } from '../types/theme';
+import { TOP_CURRENCIES, getCurrencyInfo } from '../services/currencyService';
 
 export const SettingsPage: React.FC = () => {
   const { success, error } = useToast();
@@ -29,6 +31,7 @@ export const SettingsPage: React.FC = () => {
 
   // 1. Company Profile State
   const [company, setCompany] = useState<CompanyProfile>(() => storage.getCompany());
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   // 2. Quotation Numbering & Defaults State (including Signature & Stamp)
   const [qSettings, setQSettings] = useState<QuotationSettings>(() => storage.getSettings());
@@ -94,6 +97,56 @@ export const SettingsPage: React.FC = () => {
     e.preventDefault();
     storage.updateCompany(company);
     success('Settings Saved', 'Company profile and letterhead updated');
+  };
+
+  // Upload/Replace Company Logo
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/svg+xml'];
+    if (!validTypes.includes(file.type)) {
+      error('Invalid File Type', 'Please upload a PNG, JPG, JPEG, WebP, or SVG image.');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      error('File Too Large', 'Logo image size must be under 5MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      setCompany((prev) => {
+        const updated = { ...prev, logo: dataUrl };
+        storage.updateCompany(updated);
+        return updated;
+      });
+      success('Logo Updated', 'Company logo changed and saved successfully.');
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  // Remove Company Logo
+  const handleRemoveLogo = () => {
+    setCompany((prev) => {
+      const updated = { ...prev, logo: 'none' };
+      storage.updateCompany(updated);
+      return updated;
+    });
+    success('Logo Removed', 'Company logo cleared. PDF headers will display clean company text only.');
+  };
+
+  // Restore Default Jubilant Logo
+  const handleRestoreDefaultLogo = () => {
+    setCompany((prev) => {
+      const updated = { ...prev, logo: '/New logo.png' };
+      storage.updateCompany(updated);
+      return updated;
+    });
+    success('Default Logo Restored', 'Official company brand logo restored to default.');
   };
 
   // Save Quotation Settings (including Signature & Stamp)
@@ -318,18 +371,95 @@ export const SettingsPage: React.FC = () => {
               Official Company & Letterhead Information
             </h2>
 
-            {/* Logo Preview */}
-            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-center gap-4">
-              <img
-                src={resolveLogoUrl(company.logo)}
-                alt="Logo preview"
-                className="h-14 w-auto max-w-[260px] object-contain bg-white p-2 rounded-lg border border-slate-200"
-              />
-              <div className="flex-1 text-center sm:text-left">
-                <p className="font-bold text-slate-800">Company Brand Logo</p>
-                <p className="text-[11px] text-slate-500">
-                  Used as official letterhead on quotations, documents, print layout, and portal navigation.
-                </p>
+            {/* Company Brand Logo Management */}
+            <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 pb-3 border-b border-slate-200">
+                <div className="flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4 text-red-600" />
+                  <span className="font-bold text-slate-900 text-xs uppercase tracking-wider">
+                    Company Brand Logo Management
+                  </span>
+                </div>
+                {resolveLogoUrl(company.logo) ? (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                    Active Logo Applied
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold">
+                    No Logo (Text-Only Mode)
+                  </span>
+                )}
+              </div>
+
+              <div className="mt-3 flex flex-col sm:flex-row items-center gap-4">
+                {/* Visual Preview Box */}
+                <div className="w-full sm:w-auto flex flex-col items-center justify-center p-3 bg-white rounded-xl border-2 border-dashed border-slate-200 min-h-[90px] min-w-[220px]">
+                  {resolveLogoUrl(company.logo) ? (
+                    <img
+                      src={resolveLogoUrl(company.logo)}
+                      alt="Company Logo Preview"
+                      className="h-14 w-auto max-w-[220px] object-contain"
+                    />
+                  ) : (
+                    <div className="text-center py-2">
+                      <ImageIcon className="w-6 h-6 text-slate-300 mx-auto mb-1" />
+                      <p className="text-[11px] font-bold text-slate-400">No Logo Applied</p>
+                      <p className="text-[9px] text-slate-400">PDFs will render clean text header</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Information & Action Buttons */}
+                <div className="flex-1 space-y-2 text-center sm:text-left">
+                  <p className="text-[11px] text-slate-600 leading-relaxed">
+                    This logo is automatically rendered on all quotation themes, proforma invoices, print views, and exported PDFs.
+                  </p>
+                  <p className="text-[10px] text-slate-400">
+                    Supports PNG, JPG, JPEG, WebP, SVG (Max 5MB). Transparent PNG recommended.
+                  </p>
+
+                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
+                    <input
+                      ref={logoInputRef}
+                      type="file"
+                      accept="image/png, image/jpeg, image/jpg, image/webp, image/svg+xml"
+                      className="hidden"
+                      onChange={handleLogoUpload}
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => logoInputRef.current?.click()}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold text-[11px] shadow-sm transition-all"
+                    >
+                      <Upload className="w-3.5 h-3.5" />
+                      {resolveLogoUrl(company.logo) ? 'Replace / Upload Logo' : 'Upload Company Logo'}
+                    </button>
+
+                    {resolveLogoUrl(company.logo) && (
+                      <button
+                        type="button"
+                        onClick={handleRemoveLogo}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-rose-50 text-rose-600 border border-rose-200 rounded-lg font-bold text-[11px] transition-all"
+                      >
+                        <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+                        Remove Logo
+                      </button>
+                    )}
+
+                    {company.logo !== '/New logo.png' && (
+                      <button
+                        type="button"
+                        onClick={handleRestoreDefaultLogo}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 rounded-lg font-bold text-[11px] transition-all"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                        Reset to Official Logo
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -646,6 +776,64 @@ export const SettingsPage: React.FC = () => {
                 onChange={(e) => setQSettings({ ...qSettings, defaultPaymentTerms: e.target.value })}
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 outline-none"
               />
+            </div>
+
+            <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider border-b border-slate-100 pt-4 pb-2">
+              Quotation Theme & Multi-Currency Defaults
+            </h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Default Quotation Theme</label>
+                <select
+                  value={qSettings.defaultTheme || 'modern'}
+                  onChange={(e) => setQSettings({ ...qSettings, defaultTheme: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-semibold outline-none focus:bg-white focus:border-red-500"
+                >
+                  <optgroup label="🏢 Professional Document Templates (10)">
+                    {QUOTATION_THEMES.filter((t) => t.category === 'business').map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name} [{t.paperSize}] - {t.description.split('.')[0]}
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="🪔 Festive Themes (6)">
+                    {QUOTATION_THEMES.filter((t) => t.category === 'festive').map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.name} {t.festiveGreeting} [{t.paperSize}]
+                      </option>
+                    ))}
+                  </optgroup>
+                </select>
+                <span className="text-[10px] text-slate-400 mt-1 block">
+                  New quotations will automatically default to this theme.
+                </span>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Default Quotation Currency</label>
+                <select
+                  value={qSettings.defaultCurrency || 'INR'}
+                  onChange={(e) => {
+                    const info = getCurrencyInfo(e.target.value);
+                    setQSettings({
+                      ...qSettings,
+                      defaultCurrency: info.code,
+                      defaultCurrencySymbol: info.symbol,
+                    });
+                  }}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-semibold outline-none focus:bg-white focus:border-red-500"
+                >
+                  {TOP_CURRENCIES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.code} — {c.name} ({c.symbol})
+                    </option>
+                  ))}
+                </select>
+                <span className="text-[10px] text-slate-400 mt-1 block">
+                  Default commercial accounting currency.
+                </span>
+              </div>
             </div>
 
             {/* Authorized Signature & Stamp Section Shortcut */}

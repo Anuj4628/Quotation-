@@ -104,6 +104,14 @@ export const QuotationEditorPage: React.FC = () => {
   const [signatoryName, setSignatoryName] = useState(() => settings.signatoryName || 'Mohan Jha');
   const [signatoryDesignation, setSignatoryDesignation] = useState(() => settings.signatoryDesignation || 'Commercial & Technical Operations');
 
+  // Theme & Currency snapshot state
+  const [themeId, setThemeId] = useState<string>(() => settings.defaultTheme || 'modern');
+  const [displayCurrency, setDisplayCurrency] = useState<string>('INR');
+  const [exchangeRate, setExchangeRate] = useState<number | undefined>(undefined);
+  const [exchangeRateDate, setExchangeRateDate] = useState<string | undefined>(undefined);
+  const [isCustomRate, setIsCustomRate] = useState<boolean | undefined>(undefined);
+  const [customRate, setCustomRate] = useState<number | undefined>(undefined);
+
   // Customer selection
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -215,6 +223,14 @@ export const QuotationEditorPage: React.FC = () => {
         if (existing.stampSize) setStampSize(existing.stampSize);
         if (existing.signatoryName) setSignatoryName(existing.signatoryName);
         if (existing.signatoryDesignation) setSignatoryDesignation(existing.signatoryDesignation);
+
+        // Retain theme & currency snapshot
+        if (existing.themeId) setThemeId(existing.themeId);
+        if (existing.displayCurrency) setDisplayCurrency(existing.displayCurrency);
+        if (existing.exchangeRate !== undefined) setExchangeRate(existing.exchangeRate);
+        if (existing.exchangeRateDate) setExchangeRateDate(existing.exchangeRateDate);
+        if (existing.isCustomRate !== undefined) setIsCustomRate(existing.isCustomRate);
+        if (existing.customRate !== undefined) setCustomRate(existing.customRate);
 
         // Find customer
         setSelectedCustomerId(existing.customerId);
@@ -644,6 +660,13 @@ export const QuotationEditorPage: React.FC = () => {
       stampSize,
       signatoryName,
       signatoryDesignation,
+      themeId: themeId || settings.defaultTheme || 'modern',
+      originalCurrency: 'INR',
+      displayCurrency: displayCurrency || 'INR',
+      exchangeRate: exchangeRate !== undefined ? exchangeRate : 1,
+      exchangeRateDate: exchangeRateDate || quotationDate,
+      isCustomRate: isCustomRate || false,
+      customRate,
       statusHistory: [],
       createdBy: user.id,
       createdByName: user.name,

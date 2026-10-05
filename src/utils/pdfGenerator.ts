@@ -69,14 +69,17 @@ export async function createQuotationPDF({
     // Small delay to ensure all DOM layout and child assets are painted
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    // Check if the document contains discrete .a4-page elements
-    const pageElements = Array.from(element.querySelectorAll<HTMLElement>('.a4-page'));
+    // Check if the document contains discrete page elements (.a4-page, .a5-page, or .doc-page)
+    const pageElements = Array.from(element.querySelectorAll<HTMLElement>('.a4-page, .a5-page, .doc-page'));
 
     if (pageElements.length > 0) {
+      const firstPageIsA5 = pageElements[0].classList.contains('a5-page');
+      const initialFormat = firstPageIsA5 ? 'a5' : 'a4';
+
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
-        format: 'a4',
+        format: initialFormat,
         compress: true,
       });
 
@@ -86,18 +89,24 @@ export async function createQuotationPDF({
           onProgress(20 + Math.floor((68 * (i + 1)) / pageElements.length));
         }
 
-        // Ensure page element renders at precise A4 proportions
+        const isPageA5 = pageEl.classList.contains('a5-page');
+        const pMmWidth = isPageA5 ? 148 : 210;
+        const pMmHeight = isPageA5 ? 210 : 297;
+        const pPxWidth = isPageA5 ? 559 : 794;
+        const pPxHeight = isPageA5 ? 794 : 1123;
+
+        // Ensure page element renders at precise proportions for canvas snapshot
         const prevWidth = pageEl.style.width;
         const prevMinHeight = pageEl.style.minHeight;
-        pageEl.style.width = '794px';
-        pageEl.style.minHeight = '1123px';
+        pageEl.style.width = `${pPxWidth}px`;
+        pageEl.style.minHeight = `${pPxHeight}px`;
 
         const canvas = await html2canvas(pageEl, {
           scale: 2, // 2x for sharp retina rendering
           useCORS: true,
           logging: false,
           backgroundColor: '#ffffff',
-          windowWidth: 794,
+          windowWidth: pPxWidth,
           scrollX: 0,
           scrollY: 0,
         });
@@ -107,9 +116,9 @@ export async function createQuotationPDF({
 
         const imgData = canvas.toDataURL('image/png', 1.0);
         if (i > 0) {
-          pdf.addPage('a4', 'portrait');
+          pdf.addPage(isPageA5 ? 'a5' : 'a4', 'portrait');
         }
-        pdf.addImage(imgData, 'PNG', 0, 0, 210, 297, undefined, 'FAST');
+        pdf.addImage(imgData, 'PNG', 0, 0, pMmWidth, pMmHeight, undefined, 'FAST');
       }
 
       if (onProgress) onProgress(92);

@@ -12,15 +12,20 @@ export const DEFAULT_STAMP = stampImg;
  * Prevents broken root-slash (/logo.png) paths when running from file:// in packaged Electron.
  */
 export function resolveLogoUrl(url?: string | null): string {
+  if (url === 'none' || url === '' || url === 'null') {
+    return '';
+  }
+  if (!url || typeof url !== 'string') {
+    return DEFAULT_LOGO;
+  }
   if (
-    !url ||
-    typeof url !== 'string' ||
     url === '/logo.png' ||
     url === '/logo3.png' ||
+    url === '/New logo.png' ||
     url.includes('logo3.png') ||
     url.includes('logo.png') ||
     url.includes('logo2.png') ||
-    url.trim() === ''
+    url.includes('New logo.png')
   ) {
     return DEFAULT_LOGO;
   }

@@ -818,14 +818,13 @@ class StorageService {
     const settings = this.getSettings();
 
     const newQuotation: Quotation = {
-      signatureUrl: quotation.signatureUrl !== undefined ? quotation.signatureUrl : settings.signatureUrl,
-      stampUrl: quotation.stampUrl !== undefined ? quotation.stampUrl : settings.stampUrl,
-      signatureEnabled: quotation.signatureEnabled !== undefined ? quotation.signatureEnabled : (settings.signatureEnabled ?? true),
-      stampEnabled: quotation.stampEnabled !== undefined ? quotation.stampEnabled : (settings.stampEnabled ?? true),
-      signatureSize: quotation.signatureSize || settings.signatureSize || 'md',
-      stampSize: quotation.stampSize || settings.stampSize || 'md',
-      signatoryName: quotation.signatoryName || settings.signatoryName || 'Mohan Jha',
-      signatoryDesignation: quotation.signatoryDesignation || settings.signatoryDesignation || 'Commercial & Technical Operations',
+      themeId: quotation.themeId || settings.defaultTheme || 'modern',
+      originalCurrency: quotation.originalCurrency || 'INR',
+      displayCurrency: quotation.displayCurrency || 'INR',
+      exchangeRate: quotation.exchangeRate !== undefined ? quotation.exchangeRate : 1,
+      exchangeRateDate: quotation.exchangeRateDate || quotation.quotationDate,
+      isCustomRate: quotation.isCustomRate || false,
+      customRate: quotation.customRate,
 
       ...quotation,
       id: newId,
@@ -840,6 +839,25 @@ class StorageService {
     localStorage.setItem(STORAGE_KEYS.QUOTATIONS, JSON.stringify(list));
     this.incrementQuotationSequence();
     return newQuotation;
+  }
+
+  public updateQuotationThemeAndCurrency(
+    id: string,
+    updates: {
+      themeId?: string;
+      displayCurrency?: string;
+      exchangeRate?: number;
+      exchangeRateDate?: string;
+      isCustomRate?: boolean;
+      customRate?: number;
+    }
+  ): Quotation | null {
+    const existing = this.getQuotationById(id);
+    if (!existing) return null;
+    return this.saveQuotation({
+      ...existing,
+      ...updates,
+    });
   }
 
   public duplicateQuotation(id: string): Quotation | null {

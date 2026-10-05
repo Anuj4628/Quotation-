@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Quotation, ProformaInvoice } from '../../types';
 import { formatINR } from '../../utils/calculator';
+import { formatCurrency, roundCurrency } from '../../services/currencyService';
 import { useToast } from '../../context/ToastContext';
 import { storage } from '../../services/storage';
 import {
@@ -63,11 +64,16 @@ export const ShareModal: React.FC<ShareModalProps> = ({ quotation, proforma, isO
   const grandTotal = doc.grandTotal || 0;
   const validUntil = doc.validUntil || '';
 
+  const displayTotalText =
+    quotation && quotation.displayCurrency && quotation.displayCurrency !== 'INR'
+      ? `${formatCurrency(roundCurrency(grandTotal * (quotation.exchangeRate || 1), quotation.displayCurrency), quotation.displayCurrency)} (${formatINR(grandTotal)})`
+      : formatINR(grandTotal);
+
   const messageText = `Dear ${contactPerson},
 
 Please find attached our ${docTitle} ${docNumber} from Jubilant Metal and Alloys.
 
-${isProforma ? 'Proforma' : 'Quotation'} Value: ${formatINR(grandTotal)}
+${isProforma ? 'Proforma' : 'Quotation'} Value: ${displayTotalText}
 Valid Until: ${validUntil}
 
 Link to view & download ${docTitle}:
@@ -75,8 +81,8 @@ ${docUrl}
 
 Regards,
 JUBILANT METAL AND ALLOYS
-sales@jubilantmetal.com
-+91 22 2741 8900`;
+    sales@jubilantmetal.com
+    +91 22 2741 8900`;
 
   // Target phone formatting
   const targetPhone =

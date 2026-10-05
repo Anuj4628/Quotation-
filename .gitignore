@@ -12,6 +12,9 @@ dist
 dist-ssr
 dist-electron
 release
+*.zip
+*.exe
+release.zip
 scratch
 *.local
 

@@ -14,6 +14,9 @@ import {
   History,
   FileCheck2,
   Sparkles,
+  Palette,
+  DollarSign,
+  Globe,
 } from 'lucide-react';
 import { storage } from '../services/storage';
 import { Quotation, QuotationStatus } from '../types';
@@ -22,15 +25,22 @@ import { useToast } from '../context/ToastContext';
 import { generateQuotationPDF } from '../utils/pdfGenerator';
 import { QuotationDocument } from '../components/quotation/QuotationDocument';
 import { ShareModal } from '../components/quotation/ShareModal';
+import { ThemeSelectorModal } from '../components/quotation/ThemeSelectorModal';
+import { CurrencySelectorModal } from '../components/quotation/CurrencySelectorModal';
+import { QUOTATION_THEMES } from '../types/theme';
+import { getCurrencyInfo } from '../services/currencyService';
 
 export const QuotationDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { success, error } = useToast();
+  const { success } = useToast();
   const [refreshKey, setRefreshKey] = useState(0);
 
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
+  const [isCurrencyModalOpen, setIsCurrencyModalOpen] = useState(false);
+
   const [newStatus, setNewStatus] = useState<QuotationStatus>('approved');
   const [statusNote, setStatusNote] = useState('');
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
@@ -39,6 +49,28 @@ export const QuotationDetailPage: React.FC = () => {
     if (!id) return undefined;
     return storage.getQuotationById(id);
   }, [id, refreshKey]);
+
+  // Theme & Currency active state (live responsive without full reload)
+  const [activeThemeId, setActiveThemeId] = useState<string>(() => {
+    const q = id ? storage.getQuotationById(id) : undefined;
+    return q?.themeId || storage.getSettings().defaultTheme || 'modern';
+  });
+  const [activeCurrency, setActiveCurrency] = useState<string>(() => {
+    const q = id ? storage.getQuotationById(id) : undefined;
+    return q?.displayCurrency || 'INR';
+  });
+  const [activeRate, setActiveRate] = useState<number | undefined>(() => {
+    const q = id ? storage.getQuotationById(id) : undefined;
+    return q?.exchangeRate;
+  });
+  const [activeRateDate, setActiveRateDate] = useState<string | undefined>(() => {
+    const q = id ? storage.getQuotationById(id) : undefined;
+    return q?.exchangeRateDate;
+  });
+  const [activeIsCustomRate, setActiveIsCustomRate] = useState<boolean | undefined>(() => {
+    const q = id ? storage.getQuotationById(id) : undefined;
+    return q?.isCustomRate;
+  });
 
   if (!quotation) {
     return (
@@ -71,15 +103,47 @@ export const QuotationDetailPage: React.FC = () => {
     }
   };
 
+  const handleSelectTheme = (themeId: string, setAsGlobalDefault?: boolean) => {
+    setActiveThemeId(themeId);
+    storage.updateQuotationThemeAndCurrency(quotation.id, { themeId });
+    if (setAsGlobalDefault) {
+      storage.updateSettings({ defaultTheme: themeId });
+    }
+    const t = QUOTATION_THEMES.find((item) => item.id === themeId);
+    success('Theme Applied', `Switched quotation to ${t?.name || themeId} theme`);
+    setRefreshKey((k) => k + 1);
+  };
+
+  const handleApplyCurrency = (currencyData: {
+    displayCurrency: string;
+    exchangeRate: number;
+    exchangeRateDate: string;
+    isCustomRate: boolean;
+    customRate?: number;
+  }) => {
+    setActiveCurrency(currencyData.displayCurrency);
+    setActiveRate(currencyData.exchangeRate);
+    setActiveRateDate(currencyData.exchangeRateDate);
+    setActiveIsCustomRate(currencyData.isCustomRate);
+
+    storage.updateQuotationThemeAndCurrency(quotation.id, currencyData);
+    success(
+      'Currency Updated',
+      `Quotation converted to ${currencyData.displayCurrency} @ ${currencyData.exchangeRate}`
+    );
+    setRefreshKey((k) => k + 1);
+  };
+
   const handleDownloadPdf = async () => {
     setIsGeneratingPdf(true);
+    const currSuffix = activeCurrency !== 'INR' ? `-${activeCurrency}` : '';
     const ok = await generateQuotationPDF({
       elementId: 'quotation-print-document',
-      filename: `${quotation.quotationNumber}-Jubilant.pdf`,
+      filename: `${quotation.quotationNumber}${currSuffix}-Jubilant.pdf`,
     });
     setIsGeneratingPdf(false);
     if (ok) {
-      success('PDF Generated', `Downloaded ${quotation.quotationNumber}.pdf`);
+      success('PDF Generated', `Downloaded ${quotation.quotationNumber}${currSuffix}.pdf`);
     }
   };
 
@@ -106,6 +170,9 @@ export const QuotationDetailPage: React.FC = () => {
     rejected: 'bg-red-50 text-red-700 border-red-300',
     converted: 'bg-purple-50 text-purple-700 border-purple-300',
   };
+
+  const activeThemeObj = QUOTATION_THEMES.find((t) => t.id === activeThemeId) || QUOTATION_THEMES[0];
+  const activeCurrencyInfo = getCurrencyInfo(activeCurrency);
 
   return (
     <div className="space-y-6 pb-20">
@@ -176,7 +243,7 @@ export const QuotationDetailPage: React.FC = () => {
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-semibold shadow-sm transition-all"
           >
             <Printer className="w-3.5 h-3.5" />
-            <span>Print A4</span>
+            <span>Print ({activeThemeObj.paperSize})</span>
           </button>
 
           <button
@@ -198,9 +265,68 @@ export const QuotationDetailPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Theme & Multi-Currency Controls Bar */}
+      <div className="no-print bg-white p-4 rounded-2xl border border-slate-200 shadow-soft flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Change Theme Button */}
+          <button
+            onClick={() => setIsThemeModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white text-xs font-bold shadow-md shadow-red-600/20 transition-all cursor-pointer"
+          >
+            <Palette className="w-4 h-4" />
+            <span>Template: {activeThemeObj.name} ({activeThemeObj.paperSize})</span>
+            <ChevronDown className="w-3.5 h-3.5 opacity-80" />
+          </button>
+
+          {/* Change Currency Button */}
+          <button
+            onClick={() => setIsCurrencyModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold shadow-md transition-all cursor-pointer"
+          >
+            <DollarSign className="w-4 h-4 text-emerald-400" />
+            <span>Currency: {activeCurrency} ({activeCurrencyInfo.symbol})</span>
+            <ChevronDown className="w-3.5 h-3.5 opacity-80" />
+          </button>
+
+          {/* Status badge */}
+          <div className="flex items-center gap-2 text-xs">
+            {activeThemeObj.category === 'festive' ? (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 text-[11px] font-bold">
+                <span>🪔</span> Festive Theme: {activeThemeObj.name}
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 border border-slate-200 text-[11px] font-medium">
+                🏢 Business Theme: {activeThemeObj.name}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Currency rate transparency chip */}
+        <div className="flex items-center gap-2 text-xs">
+          {activeCurrency !== 'INR' && activeRate && (
+            <div className="px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-center gap-1.5 font-medium">
+              <Globe className="w-3.5 h-3.5 text-amber-700" />
+              <span>
+                1 INR = {activeRate < 0.01 ? activeRate.toFixed(6) : activeRate.toFixed(4)} {activeCurrency}
+                {activeIsCustomRate ? ' (Custom Rate)' : ''}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Main Official Document Layout */}
       <div className="bg-slate-200/50 p-2 sm:p-6 rounded-2xl border border-slate-300/80 overflow-x-auto print:bg-white print:border-none print:p-0">
-        <QuotationDocument quotation={quotation} id="quotation-print-document" />
+        <QuotationDocument
+          quotation={quotation}
+          id="quotation-print-document"
+          themeId={activeThemeId}
+          displayCurrency={activeCurrency}
+          exchangeRate={activeRate}
+          exchangeRateDate={activeRateDate}
+          isCustomRate={activeIsCustomRate}
+        />
       </div>
 
       {/* Audit Trail & Activity Timeline */}
@@ -308,6 +434,29 @@ export const QuotationDetailPage: React.FC = () => {
           quotation={quotation}
           isOpen={isShareOpen}
           onClose={() => setIsShareOpen(false)}
+        />
+      )}
+
+      {/* Theme Selector Modal */}
+      {isThemeModalOpen && (
+        <ThemeSelectorModal
+          isOpen={isThemeModalOpen}
+          onClose={() => setIsThemeModalOpen(false)}
+          currentThemeId={activeThemeId}
+          onSelectTheme={handleSelectTheme}
+        />
+      )}
+
+      {/* Currency Selector Modal */}
+      {isCurrencyModalOpen && (
+        <CurrencySelectorModal
+          isOpen={isCurrencyModalOpen}
+          onClose={() => setIsCurrencyModalOpen(false)}
+          quotation={quotation}
+          currentCurrency={activeCurrency}
+          currentRate={activeRate}
+          currentIsCustomRate={activeIsCustomRate}
+          onApplyCurrency={handleApplyCurrency}
         />
       )}
     </div>
