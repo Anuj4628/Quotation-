@@ -717,7 +717,7 @@ export const QuotationEditorPage: React.FC = () => {
           <button
             type="button"
             onClick={() => handleSaveQuotation(status, true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-xs shadow-md shadow-red-600/20"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0D5C46] hover:bg-[#084434] text-white font-semibold text-xs shadow-md shadow-[#0D5C46]/20 cursor-pointer"
           >
             <Save className="w-4 h-4" />
             <span>Save & Preview</span>
@@ -732,7 +732,7 @@ export const QuotationEditorPage: React.FC = () => {
           <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-soft space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-red-600" />
+                <Building2 className="w-4 h-4 text-[#0D5C46]" />
                 <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
                   1. Customer & Consignee Information
                 </h2>
@@ -755,7 +755,7 @@ export const QuotationEditorPage: React.FC = () => {
               <select
                 value={selectedCustomerId}
                 onChange={(e) => handleCustomerSelect(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-900 focus:outline-none focus:border-red-500 focus:bg-white"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-900 focus:outline-none focus:border-[#0D5C46] focus:bg-white"
               >
                 <option value="">-- Choose Customer from Database --</option>
                 {customers.map((c) => (
@@ -799,7 +799,7 @@ export const QuotationEditorPage: React.FC = () => {
                             setSameAsBilling(e.target.checked);
                             if (e.target.checked) setShippingAddress(selectedCustomer.billingAddress);
                           }}
-                          className="rounded text-red-600 focus:ring-red-500 mr-1"
+                          className="rounded text-[#0D5C46] focus:ring-[#0D5C46] mr-1"
                         />
                         Same as Billing
                       </label>
@@ -810,7 +810,7 @@ export const QuotationEditorPage: React.FC = () => {
                         value={shippingAddress}
                         onChange={(e) => setShippingAddress(e.target.value)}
                         placeholder="Enter consignee site delivery address..."
-                        className="w-full bg-white border border-slate-200 rounded-lg p-2 text-xs text-slate-800"
+                        className="w-full bg-white border border-slate-200 rounded-lg p-2 text-xs text-slate-800 focus:outline-none focus:border-[#0D5C46]"
                       />
                     ) : (
                       <p className="text-slate-600 italic">Same as Billing Address</p>
@@ -824,7 +824,7 @@ export const QuotationEditorPage: React.FC = () => {
           {/* SECTION 2: Quotation Metadata */}
           <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-soft space-y-4">
             <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-              <Calendar className="w-4 h-4 text-red-600" />
+              <Calendar className="w-4 h-4 text-[#0D5C46]" />
               <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
                 2. Quotation Parameters & Terms
               </h2>
@@ -839,7 +839,7 @@ export const QuotationEditorPage: React.FC = () => {
                   type="text"
                   value={quotationNumber}
                   onChange={(e) => setQuotationNumber(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-slate-900 focus:bg-white focus:border-red-500 outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-slate-900 focus:bg-white focus:border-[#0D5C46] outline-none"
                 />
               </div>
 
@@ -859,7 +859,7 @@ export const QuotationEditorPage: React.FC = () => {
                       }
                     }
                   }}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 focus:bg-white focus:border-red-500 outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 focus:bg-white focus:border-[#0D5C46] outline-none"
                 />
               </div>
 
@@ -869,7 +869,7 @@ export const QuotationEditorPage: React.FC = () => {
                   type="date"
                   value={validUntil}
                   onChange={(e) => setValidUntil(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 focus:bg-white focus:border-red-500 outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 focus:bg-white focus:border-[#0D5C46] outline-none"
                 />
               </div>
 
@@ -880,7 +880,7 @@ export const QuotationEditorPage: React.FC = () => {
                   value={customerReference}
                   onChange={(e) => setCustomerReference(e.target.value)}
                   placeholder="e.g. ENQ/LT/HE/2026/01"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 focus:bg-white focus:border-red-500 outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 focus:bg-white focus:border-[#0D5C46] outline-none"
                 />
               </div>
 
@@ -890,7 +890,7 @@ export const QuotationEditorPage: React.FC = () => {
                   type="text"
                   value={salesperson}
                   onChange={(e) => setSalesperson(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 focus:bg-white focus:border-red-500 outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 focus:bg-white focus:border-[#0D5C46] outline-none"
                 />
               </div>
 
@@ -954,7 +954,7 @@ export const QuotationEditorPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => handleAddItem(true)}
-                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-sm shadow-red-600/20 transition-all"
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#0D5C46] hover:bg-[#084434] text-white text-xs font-bold shadow-sm shadow-[#0D5C46]/20 transition-all cursor-pointer"
                   title="Add blank row (Shortcut: Press Enter on Rate)"
                 >
                   <Plus className="w-4 h-4" />
@@ -995,7 +995,7 @@ export const QuotationEditorPage: React.FC = () => {
                             value={item.description}
                             onChange={(e) => handleItemChange(idx, 'description', e.target.value)}
                             placeholder="Paste complete product description (e.g. SS 304 Seamless Pipe, 2 inch NB, SCH 40, ASTM A312, 6M)..."
-                            className="w-full bg-white border border-slate-200 focus:border-red-500 focus:ring-1 focus:ring-red-500 rounded-lg p-2 text-xs font-medium text-slate-900 placeholder:text-slate-400 outline-none resize-y min-h-[38px] transition-all leading-relaxed"
+                            className="w-full bg-white border border-slate-200 focus:border-[#0D5C46] focus:ring-1 focus:ring-[#0D5C46] rounded-lg p-2 text-xs font-medium text-slate-900 placeholder:text-slate-400 outline-none resize-y min-h-[38px] transition-all leading-relaxed"
                           />
                         </td>
 
@@ -1010,7 +1010,7 @@ export const QuotationEditorPage: React.FC = () => {
                               handleItemChange(idx, 'quantity', e.target.value === '' ? 0 : parseFloat(e.target.value) || 0)
                             }
                             placeholder="1"
-                            className="w-full bg-white border border-slate-200 focus:border-red-500 focus:ring-1 focus:ring-red-500 rounded-lg px-2.5 py-2 text-xs font-mono font-semibold text-right text-slate-900 outline-none transition-all"
+                            className="w-full bg-white border border-slate-200 focus:border-[#0D5C46] focus:ring-1 focus:ring-[#0D5C46] rounded-lg px-2.5 py-2 text-xs font-mono font-semibold text-right text-slate-900 outline-none transition-all"
                           />
                         </td>
 
@@ -1053,7 +1053,7 @@ export const QuotationEditorPage: React.FC = () => {
                                 }
                               }}
                               placeholder="0.00"
-                              className="w-full bg-white border border-slate-200 focus:border-red-500 focus:ring-1 focus:ring-red-500 rounded-lg pl-6 pr-2.5 py-2 text-xs font-mono font-semibold text-right text-slate-900 outline-none transition-all"
+                              className="w-full bg-white border border-slate-200 focus:border-[#0D5C46] focus:ring-1 focus:ring-[#0D5C46] rounded-lg pl-6 pr-2.5 py-2 text-xs font-mono font-semibold text-right text-slate-900 outline-none transition-all"
                             />
                           </div>
                         </td>
@@ -1312,8 +1312,8 @@ export const QuotationEditorPage: React.FC = () => {
               )}
 
               {/* Grand Total Highlight */}
-              <div className="p-3.5 bg-red-600 text-white rounded-xl shadow-md space-y-1 mt-3">
-                <span className="text-[10px] font-bold uppercase tracking-wider block opacity-90">
+              <div className="p-3.5 bg-[#0D5C46] text-white rounded-xl shadow-md space-y-1 mt-3 border border-[#BC9647]/30">
+                <span className="text-[10px] font-bold uppercase tracking-wider block opacity-90 text-emerald-100">
                   GRAND TOTAL (INC. ALL TAXES)
                 </span>
                 <p className="text-xl sm:text-2xl font-display font-extrabold font-mono">
@@ -1336,7 +1336,7 @@ export const QuotationEditorPage: React.FC = () => {
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as QuotationStatus)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold capitalize text-slate-800"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold capitalize text-slate-800 focus:outline-none focus:border-[#0D5C46]"
               >
                 <option value="draft">Draft</option>
                 <option value="sent">Sent</option>
@@ -1353,7 +1353,7 @@ export const QuotationEditorPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleSaveQuotation(status, true)}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-md shadow-red-600/30 transition-all"
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[#0D5C46] hover:bg-[#084434] text-white font-bold text-xs shadow-md shadow-[#0D5C46]/30 transition-all cursor-pointer"
               >
                 <Save className="w-4 h-4" />
                 <span>Save Quotation & View</span>
@@ -1584,7 +1584,7 @@ export const QuotationEditorPage: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold shadow-md"
+                  className="px-4 py-2 bg-[#0D5C46] hover:bg-[#084434] text-white rounded-lg font-bold shadow-md cursor-pointer"
                 >
                   Save & Select Customer
                 </button>
@@ -1600,12 +1600,12 @@ export const QuotationEditorPage: React.FC = () => {
           <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
             <div className="p-4 border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <ClipboardList className="w-4 h-4 text-red-600" />
+                <ClipboardList className="w-4 h-4 text-[#0D5C46]" />
                 <h3 className="text-sm font-bold text-slate-900">Bulk Paste Product Descriptions</h3>
               </div>
               <button
                 onClick={() => setIsBulkPasteOpen(false)}
-                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1621,7 +1621,7 @@ export const QuotationEditorPage: React.FC = () => {
                 value={bulkPasteText}
                 onChange={(e) => setBulkPasteText(e.target.value)}
                 placeholder={`SS 304 Seamless Pipe, 2 inch NB, SCH 40, ASTM A312 TP304, 6M\nStainless Steel Flanges, ASTM A182 F304, Class 150, 4 inch, RF\nSS 316L Round Bar, 50mm Dia, ASTM A276, 3M`}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-mono text-slate-900 outline-none focus:bg-white focus:border-red-500 leading-relaxed"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-mono text-slate-900 outline-none focus:bg-white focus:border-[#0D5C46] leading-relaxed"
               />
             </div>
 
@@ -1629,14 +1629,14 @@ export const QuotationEditorPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsBulkPasteOpen(false)}
-                className="px-3.5 py-2 text-slate-600 hover:bg-slate-200/60 rounded-xl font-semibold text-xs"
+                className="px-3.5 py-2 text-slate-600 hover:bg-slate-200/60 rounded-xl font-semibold text-xs cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleApplyBulkPaste}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs shadow-md shadow-red-600/20"
+                className="px-4 py-2 bg-[#0D5C46] hover:bg-[#084434] text-white rounded-xl font-bold text-xs shadow-md shadow-[#0D5C46]/20 cursor-pointer"
               >
                 Insert Rows
               </button>

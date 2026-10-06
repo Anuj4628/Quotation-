@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-console.log('=== BUILDING JUBILANT METAL & ALLOYS DESKTOP APPLICATION ===\n');
+console.log('=== BUILDING QUOTATION BILLING SOFTWARE DESKTOP APPLICATION ===\n');
 
 // 1. Compile frontend
 console.log('1. Building frontend Vite bundle...');
@@ -14,7 +14,7 @@ console.log('\n2. Compiling Electron backend and copying WebAssembly SQLite runt
 execSync('npm run electron:compile', { stdio: 'inherit' });
 
 // 3. Setup fast temporary output directory outside OneDrive to avoid OneDrive file-locking issues
-const tempOutDir = path.join(os.tmpdir(), 'jubilant-release-output');
+const tempOutDir = path.join(os.tmpdir(), 'quotation-release-output');
 if (fs.existsSync(tempOutDir)) {
   try {
     fs.rmSync(tempOutDir, { recursive: true, force: true });
@@ -58,4 +58,4 @@ if (fs.existsSync(localAppDir) && fs.existsSync(unpackedDir)) {
 }
 
 console.log('\n=== BUILD COMPLETED SUCCESSFULLY! ===');
-console.log(`Installer is ready at: ${path.join(projectReleaseDir, 'Jubilant Metal and Alloys – Quotation Billing Setup.exe')}\n`);
+console.log(`Installer is ready at: ${path.join(projectReleaseDir, 'Quotation Billing Software Setup.exe')}\n`);

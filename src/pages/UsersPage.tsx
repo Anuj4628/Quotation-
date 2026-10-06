@@ -130,7 +130,7 @@ export const UsersPage: React.FC = () => {
         </div>
         <button
           onClick={openAddModal}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-xs shadow-md shadow-red-600/20"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0D5C46] hover:bg-[#084434] text-white font-semibold text-xs shadow-md shadow-[#0D5C46]/20 transition-all"
         >
           <Plus className="w-4 h-4" />
           <span>+ Add Team Member</span>
@@ -164,14 +164,14 @@ export const UsersPage: React.FC = () => {
                   <tr key={u.id} className="hover:bg-slate-50/80">
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-red-50 text-red-600 font-bold flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-full bg-emerald-50 text-[#0D5C46] font-bold flex items-center justify-center">
                           {u.name.charAt(0)}
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="font-bold text-slate-900">{u.name}</span>
                             {isCurrent && (
-                              <span className="px-1.5 py-0.5 bg-red-600 text-white font-bold text-[9px] rounded uppercase">
+                              <span className="px-1.5 py-0.5 bg-[#0D5C46] text-white font-bold text-[9px] rounded uppercase">
                                 You
                               </span>
                             )}
@@ -227,7 +227,7 @@ export const UsersPage: React.FC = () => {
             >
               <div className="flex items-center justify-between">
                 <span className="font-bold text-sm text-slate-900">{details.label}</span>
-                <ShieldCheck className="w-4 h-4 text-red-600" />
+                <ShieldCheck className="w-4 h-4 text-[#0D5C46]" />
               </div>
               <p className="text-slate-500 text-[11px] min-h-[32px]">{details.desc}</p>
               <div className="pt-2 border-t border-slate-100 space-y-1.5">
@@ -270,7 +270,7 @@ export const UsersPage: React.FC = () => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Ramesh Kulkarni"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-semibold outline-none focus:bg-white focus:border-red-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-semibold outline-none focus:bg-white focus:border-[#0D5C46]"
                 />
               </div>
 
@@ -283,8 +283,8 @@ export const UsersPage: React.FC = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="ramesh@jubilantmetal.com"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 outline-none focus:bg-white focus:border-red-500"
+                  placeholder="ramesh@bhawalsteel.com"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 outline-none focus:bg-white focus:border-[#0D5C46]"
                 />
               </div>
 
@@ -316,7 +316,7 @@ export const UsersPage: React.FC = () => {
                   id="userActive"
                   checked={isActive}
                   onChange={(e) => setIsActive(e.target.checked)}
-                  className="rounded text-red-600 focus:ring-red-500"
+                  className="rounded text-[#0D5C46] focus:ring-[#0D5C46]"
                 />
                 <label htmlFor="userActive" className="font-semibold text-slate-700 cursor-pointer">
                   Account is Active
@@ -333,7 +333,7 @@ export const UsersPage: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold shadow-md shadow-red-600/20"
+                  className="px-5 py-2 bg-[#0D5C46] hover:bg-[#084434] text-white rounded-xl font-bold shadow-md shadow-[#0D5C46]/20 transition-all"
                 >
                   Save User
                 </button>

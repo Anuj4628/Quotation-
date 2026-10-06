@@ -106,7 +106,7 @@ export const CategoriesPage: React.FC = () => {
         </div>
         <button
           onClick={openAddModal}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-xs shadow-md shadow-red-600/20 transition-all"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0D5C46] hover:bg-[#084434] text-white font-semibold text-xs shadow-md shadow-[#0D5C46]/20 transition-all"
         >
           <Plus className="w-4 h-4" />
           <span>+ Add Category</span>
@@ -122,7 +122,7 @@ export const CategoriesPage: React.FC = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search product categories..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 outline-none focus:bg-white focus:border-red-500"
+            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 outline-none focus:bg-white focus:border-[#0D5C46]"
           />
         </div>
       </div>
@@ -139,7 +139,7 @@ export const CategoriesPage: React.FC = () => {
             >
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="p-2.5 rounded-xl bg-red-50 text-red-600">
+                  <div className="p-2.5 rounded-xl bg-emerald-50 text-[#0D5C46]">
                     <Layers className="w-5 h-5" />
                   </div>
                   <div className="flex items-center gap-1">
@@ -211,7 +211,7 @@ export const CategoriesPage: React.FC = () => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Forged Fittings"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-semibold outline-none focus:bg-white focus:border-red-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-semibold outline-none focus:bg-white focus:border-[#0D5C46]"
                 />
               </div>
 
@@ -222,7 +222,7 @@ export const CategoriesPage: React.FC = () => {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Summary of metal specifications covered by this category..."
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 outline-none focus:bg-white focus:border-red-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-900 outline-none focus:bg-white focus:border-[#0D5C46]"
                 />
               </div>
 
@@ -232,7 +232,7 @@ export const CategoriesPage: React.FC = () => {
                   id="catActive"
                   checked={isActive}
                   onChange={(e) => setIsActive(e.target.checked)}
-                  className="rounded text-red-600 focus:ring-red-500"
+                  className="rounded text-[#0D5C46] focus:ring-[#0D5C46]"
                 />
                 <label htmlFor="catActive" className="font-semibold text-slate-700 cursor-pointer">
                   Category is Active
@@ -249,7 +249,7 @@ export const CategoriesPage: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold shadow-md shadow-red-600/20"
+                  className="px-5 py-2 bg-[#0D5C46] hover:bg-[#084434] text-white rounded-xl font-bold shadow-md shadow-[#0D5C46]/20 transition-all"
                 >
                   Save Category
                 </button>

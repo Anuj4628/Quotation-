@@ -33,7 +33,7 @@ export const StylishTemplate: React.FC<TemplateProps> = ({
                   />
                 ) : null}
                 <span className="inline-block px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 font-extrabold text-[9px] uppercase tracking-wider mt-1 border border-rose-200">
-                  {company.name || 'Jubilant Metal & Alloys'}
+                  {company.name || 'Bhawal Steel & Engineering Co.'}
                 </span>
                 <p className="text-[10px] text-slate-500 font-medium leading-tight">
                   {company.tagline || 'Govt. Recognized Star Export House • Precision Engineering'}

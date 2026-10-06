@@ -760,7 +760,7 @@ export class DatabaseManager {
         this.run(
           `INSERT INTO users (id, name, email, username, password_hash, password_salt, role, phone, avatar, isActive, createdAt)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          ['user-01', 'Administrator', 'admin@jubilantmetal.com', 'admin', hash, salt, 'admin', '+91 98201 45890', null, 1, now]
+          ['user-01', 'Administrator', 'admin@bhawalsteel.com', 'admin', hash, salt, 'admin', '+91 98201 45890', null, 1, now]
         );
       } else {
         const salt = generateSalt();
@@ -788,8 +788,8 @@ export class DatabaseManager {
         `INSERT INTO company_profile (id, name, tagline, logo, gstin, pan, cin, addressLine1, addressLine2, city, state, stateCode, country, pinCode, phone, email, website)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
-          'comp-jubilant-01',
-          'JUBILANT METAL AND ALLOYS',
+          'comp-bhawal-01',
+          'BHAWAL STEEL & ENGINEERING COMPANY',
           'Stockist, Manufacturer & Global Exporters of High Nickel Alloys, Stainless Steel & Pipes',
           '/New logo.png',
           '27AABCJ4589K1Z5',
@@ -803,8 +803,8 @@ export class DatabaseManager {
           'India',
           '410208',
           '+91 22 2741 8900 / +91 98201 45890',
-          'sales@jubilantmetal.com',
-          'www.jubilantmetal.com',
+          'sales@bhawalsteel.com',
+          'www.bhawalsteel.com',
         ]
       );
     }
@@ -819,7 +819,7 @@ export class DatabaseManager {
       this.run(
         `INSERT INTO users (id, name, email, username, password_hash, password_salt, role, phone, avatar, isActive, createdAt)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        ['user-01', 'Administrator', 'admin@jubilantmetal.com', 'admin', hash, salt, 'admin', '+91 98201 45890', null, 1, now]
+        ['user-01', 'Administrator', 'admin@bhawalsteel.com', 'admin', hash, salt, 'admin', '+91 98201 45890', null, 1, now]
       );
     }
 
@@ -885,11 +885,11 @@ export class DatabaseManager {
         [
           'bank-01',
           'HDFC Bank Limited',
-          'JUBILANT METAL AND ALLOYS',
+          'BHAWAL STEEL & ENGINEERING COMPANY',
           '50200084591234',
           'HDFC0001245',
           'Taloja Industrial MIDC Branch, Navi Mumbai',
-          'jubilantmetal@hdfcbank',
+          'bhawalsteel@hdfcbank',
           'HDFCINBBTAL',
           1,
         ]

@@ -254,7 +254,7 @@ export const ProductsPage: React.FC = () => {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Jubilant_Products_Catalog_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `Products_Catalog_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -283,7 +283,7 @@ export const ProductsPage: React.FC = () => {
           </button>
           <button
             onClick={openAddModal}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-xs shadow-md shadow-red-600/20"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0D5C46] hover:bg-[#084434] text-white font-semibold text-xs shadow-md shadow-[#0D5C46]/20 transition-all"
           >
             <Plus className="w-4 h-4" />
             <span>+ Add Metal Product</span>
@@ -301,7 +301,7 @@ export const ProductsPage: React.FC = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search alloy, grade, size, SKU..."
-            className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 outline-none focus:bg-white focus:border-red-500"
+            className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 outline-none focus:bg-white focus:border-[#0D5C46]"
           />
         </div>
 
@@ -372,13 +372,13 @@ export const ProductsPage: React.FC = () => {
             <tbody className="divide-y divide-slate-100">
               {filteredProducts.map((p) => (
                 <tr key={p.id} className="hover:bg-slate-50/80 transition-colors group">
-                  <td className="py-3 px-4 font-mono font-bold text-red-600">
+                  <td className="py-3 px-4 font-mono font-bold text-[#0D5C46]">
                     {p.productCode}
                   </td>
                   <td className="py-3 px-4">
                     <p
                       onClick={() => setViewingProduct(p)}
-                      className="font-bold text-slate-900 hover:text-red-600 cursor-pointer"
+                      className="font-bold text-slate-900 hover:text-[#0D5C46] cursor-pointer"
                     >
                       {p.name}
                     </p>
@@ -461,7 +461,7 @@ export const ProductsPage: React.FC = () => {
           <div className="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
             <div className="p-4 border-b border-slate-100 flex items-center justify-between">
               <div>
-                <span className="font-mono text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded">
+                <span className="font-mono text-xs font-bold text-[#0D5C46] bg-emerald-50 px-2 py-0.5 rounded">
                   {viewingProduct.productCode}
                 </span>
                 <h3 className="text-base font-bold text-slate-900 mt-1">{viewingProduct.name}</h3>
@@ -482,7 +482,7 @@ export const ProductsPage: React.FC = () => {
                 </div>
                 <div>
                   <span className="text-slate-400 font-bold uppercase text-[10px] block">Alloy Grade</span>
-                  <p className="font-bold text-red-600 font-mono text-sm">{viewingProduct.grade}</p>
+                  <p className="font-bold text-[#0D5C46] font-mono text-sm">{viewingProduct.grade}</p>
                 </div>
                 <div>
                   <span className="text-slate-400 font-bold uppercase text-[10px] block">Category</span>
@@ -561,7 +561,7 @@ export const ProductsPage: React.FC = () => {
           <div className="relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden max-h-[90vh] flex flex-col">
             <div className="p-4 border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Package className="w-5 h-5 text-red-600" />
+                <Package className="w-5 h-5 text-[#0D5C46]" />
                 <h3 className="text-base font-bold text-slate-900">
                   {editingProduct ? 'Edit Metal Product Specifications' : 'Add Metal Product to Catalog'}
                 </h3>
@@ -586,7 +586,7 @@ export const ProductsPage: React.FC = () => {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. SS 316L Seamless Pipe"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-semibold outline-none focus:border-red-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-semibold outline-none focus:border-[#0D5C46]"
                   />
                 </div>
 
@@ -803,7 +803,7 @@ export const ProductsPage: React.FC = () => {
                   id="isActiveToggle"
                   checked={isActive}
                   onChange={(e) => setIsActive(e.target.checked)}
-                  className="rounded text-red-600 focus:ring-red-500"
+                  className="rounded text-[#0D5C46] focus:ring-[#0D5C46]"
                 />
                 <label htmlFor="isActiveToggle" className="text-xs font-semibold text-slate-700 cursor-pointer">
                   Active in Catalog (Available for Quotations)
@@ -820,7 +820,7 @@ export const ProductsPage: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold shadow-md shadow-red-600/20"
+                  className="px-5 py-2 bg-[#0D5C46] hover:bg-[#084434] text-white rounded-xl font-bold shadow-md shadow-[#0D5C46]/20 transition-all"
                 >
                   {editingProduct ? 'Update Product' : 'Save Product'}
                 </button>

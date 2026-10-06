@@ -1,5 +1,5 @@
 // ==============================================================================
-// JUBILANT METAL AND ALLOYS - REALISTIC B2B SAMPLE & SEED DATA
+// BHAWAL STEEL & ENGINEERING COMPANY - B2B SAMPLE & SEED DATA
 // ==============================================================================
 
 import {
@@ -15,8 +15,8 @@ import {
 } from '../types';
 
 export const INITIAL_COMPANY: CompanyProfile = {
-  id: 'comp-jubilant-01',
-  name: 'JUBILANT METAL AND ALLOYS',
+  id: 'comp-bhawal-01',
+  name: 'BHAWAL STEEL & ENGINEERING COMPANY',
   tagline: 'Stockist, Manufacturer & Global Exporters of High Nickel Alloys, Stainless Steel & Pipes',
   logo: '/New logo.png',
   gstin: '27AABCJ4589K1Z5',
@@ -30,15 +30,15 @@ export const INITIAL_COMPANY: CompanyProfile = {
   country: 'India',
   pinCode: '410208',
   phone: '+91 22 2741 8900 / +91 98201 45890',
-  email: 'sales@jubilantmetal.com',
-  website: 'www.jubilantmetal.com',
+  email: 'sales@bhawalsteel.com',
+  website: 'www.bhawalsteel.com',
 };
 
 export const INITIAL_USERS: User[] = [
   {
     id: 'user-01',
     name: 'Rajesh Sharma',
-    email: 'admin@jubilantmetal.com',
+    email: 'admin@bhawalsteel.com',
     username: 'admin',
     role: 'admin',
     phone: '+91 98201 45890',
@@ -583,22 +583,22 @@ export const INITIAL_BANK_ACCOUNTS: BankAccount[] = [
   {
     id: 'bank-01',
     bankName: 'HDFC Bank Limited',
-    accountName: 'JUBILANT METAL AND ALLOYS',
+    accountName: 'BHAWAL STEEL & ENGINEERING COMPANY',
     accountNumber: '50200045892144',
     ifscCode: 'HDFC0001024',
     branchName: 'MIDC Industrial Branch, Taloja, Navi Mumbai',
-    upiId: 'jubilantmetal@hdfcbank',
+    upiId: 'bhawalsteel@hdfcbank',
     swiftCode: 'HDFCINBBXXX',
     isDefault: true,
   },
   {
     id: 'bank-02',
     bankName: 'State Bank of India',
-    accountName: 'JUBILANT METAL AND ALLOYS',
+    accountName: 'BHAWAL STEEL & ENGINEERING COMPANY',
     accountNumber: '39485729104',
     ifscCode: 'SBIN0004521',
     branchName: 'Commercial Branch, Fort, Mumbai',
-    upiId: 'jubilantmetal@sbi',
+    upiId: 'bhawalsteel@sbi',
     swiftCode: 'SBININBB214',
     isDefault: false,
   },

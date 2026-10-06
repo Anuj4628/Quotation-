@@ -1,5 +1,5 @@
 // ==============================================================================
-// JUBILANT METAL AND ALLOYS - RELATIONAL DATA PERSISTENCE SERVICE
+// QUOTATION BILLING SOFTWARE - RELATIONAL DATA PERSISTENCE SERVICE
 // Supports persistent SQLite database via Electron desktop IPC bridge with
 // fallback to browser localStorage.
 // ==============================================================================

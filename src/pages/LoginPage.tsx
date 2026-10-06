@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { User, Lock, Eye, EyeOff, Loader2, ArrowRight, AlertCircle } from 'lucide-react';
-import { DEFAULT_LOGO } from '../utils/assetResolver';
 
 export const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -35,7 +34,7 @@ export const LoginPage: React.FC = () => {
     try {
       const res = await login(cleanUsername, password);
       if (res.success) {
-        success('Welcome back', 'Logged in successfully to Jubilant ERP');
+        success('Welcome back', 'Logged in successfully to Quotation Billing Software');
         navigate('/dashboard', { replace: true });
       } else {
         setErrorMessage(res.error || 'Invalid username or password.');
@@ -50,23 +49,16 @@ export const LoginPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-900 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden select-none">
       {/* Background Subtle Ambient Glow */}
-      <div className="absolute -top-40 -right-40 w-96 h-96 bg-red-600/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-slate-800/40 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#0D5C46]/20 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-[#BC9647]/10 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center z-10">
-        {/* Brand Logo */}
-        <div className="inline-block p-4 bg-white/95 rounded-2xl shadow-2xl mb-4 backdrop-blur-md border border-slate-700/50">
-          <img
-            src={DEFAULT_LOGO}
-            alt="Jubilant Metal and Alloys"
-            className="h-14 w-auto max-w-[280px] object-contain mx-auto"
-          />
-        </div>
-        <h2 className="text-xl sm:text-2xl font-display font-extrabold text-white tracking-tight">
-          Quotation & Billing Management System
-        </h2>
-        <p className="mt-1 text-xs text-slate-400">
-          Commercial Enterprise Portal
+      {/* BoxTech Web Solutions Branding */}
+      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center z-10 mb-2">
+        <h1 className="text-2xl sm:text-3xl font-display font-bold text-white tracking-tight">
+          BoxTech Web Solutions
+        </h1>
+        <p className="mt-1.5 text-xs sm:text-sm font-medium text-emerald-400 tracking-wide">
+          Quotation Billing Software
         </p>
       </div>
 
@@ -102,7 +94,7 @@ export const LoginPage: React.FC = () => {
                   autoComplete="username"
                   required
                   disabled={isSubmitting}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 disabled:opacity-60 transition-colors"
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#0D5C46] focus:ring-1 focus:ring-[#0D5C46] disabled:opacity-60 transition-colors"
                 />
               </div>
             </div>
@@ -127,7 +119,7 @@ export const LoginPage: React.FC = () => {
                   autoComplete="current-password"
                   required
                   disabled={isSubmitting}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-10 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 disabled:opacity-60 transition-colors font-mono text-xs tracking-wider"
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-10 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#0D5C46] focus:ring-1 focus:ring-[#0D5C46] disabled:opacity-60 transition-colors font-mono text-xs tracking-wider"
                 />
                 <button
                   type="button"
@@ -150,7 +142,7 @@ export const LoginPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-semibold text-sm shadow-lg shadow-red-600/30 transition-all hover:shadow-red-600/50 disabled:opacity-70 cursor-pointer disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-[#0D5C46] hover:bg-[#084434] active:bg-[#052F24] text-white font-semibold text-sm shadow-lg shadow-[#0D5C46]/25 transition-all hover:shadow-[#0D5C46]/40 disabled:opacity-70 cursor-pointer disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
                   <>
@@ -169,7 +161,7 @@ export const LoginPage: React.FC = () => {
         </div>
 
         <p className="mt-6 text-center text-xs text-slate-500">
-          © {new Date().getFullYear()} Jubilant Metal and Alloys. All rights reserved.
+          © {new Date().getFullYear()} BoxTech Web Solutions. All rights reserved.
         </p>
       </div>
     </div>

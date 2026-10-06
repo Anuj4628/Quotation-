@@ -26,7 +26,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4">
-        <div className="w-10 h-10 border-4 border-red-600/30 border-t-red-600 rounded-full animate-spin mb-4" />
+        <div className="w-10 h-10 border-4 border-[#0D5C46]/30 border-t-[#0D5C46] rounded-full animate-spin mb-4" />
         <p className="text-xs font-semibold text-slate-400 tracking-wider uppercase">
           Verifying workstation session...
         </p>
@@ -47,7 +47,7 @@ const PublicLoginRoute: React.FC = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4">
-        <div className="w-10 h-10 border-4 border-red-600/30 border-t-red-600 rounded-full animate-spin mb-4" />
+        <div className="w-10 h-10 border-4 border-[#0D5C46]/30 border-t-[#0D5C46] rounded-full animate-spin mb-4" />
         <p className="text-xs font-semibold text-slate-400 tracking-wider uppercase">
           Loading workspace...
         </p>

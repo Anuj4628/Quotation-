@@ -55,6 +55,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({ quotation, proforma, isO
   const doc = proforma || quotation;
   if (!isOpen || !doc) return null;
 
+  const company = storage.getCompany();
+
   const isProforma = Boolean(proforma);
   const docNumber = isProforma ? (proforma!.proformaNumber || 'Proforma') : (quotation!.quotationNumber || 'Quotation');
   const docTitle = isProforma ? 'Proforma Invoice' : 'Quotation';
@@ -71,7 +73,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ quotation, proforma, isO
 
   const messageText = `Dear ${contactPerson},
 
-Please find attached our ${docTitle} ${docNumber} from Jubilant Metal and Alloys.
+Please find attached our ${docTitle} ${docNumber} from ${company.name || 'BHAWAL STEEL & ENGINEERING COMPANY'}.
 
 ${isProforma ? 'Proforma' : 'Quotation'} Value: ${displayTotalText}
 Valid Until: ${validUntil}
@@ -80,9 +82,9 @@ Link to view & download ${docTitle}:
 ${docUrl}
 
 Regards,
-JUBILANT METAL AND ALLOYS
-    sales@jubilantmetal.com
-    +91 22 2741 8900`;
+${company.name || 'BHAWAL STEEL & ENGINEERING COMPANY'}
+${company.email || 'sales@bhawalsteel.com'}
+${company.phone || '+91 22 2741 8900'}`;
 
   // Target phone formatting
   const targetPhone =
@@ -113,7 +115,7 @@ JUBILANT METAL AND ALLOYS
     setPdfProgress(15);
     setFallbackNotice(null);
 
-    const filename = `${docNumber}-Jubilant.pdf`;
+    const filename = `${docNumber}-${isProforma ? 'Proforma' : 'Quotation'}.pdf`;
     const docElementId = isProforma
       ? `share-modal-print-pi-${proforma!.id}`
       : `share-modal-print-doc-${quotation!.id}`;
@@ -169,7 +171,7 @@ JUBILANT METAL AND ALLOYS
       ) {
         try {
           await navigator.share({
-            title: `${docTitle} ${docNumber} - Jubilant Metal and Alloys`,
+            title: `${docTitle} ${docNumber} - ${company.name || 'Quotation Billing Software'}`,
             text: messageText,
             files: [result.file],
           });
@@ -220,14 +222,14 @@ JUBILANT METAL AND ALLOYS
   };
 
   const handleEmail = () => {
-    const subject = encodeURIComponent(`${docTitle} ${docNumber} - Jubilant Metal and Alloys`);
+    const subject = encodeURIComponent(`${docTitle} ${docNumber} - ${company.name || 'Quotation Billing Software'}`);
     const body = encodeURIComponent(messageText);
     window.location.href = `mailto:${doc.customerEmail || ''}?subject=${subject}&body=${body}`;
   };
 
   const handleDirectDownload = async () => {
     setIsDownloadingPdf(true);
-    const filename = `${docNumber}-Jubilant.pdf`;
+    const filename = `${docNumber}-${isProforma ? 'Proforma' : 'Quotation'}.pdf`;
     const docElementId = isProforma
       ? `share-modal-print-pi-${proforma!.id}`
       : `share-modal-print-doc-${quotation!.id}`;
@@ -268,7 +270,7 @@ JUBILANT METAL AND ALLOYS
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-slate-100 shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-red-50 text-red-600">
+            <div className="p-2 rounded-xl bg-emerald-50 text-[#0D5C46]">
               <Share2 className="w-5 h-5" />
             </div>
             <div>
@@ -305,7 +307,7 @@ JUBILANT METAL AND ALLOYS
                       : `The official ${docTitle.toLowerCase()} PDF has been generated and saved to your Downloads folder:`}
                   </p>
                   <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-emerald-300 rounded-lg font-mono font-bold text-slate-800 shadow-2xs">
-                    <FileText className="w-4 h-4 text-red-600" />
+                    <FileText className="w-4 h-4 text-[#0D5C46]" />
                     <span>{fallbackNotice.filename}</span>
                   </div>
                   <p className="text-emerald-900 font-medium pt-1">
@@ -417,7 +419,7 @@ JUBILANT METAL AND ALLOYS
                 type="button"
                 onClick={handleDirectDownload}
                 disabled={isDownloadingPdf}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-red-600 hover:text-red-700 transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0D5C46] hover:text-[#084434] transition-colors"
               >
                 {isDownloadingPdf ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -453,7 +455,7 @@ JUBILANT METAL AND ALLOYS
               <button
                 type="button"
                 onClick={handleCopyText}
-                className="text-xs text-red-600 hover:text-red-700 font-semibold flex items-center gap-1"
+                className="text-xs text-[#0D5C46] hover:text-[#084434] font-semibold flex items-center gap-1"
               >
                 {copiedText ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{copiedText ? 'Copied' : 'Copy Text'}</span>

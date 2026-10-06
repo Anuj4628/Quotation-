@@ -102,7 +102,7 @@ export const ReportsPage: React.FC = () => {
     const encoded = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encoded);
-    link.setAttribute('download', `Jubilant_${reportType}_report.csv`);
+    link.setAttribute('download', `Quotation_${reportType}_report.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -153,7 +153,7 @@ export const ReportsPage: React.FC = () => {
               onClick={() => setReportType(tab.id as any)}
               className={`px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-all ${
                 reportType === tab.id
-                  ? 'bg-red-600 text-white shadow-sm'
+                  ? 'bg-[#0D5C46] text-white shadow-sm'
                   : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200'
               }`}
             >
@@ -200,7 +200,7 @@ export const ReportsPage: React.FC = () => {
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-soft">
           <span className="text-slate-400 font-bold uppercase text-[10px] block">GST Liability</span>
-          <p className="text-xl sm:text-2xl font-display font-extrabold text-slate-900 mt-1 font-mono text-red-600">
+          <p className="text-xl sm:text-2xl font-display font-extrabold mt-1 font-mono text-[#0D5C46]">
             {formatINR(totalTax)}
           </p>
           <p className="text-slate-500 mt-1">CGST, SGST & IGST combined</p>
@@ -310,7 +310,7 @@ export const ReportsPage: React.FC = () => {
               <tbody className="divide-y divide-slate-100">
                 {filteredQuotations.map((q) => (
                   <tr key={q.id} className="hover:bg-slate-50/80">
-                    <td className="py-3 px-4 font-mono font-bold text-red-600">{q.quotationNumber}</td>
+                    <td className="py-3 px-4 font-mono font-bold text-[#0D5C46]">{q.quotationNumber}</td>
                     <td className="py-3 px-4 text-slate-600">{q.quotationDate}</td>
                     <td className="py-3 px-4 font-semibold text-slate-900">{q.customerName}</td>
                     <td className="py-3 px-4 text-right font-mono">{formatINR(q.taxableAmount)}</td>

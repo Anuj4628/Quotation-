@@ -41,7 +41,7 @@ export const SettingsPage: React.FC = () => {
   const [editingBank, setEditingBank] = useState<BankAccount>({
     id: '',
     bankName: '',
-    accountName: 'JUBILANT METAL AND ALLOYS',
+    accountName: 'BHAWAL STEEL & ENGINEERING COMPANY',
     accountNumber: '',
     ifscCode: '',
     branchName: '',
@@ -139,7 +139,7 @@ export const SettingsPage: React.FC = () => {
     success('Logo Removed', 'Company logo cleared. PDF headers will display clean company text only.');
   };
 
-  // Restore Default Jubilant Logo
+  // Restore Default Company Logo
   const handleRestoreDefaultLogo = () => {
     setCompany((prev) => {
       const updated = { ...prev, logo: '/New logo.png' };
@@ -213,7 +213,7 @@ export const SettingsPage: React.FC = () => {
     }
   };
 
-  // Restore Official Jubilant Signature & Stamp
+  // Restore Official Signature & Stamp
   const handleRestoreOfficialAssets = () => {
     setQSettings((prev) => ({
       ...prev,
@@ -226,7 +226,7 @@ export const SettingsPage: React.FC = () => {
       signatoryName: 'Mohan Jha',
       signatoryDesignation: 'Commercial & Technical Operations',
     }));
-    success('Official Assets Restored', 'Jubilant signature and stamp restored to defaults.');
+    success('Official Assets Restored', 'Official signature and stamp restored to defaults.');
   };
 
   // Save Bank Account
@@ -281,7 +281,7 @@ export const SettingsPage: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `Jubilant_ERP_Backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `Quotation_Software_Backup_${new Date().toISOString().split('T')[0]}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -314,7 +314,7 @@ export const SettingsPage: React.FC = () => {
   const handleResetSampleData = () => {
     if (
       window.confirm(
-        'Are you sure you want to reset the system database? This will clear all quotations, keep 1 demo company, and maintain your Jubilant Metal and Alloys company profile and product catalog.'
+        'Are you sure you want to reset the system database? This will clear all quotations, keep 1 demo company, and maintain your company profile and product catalog.'
       )
     ) {
       storage.resetToSampleData();
@@ -352,7 +352,7 @@ export const SettingsPage: React.FC = () => {
               onClick={() => setActiveTab(tab.id as any)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold transition-all whitespace-nowrap ${
                 activeTab === tab.id
-                  ? 'bg-red-600 text-white shadow-sm'
+                  ? 'bg-[#0D5C46] text-white shadow-sm'
                   : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'
               }`}
             >
@@ -375,7 +375,7 @@ export const SettingsPage: React.FC = () => {
             <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 pb-3 border-b border-slate-200">
                 <div className="flex items-center gap-2">
-                  <ImageIcon className="w-4 h-4 text-red-600" />
+                  <ImageIcon className="w-4 h-4 text-[#0D5C46]" />
                   <span className="font-bold text-slate-900 text-xs uppercase tracking-wider">
                     Company Brand Logo Management
                   </span>
@@ -431,7 +431,7 @@ export const SettingsPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => logoInputRef.current?.click()}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold text-[11px] shadow-sm transition-all"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#0D5C46] hover:bg-[#084434] text-white rounded-lg font-bold text-[11px] shadow-sm transition-all"
                     >
                       <Upload className="w-3.5 h-3.5" />
                       {resolveLogoUrl(company.logo) ? 'Replace / Upload Logo' : 'Upload Company Logo'}
@@ -471,7 +471,7 @@ export const SettingsPage: React.FC = () => {
                   required
                   value={company.name}
                   onChange={(e) => setCompany({ ...company, name: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 outline-none focus:bg-white focus:border-red-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 outline-none focus:bg-white focus:border-[#0D5C46]"
                 />
               </div>
 
@@ -481,7 +481,7 @@ export const SettingsPage: React.FC = () => {
                   type="text"
                   value={company.tagline}
                   onChange={(e) => setCompany({ ...company, tagline: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 outline-none focus:bg-white focus:border-red-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 outline-none focus:bg-white focus:border-[#0D5C46]"
                 />
               </div>
             </div>
@@ -501,7 +501,7 @@ export const SettingsPage: React.FC = () => {
                       stateCode: e.target.value.substring(0, 2),
                     })
                   }
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-slate-900 outline-none focus:bg-white focus:border-red-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-slate-900 outline-none focus:bg-white focus:border-[#0D5C46]"
                 />
               </div>
 
@@ -514,7 +514,7 @@ export const SettingsPage: React.FC = () => {
                   maxLength={10}
                   value={company.pan || ''}
                   onChange={(e) => setCompany({ ...company, pan: e.target.value.toUpperCase() })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-slate-900 outline-none focus:bg-white focus:border-red-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-slate-900 outline-none focus:bg-white focus:border-[#0D5C46]"
                 />
               </div>
 
@@ -526,7 +526,7 @@ export const SettingsPage: React.FC = () => {
                   type="text"
                   value={company.cin || ''}
                   onChange={(e) => setCompany({ ...company, cin: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono text-slate-800 outline-none focus:bg-white focus:border-red-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono text-slate-800 outline-none focus:bg-white focus:border-[#0D5C46]"
                 />
               </div>
             </div>
@@ -539,7 +539,7 @@ export const SettingsPage: React.FC = () => {
                   required
                   value={company.addressLine1}
                   onChange={(e) => setCompany({ ...company, addressLine1: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 outline-none focus:bg-white focus:border-red-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 outline-none focus:bg-white focus:border-[#0D5C46]"
                 />
               </div>
 
@@ -549,7 +549,7 @@ export const SettingsPage: React.FC = () => {
                   type="text"
                   value={company.addressLine2 || ''}
                   onChange={(e) => setCompany({ ...company, addressLine2: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 outline-none focus:bg-white focus:border-red-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 outline-none focus:bg-white focus:border-[#0D5C46]"
                 />
               </div>
             </div>
@@ -631,7 +631,7 @@ export const SettingsPage: React.FC = () => {
             <div className="pt-4 border-t border-slate-100 flex justify-end">
               <button
                 type="submit"
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-md shadow-red-600/20"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0D5C46] hover:bg-[#084434] text-white font-bold text-xs shadow-md shadow-[#0D5C46]/20 transition-all"
               >
                 <Save className="w-4 h-4" />
                 <span>Save Company Settings</span>
@@ -657,7 +657,7 @@ export const SettingsPage: React.FC = () => {
                   required
                   value={qSettings.prefix}
                   onChange={(e) => setQSettings({ ...qSettings, prefix: e.target.value.toUpperCase() })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-slate-900 outline-none focus:bg-white focus:border-red-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-slate-900 outline-none focus:bg-white focus:border-[#0D5C46]"
                 />
                 <span className="text-[10px] text-slate-400 mt-1 block">e.g. JMA</span>
               </div>
@@ -669,7 +669,7 @@ export const SettingsPage: React.FC = () => {
                   required
                   value={qSettings.sequenceNumber}
                   onChange={(e) => setQSettings({ ...qSettings, sequenceNumber: parseInt(e.target.value) || 1 })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-slate-900 outline-none focus:bg-white focus:border-red-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-slate-900 outline-none focus:bg-white focus:border-[#0D5C46]"
                 />
                 <span className="text-[10px] text-slate-400 mt-1 block">Increments after every new quote</span>
               </div>
@@ -681,19 +681,19 @@ export const SettingsPage: React.FC = () => {
                   required
                   value={qSettings.formatTemplate}
                   onChange={(e) => setQSettings({ ...qSettings, formatTemplate: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-slate-900 outline-none focus:bg-white focus:border-red-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-slate-900 outline-none focus:bg-white focus:border-[#0D5C46]"
                 />
                 <span className="text-[10px] text-slate-400 mt-1 block">&#123;PREFIX&#125;-&#123;YEAR&#125;-&#123;NUMBER&#125;</span>
               </div>
             </div>
 
             {/* Live Number Example */}
-            <div className="p-3 bg-red-50/70 border border-red-100 rounded-xl flex items-center justify-between">
+            <div className="p-3 bg-emerald-50/70 border border-emerald-100 rounded-xl flex items-center justify-between">
               <div>
-                <span className="text-[10px] uppercase font-bold text-red-700 block">Preview Next Quotation Number</span>
-                <p className="font-mono font-bold text-sm text-red-900">
+                <span className="text-[10px] uppercase font-bold text-[#0D5C46] block">Preview Next Quotation Number</span>
+                <p className="font-mono font-bold text-sm text-[#0D5C46]">
                   {(qSettings.formatTemplate || '{PREFIX}-{YEAR}-{NUMBER}')
-                    .replace('{PREFIX}', qSettings.prefix || 'JMA')
+                    .replace('{PREFIX}', qSettings.prefix || 'QT')
                     .replace('{YEAR}', new Date().getFullYear().toString())
                     .replace('{NUMBER}', (qSettings.sequenceNumber || 1011).toString().padStart(4, '0'))}
                 </p>
@@ -710,11 +710,11 @@ export const SettingsPage: React.FC = () => {
                 <input
                   type="text"
                   required
-                  value={qSettings.piPrefix || 'JMA-PI'}
+                  value={qSettings.piPrefix || 'PI'}
                   onChange={(e) => setQSettings({ ...qSettings, piPrefix: e.target.value.toUpperCase() })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-slate-900 outline-none focus:bg-white focus:border-red-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-slate-900 outline-none focus:bg-white focus:border-[#0D5C46]"
                 />
-                <span className="text-[10px] text-slate-400 mt-1 block">e.g. JMA-PI</span>
+                <span className="text-[10px] text-slate-400 mt-1 block">e.g. PI</span>
               </div>
 
               <div>
@@ -724,7 +724,7 @@ export const SettingsPage: React.FC = () => {
                   required
                   value={qSettings.piSequenceNumber || 501}
                   onChange={(e) => setQSettings({ ...qSettings, piSequenceNumber: parseInt(e.target.value) || 1 })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-slate-900 outline-none focus:bg-white focus:border-red-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-mono font-bold text-slate-900 outline-none focus:bg-white focus:border-[#0D5C46]"
                 />
                 <span className="text-[10px] text-slate-400 mt-1 block">Independent sequence counter for Proforma Invoices</span>
               </div>
@@ -788,7 +788,7 @@ export const SettingsPage: React.FC = () => {
                 <select
                   value={qSettings.defaultTheme || 'modern'}
                   onChange={(e) => setQSettings({ ...qSettings, defaultTheme: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-semibold outline-none focus:bg-white focus:border-red-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-semibold outline-none focus:bg-white focus:border-[#0D5C46]"
                 >
                   <optgroup label="🏢 Professional Document Templates (10)">
                     {QUOTATION_THEMES.filter((t) => t.category === 'business').map((t) => (
@@ -822,7 +822,7 @@ export const SettingsPage: React.FC = () => {
                       defaultCurrencySymbol: info.symbol,
                     });
                   }}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-semibold outline-none focus:bg-white focus:border-red-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-semibold outline-none focus:bg-white focus:border-[#0D5C46]"
                 >
                   {TOP_CURRENCIES.map((c) => (
                     <option key={c.code} value={c.code}>
@@ -892,7 +892,7 @@ export const SettingsPage: React.FC = () => {
             <div className="pt-4 border-t border-slate-100 flex justify-end">
               <button
                 type="submit"
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-md shadow-red-600/20"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0D5C46] hover:bg-[#084434] text-white font-bold text-xs shadow-md shadow-[#0D5C46]/20 transition-all"
               >
                 <Save className="w-4 h-4" />
                 <span>Save Quotation Settings</span>
@@ -909,7 +909,7 @@ export const SettingsPage: React.FC = () => {
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-soft flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
               <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <Stamp className="w-5 h-5 text-red-600" />
+                <Stamp className="w-5 h-5 text-[#0D5C46]" />
                 <span>Authorized Signature & Company Stamp</span>
               </h2>
               <p className="text-xs text-slate-500 mt-1">
@@ -921,7 +921,7 @@ export const SettingsPage: React.FC = () => {
                 type="button"
                 onClick={handleRestoreOfficialAssets}
                 className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition-all"
-                title="Restore Mohan Jha signature and Sunmarg India company stamp"
+                title="Restore Mohan Jha signature and company stamp"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 <span>Restore Official Assets</span>
@@ -929,7 +929,7 @@ export const SettingsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleSaveQuotationSettings()}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-md shadow-red-600/20 transition-all"
+                className="flex items-center gap-2 px-4 py-2 bg-[#0D5C46] hover:bg-[#084434] text-white font-bold rounded-xl shadow-md shadow-[#0D5C46]/20 transition-all"
               >
                 <Save className="w-4 h-4" />
                 <span>Save All Changes</span>
@@ -958,7 +958,7 @@ export const SettingsPage: React.FC = () => {
                       onChange={(e) =>
                         setQSettings({ ...qSettings, signatureEnabled: e.target.checked })
                       }
-                      className="rounded text-red-600 focus:ring-red-500"
+                      className="rounded text-[#0D5C46] focus:ring-[#0D5C46]"
                     />
                     <span className="font-semibold text-slate-800 text-xs">Enable Signature</span>
                   </label>
@@ -983,7 +983,7 @@ export const SettingsPage: React.FC = () => {
 
                   <div className="flex-1 space-y-2.5 w-full sm:w-auto text-center sm:text-left">
                     <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                      <label className="flex items-center gap-1.5 px-3.5 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl cursor-pointer shadow-sm transition-all text-xs">
+                      <label className="flex items-center gap-1.5 px-3.5 py-2 bg-[#0D5C46] hover:bg-[#084434] text-white font-bold rounded-xl cursor-pointer shadow-sm transition-all text-xs">
                         <Upload className="w-3.5 h-3.5" />
                         <span>{qSettings.signatureUrl ? 'Replace Signature' : 'Upload Signature'}</span>
                         <input
@@ -1051,7 +1051,7 @@ export const SettingsPage: React.FC = () => {
                       onChange={(e) =>
                         setQSettings({ ...qSettings, stampEnabled: e.target.checked })
                       }
-                      className="rounded text-red-600 focus:ring-red-500"
+                      className="rounded text-[#0D5C46] focus:ring-[#0D5C46]"
                     />
                     <span className="font-semibold text-slate-800 text-xs">Enable Stamp</span>
                   </label>
@@ -1076,7 +1076,7 @@ export const SettingsPage: React.FC = () => {
 
                   <div className="flex-1 space-y-2.5 w-full sm:w-auto text-center sm:text-left">
                     <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                      <label className="flex items-center gap-1.5 px-3.5 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl cursor-pointer shadow-sm transition-all text-xs">
+                      <label className="flex items-center gap-1.5 px-3.5 py-2 bg-[#0D5C46] hover:bg-[#084434] text-white font-bold rounded-xl cursor-pointer shadow-sm transition-all text-xs">
                         <Upload className="w-3.5 h-3.5" />
                         <span>{qSettings.stampUrl ? 'Replace Stamp' : 'Upload Stamp'}</span>
                         <input
@@ -1141,7 +1141,7 @@ export const SettingsPage: React.FC = () => {
                       value={qSettings.signatoryName || ''}
                       onChange={(e) => setQSettings({ ...qSettings, signatoryName: e.target.value })}
                       placeholder="e.g. Mohan Jha"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 outline-none focus:bg-white focus:border-red-500"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 outline-none focus:bg-white focus:border-[#0D5C46]"
                     />
                   </div>
                   <div>
@@ -1155,7 +1155,7 @@ export const SettingsPage: React.FC = () => {
                         setQSettings({ ...qSettings, signatoryDesignation: e.target.value })
                       }
                       placeholder="e.g. Commercial & Technical Operations"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 outline-none focus:bg-white focus:border-red-500"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 outline-none focus:bg-white focus:border-[#0D5C46]"
                     />
                   </div>
                 </div>
@@ -1180,7 +1180,7 @@ export const SettingsPage: React.FC = () => {
                   <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200 flex flex-col items-center text-center">
                     <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">For</p>
                     <p className="font-bold text-slate-900 text-xs uppercase tracking-wider mb-2">
-                      {company.name || 'JUBILANT METAL AND ALLOYS'}
+                      {company.name || 'BHAWAL STEEL & ENGINEERING COMPANY'}
                     </p>
 
                     <div className="flex flex-col items-center justify-center py-2 min-h-[95px] gap-2">
@@ -1503,7 +1503,7 @@ export const SettingsPage: React.FC = () => {
               Reset Database to Clean State
             </h2>
             <p className="text-red-700">
-              Clear all quotation records and reset customer database to a completely clean state. Your Jubilant Metal and Alloys company settings, logo, bank accounts, and industrial metal products will be preserved intact.
+              Clear all quotation records and reset customer database to a completely clean state. Your company settings, logo, bank accounts, and industrial metal products will be preserved intact.
             </p>
             <button
               type="button"
@@ -1562,7 +1562,7 @@ export const SettingsPage: React.FC = () => {
                       value={oldPassword}
                       onChange={(e) => setOldPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 pr-9 text-slate-900 outline-none focus:bg-white focus:border-red-500"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 pr-9 text-slate-900 outline-none focus:bg-white focus:border-[#0D5C46]"
                     />
                     <button
                       type="button"
@@ -1584,7 +1584,7 @@ export const SettingsPage: React.FC = () => {
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 pr-9 text-slate-900 outline-none focus:bg-white focus:border-red-500"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 pr-9 text-slate-900 outline-none focus:bg-white focus:border-[#0D5C46]"
                     />
                     <button
                       type="button"
@@ -1605,7 +1605,7 @@ export const SettingsPage: React.FC = () => {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 outline-none focus:bg-white focus:border-red-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 outline-none focus:bg-white focus:border-[#0D5C46]"
                   />
                 </div>
               </div>

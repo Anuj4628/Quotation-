@@ -1,5 +1,5 @@
 // ==============================================================================
-// JUBILANT METAL AND ALLOYS - COMMERCIAL & GST CALCULATION ENGINE
+// QUOTATION BILLING SOFTWARE - COMMERCIAL & GST CALCULATION ENGINE
 // ==============================================================================
 
 import { QuotationItem, UnitType } from '../types';

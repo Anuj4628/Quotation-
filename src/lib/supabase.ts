@@ -1,5 +1,5 @@
 // ==============================================================================
-// JUBILANT METAL AND ALLOYS - SUPABASE CLIENT INTEGRATION
+// QUOTATION BILLING SOFTWARE - SUPABASE CLIENT INTEGRATION
 // ==============================================================================
 
 /**

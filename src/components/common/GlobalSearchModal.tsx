@@ -125,7 +125,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
               {results.quotations.length > 0 && (
                 <div>
                   <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-400 px-2 mb-2">
-                    <FileText className="w-3.5 h-3.5 text-red-600" />
+                    <FileText className="w-3.5 h-3.5 text-[#0D5C46]" />
                     Quotations ({results.quotations.length})
                   </div>
                   <div className="space-y-1">
@@ -136,11 +136,11 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
                           onClose();
                           navigate(`/quotations/${item.id}`);
                         }}
-                        className="group flex items-center justify-between p-2.5 rounded-xl hover:bg-red-50/70 hover:border-red-100 border border-transparent cursor-pointer transition-all"
+                        className="group flex items-center justify-between p-2.5 rounded-xl hover:bg-emerald-50/70 hover:border-emerald-100 border border-transparent cursor-pointer transition-all"
                       >
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="font-mono font-bold text-sm text-slate-900 group-hover:text-red-700">
+                            <span className="font-mono font-bold text-sm text-slate-900 group-hover:text-[#0D5C46]">
                               {item.quotationNumber}
                             </span>
                             <span className="text-xs px-2 py-0.5 rounded-full font-medium capitalize bg-slate-100 text-slate-700">
@@ -153,7 +153,7 @@ export const GlobalSearchModal: React.FC<GlobalSearchModalProps> = ({ isOpen, on
                           <span className="font-semibold text-sm text-slate-900">
                             {formatINR(item.grandTotal)}
                           </span>
-                          <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-red-600 transition-colors" />
+                          <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-[#0D5C46] transition-colors" />
                         </div>
                       </div>
                     ))}

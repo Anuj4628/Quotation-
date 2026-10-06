@@ -1,5 +1,5 @@
 // ==============================================================================
-// JUBILANT METAL AND ALLOYS - DOCUMENT & PDF GENERATION ENGINE
+// QUOTATION BILLING SOFTWARE - DOCUMENT & PDF GENERATION ENGINE
 // ==============================================================================
 
 import jsPDF from 'jspdf';
@@ -35,7 +35,7 @@ export function triggerFileDownload(blobOrFile: Blob | File, filename: string) {
 
 export async function createQuotationPDF({
   elementId,
-  filename = 'Jubilant-Quotation.pdf',
+  filename = 'Quotation.pdf',
   onProgress,
   saveFile = true,
 }: PDFExportOptions): Promise<PDFExportResult> {

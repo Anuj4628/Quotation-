@@ -49,9 +49,9 @@
     "wait-on": "^9.1.0"
   },
   "build": {
-    "appId": "com.jubilantmetal.quotationbilling",
-    "productName": "Jubilant Metal and Alloys – Quotation Billing",
-    "copyright": "Copyright © 2026 Jubilant Metal and Alloys",
+    "appId": "com.boxtech.quotationbilling",
+    "productName": "Quotation Billing Software",
+    "copyright": "Copyright © 2026 BoxTech Web Solutions",
     "npmRebuild": false,
     "nodeGypRebuild": false,
     "directories": {
@@ -79,7 +79,7 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Jubilant Metal and Alloys – Quotation Billing",
+      "shortcutName": "Quotation Billing Software",
       "installerIcon": "build/icon.ico",
       "uninstallerIcon": "build/icon.ico",
       "installerHeaderIcon": "build/icon.ico"

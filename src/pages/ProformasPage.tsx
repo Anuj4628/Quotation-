@@ -115,7 +115,7 @@ export const ProformasPage: React.FC = () => {
     setTimeout(async () => {
       const ok = await generateProformaPDF({
         elementId: 'hidden-print-proforma-doc',
-        filename: `${p.proformaNumber}-Jubilant.pdf`,
+        filename: `${p.proformaNumber}-Proforma.pdf`,
       });
       if (ok) success('PDF Exported', `Downloaded ${p.proformaNumber}.pdf`);
       setPrintingProforma(null);
@@ -167,7 +167,7 @@ export const ProformasPage: React.FC = () => {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Jubilant_Proformas_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `Proformas_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -179,7 +179,7 @@ export const ProformasPage: React.FC = () => {
     paid: 'bg-blue-50 text-blue-700 border-blue-300',
     sent: 'bg-sky-50 text-sky-700 border-sky-300',
     draft: 'bg-slate-100 text-slate-700 border-slate-300',
-    cancelled: 'bg-red-50 text-red-700 border-red-300',
+    cancelled: 'bg-rose-50 text-rose-700 border-rose-300',
   };
 
   return (
@@ -188,7 +188,7 @@ export const ProformasPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <span className="px-2.5 py-0.5 rounded text-[11px] font-extrabold uppercase tracking-wider bg-red-600 text-white shadow-xs">
+            <span className="px-2.5 py-0.5 rounded text-[11px] font-extrabold uppercase tracking-wider bg-[#0D5C46] text-white shadow-xs">
               COMMERCIAL PI
             </span>
             <h1 className="text-2xl sm:text-3xl font-display font-extrabold text-slate-900 tracking-tight">
@@ -202,14 +202,14 @@ export const ProformasPage: React.FC = () => {
         <div className="flex items-center gap-2.5">
           <button
             onClick={handleExportCSV}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-semibold text-xs border border-slate-200 shadow-soft transition-colors"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-semibold text-xs border border-slate-200 shadow-soft transition-colors cursor-pointer"
           >
             <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
             <span>Export CSV</span>
           </button>
           <button
             onClick={() => navigate('/proformas/new')}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-xs shadow-md shadow-red-600/20 transition-all hover:shadow-lg hover:shadow-red-600/30"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0D5C46] hover:bg-[#084434] text-white font-semibold text-xs shadow-md shadow-[#0D5C46]/20 transition-all hover:shadow-lg hover:shadow-[#0D5C46]/30 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Create Proforma</span>
@@ -350,7 +350,7 @@ export const ProformasPage: React.FC = () => {
             </p>
             <button
               onClick={() => navigate('/proformas/new')}
-              className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-xs shadow-md shadow-red-600/20"
+              className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0D5C46] hover:bg-[#084434] text-white font-semibold text-xs shadow-md shadow-[#0D5C46]/20 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Create Proforma Now</span>
@@ -377,7 +377,7 @@ export const ProformasPage: React.FC = () => {
                     <td className="py-3 px-4 font-mono font-bold text-slate-900">
                       <span
                         onClick={() => navigate(`/proformas/${p.id}`)}
-                        className="cursor-pointer text-red-600 hover:underline"
+                        className="cursor-pointer text-[#0D5C46] hover:underline"
                       >
                         {p.proformaNumber}
                       </span>
@@ -417,21 +417,21 @@ export const ProformasPage: React.FC = () => {
                       <div className="flex items-center justify-end gap-1">
                         <button
                           onClick={() => navigate(`/proformas/${p.id}`)}
-                          className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+                          className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
                           title="View Proforma"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => navigate(`/proformas/${p.id}/edit`)}
-                          className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+                          className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
                           title="Edit Proforma"
                         >
                           <Edit3 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDownloadPdf(p)}
-                          className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          className="p-1.5 text-slate-500 hover:text-[#0D5C46] hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
                           title="Download PDF"
                         >
                           <Download className="w-4 h-4" />

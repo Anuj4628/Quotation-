@@ -120,7 +120,7 @@ export const QuotationsPage: React.FC = () => {
     setTimeout(async () => {
       const ok = await generateQuotationPDF({
         elementId: 'hidden-print-doc',
-        filename: `${q.quotationNumber}-Jubilant.pdf`,
+        filename: `${q.quotationNumber}-Quotation.pdf`,
       });
       if (ok) success('PDF Exported', `Downloaded ${q.quotationNumber}.pdf`);
       setPrintingQuotation(null);
@@ -170,7 +170,7 @@ export const QuotationsPage: React.FC = () => {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Jubilant_Quotations_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `Quotations_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -192,14 +192,14 @@ export const QuotationsPage: React.FC = () => {
         <div className="flex items-center gap-2.5">
           <button
             onClick={handleExportCSV}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-semibold text-xs border border-slate-200 shadow-soft transition-colors"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-semibold text-xs border border-slate-200 shadow-soft transition-colors cursor-pointer"
           >
             <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
             <span>Export CSV</span>
           </button>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border shadow-soft transition-colors ${
+            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border shadow-soft transition-colors cursor-pointer ${
               showFilters
                 ? 'bg-slate-900 text-white border-slate-900'
                 : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'
@@ -210,7 +210,7 @@ export const QuotationsPage: React.FC = () => {
           </button>
           <button
             onClick={() => navigate('/quotations/new')}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-xs shadow-md shadow-red-600/20 transition-all"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0D5C46] hover:bg-[#084434] text-white font-semibold text-xs shadow-md shadow-[#0D5C46]/20 transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>New Quotation</span>
@@ -224,16 +224,16 @@ export const QuotationsPage: React.FC = () => {
           <button
             key={tab.id}
             onClick={() => setSelectedStatus(tab.id)}
-            className={`px-3 py-2 rounded-xl font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-2 rounded-xl font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer ${
               selectedStatus === tab.id
-                ? 'bg-red-600 text-white shadow-sm'
+                ? 'bg-[#0D5C46] text-white shadow-sm'
                 : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'
             }`}
           >
             <span>{tab.label}</span>
             <span
               className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
-                selectedStatus === tab.id ? 'bg-red-800 text-red-100' : 'bg-slate-100 text-slate-700'
+                selectedStatus === tab.id ? 'bg-[#084434] text-emerald-100' : 'bg-slate-100 text-slate-700'
               }`}
             >
               {tab.count}
@@ -327,7 +327,7 @@ export const QuotationsPage: React.FC = () => {
       <div className="bg-white rounded-2xl border border-slate-200 shadow-soft overflow-hidden">
         {filteredQuotations.length === 0 ? (
           <div className="py-16 text-center px-4">
-            <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-3">
+            <div className="w-12 h-12 rounded-full bg-emerald-50 text-[#0D5C46] flex items-center justify-center mx-auto mb-3">
               <FileText className="w-6 h-6" />
             </div>
             <h3 className="text-base font-bold text-slate-900">No Quotations Found</h3>
@@ -336,7 +336,7 @@ export const QuotationsPage: React.FC = () => {
             </p>
             <button
               onClick={() => navigate('/quotations/new')}
-              className="mt-4 px-4 py-2 bg-red-600 text-white rounded-xl text-xs font-semibold shadow-md"
+              className="mt-4 px-4 py-2 bg-[#0D5C46] hover:bg-[#084434] text-white rounded-xl text-xs font-semibold shadow-md cursor-pointer"
             >
               + Create First Quotation
             </button>
@@ -367,7 +367,7 @@ export const QuotationsPage: React.FC = () => {
                     viewed: 'bg-cyan-50 text-cyan-700 border-cyan-200',
                     draft: 'bg-slate-100 text-slate-700 border-slate-200',
                     expired: 'bg-orange-50 text-orange-700 border-orange-200',
-                    rejected: 'bg-red-50 text-red-700 border-red-200',
+                    rejected: 'bg-rose-50 text-rose-700 border-rose-200',
                     converted: 'bg-purple-50 text-purple-700 border-purple-200',
                   };
 
@@ -376,7 +376,7 @@ export const QuotationsPage: React.FC = () => {
                       <td className="py-3.5 px-4">
                         <span
                           onClick={() => navigate(`/quotations/${q.id}`)}
-                          className="font-mono font-bold text-red-600 hover:text-red-700 cursor-pointer"
+                          className="font-mono font-bold text-[#0D5C46] hover:text-[#084434] cursor-pointer"
                         >
                           {q.quotationNumber}
                         </span>
@@ -420,49 +420,49 @@ export const QuotationsPage: React.FC = () => {
                           <button
                             onClick={() => navigate(`/quotations/${q.id}`)}
                             title="View Quotation"
-                            className="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-lg"
+                            className="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-lg cursor-pointer"
                           >
                             <Eye className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => navigate(`/quotations/${q.id}/edit`)}
                             title="Edit Quotation"
-                            className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+                            className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg cursor-pointer"
                           >
                             <Edit3 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => setShareQuotation(q)}
                             title="Share Quotation"
-                            className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg"
+                            className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg cursor-pointer"
                           >
                             <Share2 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDuplicate(q.id)}
                             title="Duplicate Quotation"
-                            className="p-1.5 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg"
+                            className="p-1.5 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg cursor-pointer"
                           >
                             <Copy className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDownloadPdf(q)}
                             title="Download PDF"
-                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                            className="p-1.5 text-slate-400 hover:text-[#0D5C46] hover:bg-emerald-50 rounded-lg cursor-pointer"
                           >
                             <Download className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handlePrint(q)}
                             title="Print Document"
-                            className="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-lg"
+                            className="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-lg cursor-pointer"
                           >
                             <Printer className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(q.id, q.quotationNumber)}
                             title="Delete Quotation"
-                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg cursor-pointer"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>

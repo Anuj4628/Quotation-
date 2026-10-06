@@ -1,5 +1,5 @@
 // ==============================================================================
-// JUBILANT METAL AND ALLOYS - TYPE DEFINITIONS
+// QUOTATION BILLING SOFTWARE - TYPE DEFINITIONS
 // ==============================================================================
 
 export type UserRole = 'admin' | 'sales_manager' | 'sales_executive' | 'viewer';

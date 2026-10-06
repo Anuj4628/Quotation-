@@ -29,7 +29,7 @@ export const FestivalTemplate: React.FC<TemplateProps> = ({
               style={{ backgroundColor: primaryColor }}
             >
               <span>{theme.festiveGreeting}</span>
-              <span className="opacity-80">Jubilant Metal & Alloys • Commercial Quotation</span>
+              <span className="opacity-80">{company.name || 'Bhawal Steel & Engineering Co.'} • Commercial Quotation</span>
               <span>{theme.festiveGreeting}</span>
             </div>
 

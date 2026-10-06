@@ -43,7 +43,7 @@ export const ProformaDetailPage: React.FC = () => {
         <p className="text-sm text-slate-500 mt-1">The requested Proforma ID does not exist.</p>
         <button
           onClick={() => navigate('/proformas')}
-          className="mt-4 px-4 py-2 bg-red-600 text-white rounded-xl text-xs font-semibold"
+          className="mt-4 px-4 py-2 bg-[#0D5C46] hover:bg-[#084434] text-white rounded-xl text-xs font-semibold transition-colors"
         >
           Return to Proforma List
         </button>
@@ -71,7 +71,7 @@ export const ProformaDetailPage: React.FC = () => {
     setIsGeneratingPdf(true);
     const ok = await generateProformaPDF({
       elementId: 'proforma-print-document',
-      filename: `${proforma.proformaNumber}-Jubilant.pdf`,
+      filename: `${proforma.proformaNumber}-Proforma.pdf`,
     });
     setIsGeneratingPdf(false);
     if (ok) {
@@ -113,7 +113,7 @@ export const ProformaDetailPage: React.FC = () => {
           </button>
           <div>
             <div className="flex items-center gap-2.5">
-              <span className="px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider bg-red-600 text-white shadow-xs">
+              <span className="px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider bg-[#0D5C46] text-white shadow-xs">
                 PROFORMA
               </span>
               <h1 className="text-xl sm:text-2xl font-mono font-bold text-slate-900">
@@ -178,7 +178,7 @@ export const ProformaDetailPage: React.FC = () => {
           <button
             onClick={handleDownloadPdf}
             disabled={isGeneratingPdf}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-md shadow-red-600/20 transition-all"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0D5C46] hover:bg-[#084434] text-white text-xs font-bold shadow-md shadow-[#0D5C46]/20 transition-all"
           >
             <Download className="w-3.5 h-3.5" />
             <span>{isGeneratingPdf ? 'Exporting PDF...' : 'Download PDF'}</span>
@@ -202,7 +202,7 @@ export const ProformaDetailPage: React.FC = () => {
       {/* Audit Trail & Activity Timeline */}
       <div className="no-print bg-white p-6 rounded-2xl border border-slate-200 shadow-soft space-y-4">
         <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-          <History className="w-4 h-4 text-red-600" />
+          <History className="w-4 h-4 text-[#0D5C46]" />
           <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
             Proforma Invoice Audit Log & Status History
           </h3>
@@ -212,7 +212,7 @@ export const ProformaDetailPage: React.FC = () => {
           {proforma.statusHistory && proforma.statusHistory.length > 0 ? (
             proforma.statusHistory.map((hist, idx) => (
               <div key={hist.id || idx} className="flex items-start gap-3 text-xs">
-                <div className="w-6 h-6 rounded-full bg-red-50 text-red-600 flex items-center justify-center shrink-0 mt-0.5">
+                <div className="w-6 h-6 rounded-full bg-emerald-50 text-[#0D5C46] flex items-center justify-center shrink-0 mt-0.5">
                   <Clock className="w-3.5 h-3.5" />
                 </div>
                 <div className="flex-1 bg-slate-50 p-3 rounded-xl border border-slate-100">
@@ -256,7 +256,7 @@ export const ProformaDetailPage: React.FC = () => {
                 <select
                   value={newStatus}
                   onChange={(e) => setNewStatus(e.target.value as ProformaStatus)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 uppercase focus:outline-none focus:border-red-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 uppercase focus:outline-none focus:border-[#0D5C46]"
                 >
                   <option value="draft">Draft</option>
                   <option value="sent">Sent to Client</option>
@@ -275,7 +275,7 @@ export const ProformaDetailPage: React.FC = () => {
                   value={statusNote}
                   onChange={(e) => setStatusNote(e.target.value)}
                   placeholder="e.g. Received 50% advance remittance via RTGS UTR #..."
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-800 focus:outline-none focus:border-red-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-800 focus:outline-none focus:border-[#0D5C46]"
                 />
               </div>
 
@@ -289,7 +289,7 @@ export const ProformaDetailPage: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-red-600 text-white text-xs font-bold hover:bg-red-700 shadow-xs"
+                  className="px-4 py-2 rounded-xl bg-[#0D5C46] text-white text-xs font-bold hover:bg-[#084434] shadow-xs transition-all"
                 >
                   Update Status
                 </button>

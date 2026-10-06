@@ -15,7 +15,7 @@ import { DocumentData } from '../src/components/quotation/templates/types';
 // 1. Mock Complete Company Profile
 const mockCompany: CompanyProfile = {
   id: 'comp-test',
-  name: 'JUBILANT METAL AND ALLOYS',
+  name: 'BHAWAL STEEL & ENGINEERING COMPANY',
   tagline: 'Govt. Recognized Star Export House • Importers, Exporters & Stockists',
   logo: '/assets/New logo.png',
   gstin: '27AABCJ1234F1Z5',
@@ -29,15 +29,15 @@ const mockCompany: CompanyProfile = {
   country: 'India',
   pinCode: '410218',
   phone: '+91 98200 12345',
-  email: 'sales@jubilantmetal.com',
-  website: 'www.jubilantmetal.com',
+  email: 'sales@bhawalsteel.com',
+  website: 'www.bhawalsteel.com',
 };
 
 // 2. Mock Bank Account
 const mockBank: BankAccount = {
   id: 'bank-test',
   bankName: 'HDFC Bank Ltd',
-  accountName: 'Jubilant Metal and Alloys',
+  accountName: 'Bhawal Steel & Engineering Company',
   accountNumber: '50200012345678',
   ifscCode: 'HDFC0001234',
   branchName: 'Kalamboli SME Branch',
@@ -286,7 +286,8 @@ async function runTestSuite() {
 
       // Verify essential data presence in rendered HTML
       const escapedCustomer = testQuotation.customerName.replace(/&/g, '&amp;');
-      const hasCompanyName = htmlSingle.includes(mockCompany.name);
+      const escapedCompany = mockCompany.name.replace(/&/g, '&amp;');
+      const hasCompanyName = htmlSingle.includes(mockCompany.name) || htmlSingle.includes(escapedCompany);
       const hasCustomerName = htmlSingle.includes(testQuotation.customerName) || htmlSingle.includes(escapedCustomer);
       const hasQuoteNum = htmlSingle.includes(testQuotation.quotationNumber);
 

@@ -19,7 +19,6 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { UserRole } from '../../types';
-import { DEFAULT_LOGO } from '../../utils/assetResolver';
 
 interface SidebarProps {
   collapsed: boolean;
@@ -63,13 +62,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div>
         <div className="flex items-center justify-between p-4 border-b border-slate-800/80">
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="bg-white rounded-xl px-2.5 py-1.5 shadow-sm flex items-center justify-center border border-white/10">
-              <img
-                src={DEFAULT_LOGO}
-                alt="Jubilant Metal and Alloys"
-                className={collapsed ? "h-7 w-7 object-contain" : "h-8 w-auto max-w-[165px] object-contain shrink-0"}
-              />
-            </div>
+            {collapsed ? (
+              <div
+                className="w-8 h-8 rounded-lg bg-[#0D5C46] flex items-center justify-center font-bold text-xs text-white tracking-wider border border-[#BC9647]/50 shadow-sm"
+                title="Quotation Billing Software"
+              >
+                QBS
+              </div>
+            ) : (
+              <div className="flex flex-col min-w-0">
+                <span className="font-display font-bold text-sm tracking-tight text-white leading-tight truncate">
+                  Quotation Billing Software
+                </span>
+                <span className="text-[10px] font-semibold text-[#BC9647] tracking-wider uppercase">
+                  Enterprise Suite
+                </span>
+              </div>
+            )}
           </div>
           {/* Desktop collapse toggle */}
           <button
@@ -93,9 +102,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all duration-150 group ${
                     isActive
-                      ? 'bg-red-600 text-white shadow-lg shadow-red-900/30 font-semibold'
+                      ? 'bg-[#0D5C46] text-white shadow-lg shadow-[#0D5C46]/30 font-semibold'
                       : item.highlight
-                      ? 'text-red-400 hover:bg-slate-900 hover:text-red-300 font-semibold border border-red-900/40'
+                      ? 'text-[#BC9647] hover:bg-slate-900 hover:text-[#D4A338] font-semibold border border-[#BC9647]/30'
                       : 'text-slate-400 hover:text-slate-100 hover:bg-slate-900'
                   }`
                 }
@@ -103,7 +112,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               >
                 <Icon
                   className={`w-5 h-5 shrink-0 transition-transform duration-150 group-hover:scale-105 ${
-                    item.highlight ? 'text-red-500' : ''
+                    item.highlight ? 'text-[#BC9647]' : ''
                   }`}
                 />
                 {!collapsed && <span className="truncate">{item.label}</span>}
@@ -122,13 +131,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
           }`}
         >
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-full bg-red-600/20 border border-red-500/40 flex items-center justify-center text-red-400 font-bold text-xs shrink-0">
+            <div className="w-8 h-8 rounded-full bg-[#0D5C46]/30 border border-[#0D5C46]/60 flex items-center justify-center text-emerald-300 font-bold text-xs shrink-0">
               {user?.name ? user.name.charAt(0) : 'A'}
             </div>
             {!collapsed && (
               <div className="min-w-0">
                 <p className="text-xs font-bold text-slate-200 truncate">{user?.name || 'Administrator'}</p>
-                <p className="text-[10px] font-semibold text-red-400 uppercase tracking-wider truncate">
+                <p className="text-[10px] font-semibold text-[#BC9647] uppercase tracking-wider truncate">
                   Administrator
                 </p>
               </div>

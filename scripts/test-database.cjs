@@ -3,7 +3,7 @@ const fs = require('fs');
 
 async function runTests() {
   console.log('=======================================================');
-  console.log('   JUBILANT METAL & ALLOYS — AUTOMATED TEST SUITE      ');
+  console.log('   QUOTATION BILLING SOFTWARE — AUTOMATED TEST SUITE      ');
   console.log('=======================================================\n');
 
   const { DatabaseManager } = require('../dist-electron/database.js');
@@ -18,7 +18,7 @@ async function runTests() {
 
   // Test Company Profile
   const comp = db.getCompany();
-  if (!comp || !comp.name.includes('JUBILANT')) throw new Error('Company profile seed failed');
+  if (!comp || !comp.name.includes('BHAWAL')) throw new Error('Company profile seed failed');
   console.log(`✓ Test 2: Seeded Company Profile verified: "${comp.name}"`);
 
   // Test Settings & Sequence Numbering

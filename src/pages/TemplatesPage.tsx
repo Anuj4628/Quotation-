@@ -91,7 +91,7 @@ export const TemplatesPage: React.FC = () => {
         </div>
         <button
           onClick={openAddModal}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-xs shadow-md shadow-red-600/20"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0D5C46] hover:bg-[#084434] text-white font-semibold text-xs shadow-md shadow-[#0D5C46]/20 transition-all"
         >
           <Plus className="w-4 h-4" />
           <span>+ Add Terms Template</span>
@@ -148,7 +148,7 @@ export const TemplatesPage: React.FC = () => {
             <div className="pt-4 mt-4 border-t border-slate-100 flex justify-end">
               <button
                 onClick={() => openEditModal(tmpl)}
-                className="text-xs font-semibold text-red-600 hover:text-red-700"
+                className="text-xs font-semibold text-[#0D5C46] hover:text-[#084434]"
               >
                 View & Edit Clauses →
               </button>
@@ -184,7 +184,7 @@ export const TemplatesPage: React.FC = () => {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g. High-Pressure Boiler Tubing Terms"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-semibold outline-none focus:bg-white focus:border-red-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 font-semibold outline-none focus:bg-white focus:border-[#0D5C46]"
                 />
               </div>
 
@@ -194,7 +194,7 @@ export const TemplatesPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setTerms([...terms, ''])}
-                    className="text-red-600 hover:text-red-700 font-bold"
+                    className="text-[#0D5C46] hover:text-[#084434] font-bold"
                   >
                     + Add Clause
                   </button>
@@ -215,7 +215,7 @@ export const TemplatesPage: React.FC = () => {
                           setTerms(next);
                         }}
                         placeholder="Enter commercial clause text..."
-                        className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 outline-none focus:bg-white focus:border-red-500"
+                        className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 outline-none focus:bg-white focus:border-[#0D5C46]"
                       />
                       <button
                         type="button"
@@ -235,7 +235,7 @@ export const TemplatesPage: React.FC = () => {
                   id="defaultTmpl"
                   checked={isDefault}
                   onChange={(e) => setIsDefault(e.target.checked)}
-                  className="rounded text-red-600 focus:ring-red-500"
+                  className="rounded text-[#0D5C46] focus:ring-[#0D5C46]"
                 />
                 <label htmlFor="defaultTmpl" className="font-semibold text-slate-700 cursor-pointer">
                   Set as Default Template for New Quotations
@@ -252,7 +252,7 @@ export const TemplatesPage: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold shadow-md shadow-red-600/20"
+                  className="px-5 py-2 bg-[#0D5C46] hover:bg-[#084434] text-white rounded-xl font-bold shadow-md shadow-[#0D5C46]/20 transition-all"
                 >
                   Save Template
                 </button>

@@ -69,18 +69,18 @@ export const ProformaDocument: React.FC<ProformaDocumentProps> = ({
 
   // 1. Header Banner
   const renderHeader = () => (
-    <div className="flex justify-between items-start pb-4 border-b-2 border-red-600 gap-4">
+    <div className="flex justify-between items-start pb-4 border-b-2 border-[#0D5C46] gap-4">
       {/* Brand Logo & Title */}
       <div className="flex flex-col items-start gap-1 max-w-[260px] shrink-0">
         <div className="bg-white rounded flex items-center">
           <img
             src={logoSrc}
-            alt={company.name || 'JUBILANT METAL AND ALLOYS'}
+            alt={company.name || 'BHAWAL STEEL & ENGINEERING COMPANY'}
             className="h-14 w-auto max-w-[260px] object-contain shrink-0"
             crossOrigin="anonymous"
           />
         </div>
-        {company.name && !company.name.toLowerCase().includes('jubilant') && (
+        {company.name && !company.name.toLowerCase().includes('bhawal') && (
           <h2 className="text-sm font-extrabold text-slate-900 tracking-tight font-display uppercase leading-tight">
             {company.name}
           </h2>
@@ -127,7 +127,7 @@ export const ProformaDocument: React.FC<ProformaDocumentProps> = ({
     <div className="pt-3 pb-2.5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="h-7 inline-flex items-center px-3 rounded bg-red-600 text-white font-display font-extrabold text-xs tracking-wider uppercase shadow-xs">
+          <span className="h-7 inline-flex items-center px-3 rounded bg-[#0D5C46] text-white font-display font-extrabold text-xs tracking-wider uppercase shadow-xs">
             PROFORMA INVOICE
           </span>
           <span
@@ -200,7 +200,7 @@ export const ProformaDocument: React.FC<ProformaDocumentProps> = ({
         {/* Bill To */}
         <div className="p-3 bg-slate-50/60 rounded-lg border border-slate-200 flex flex-col justify-between print:bg-white">
           <div className="space-y-0.5">
-            <p className="font-bold text-red-600 uppercase tracking-wider text-[10px] mb-1">
+            <p className="font-bold text-[#0D5C46] uppercase tracking-wider text-[10px] mb-1">
               Buyer / Bill To Details:
             </p>
             <p className="font-bold text-sm text-slate-900 leading-snug break-words">{proforma.customerName}</p>
@@ -228,7 +228,7 @@ export const ProformaDocument: React.FC<ProformaDocumentProps> = ({
         {/* Dedicated Ship To / Consignee */}
         <div className="p-3 bg-slate-50/60 rounded-lg border border-slate-200 flex flex-col justify-between print:bg-white">
           <div className="space-y-0.5">
-            <p className="font-bold text-red-600 uppercase tracking-wider text-[10px] mb-1">
+            <p className="font-bold text-[#0D5C46] uppercase tracking-wider text-[10px] mb-1">
               Consignee / Ship To Details:
             </p>
             <p className="font-bold text-sm text-slate-900 leading-snug break-words">{shipToName}</p>
@@ -426,7 +426,7 @@ export const ProformaDocument: React.FC<ProformaDocumentProps> = ({
         )}
 
         {/* Grand Total */}
-        <div className="flex justify-between items-center text-xs font-extrabold text-white bg-red-600 p-2 rounded shadow-xs print:bg-slate-900 mt-1">
+        <div className="flex justify-between items-center text-xs font-extrabold text-white bg-[#0D5C46] p-2 rounded shadow-xs print:bg-slate-900 mt-1">
           <span className="tracking-wide">GRAND TOTAL:</span>
           <span className="font-mono text-sm sm:text-base whitespace-nowrap tabular-nums text-right">{formatINR(proforma.grandTotal)}</span>
         </div>
@@ -440,7 +440,7 @@ export const ProformaDocument: React.FC<ProformaDocumentProps> = ({
       {/* Terms & Conditions */}
       <div className="col-span-7 bg-slate-50/70 p-3 rounded-lg border border-slate-200 flex flex-col justify-between print:bg-white">
         <div>
-          <p className="font-bold text-red-600 uppercase tracking-wider text-[10px] mb-1.5">
+          <p className="font-bold text-[#0D5C46] uppercase tracking-wider text-[10px] mb-1.5">
             TERMS & CONDITIONS:
           </p>
           <ul className="space-y-1 text-slate-800 text-[10px] leading-relaxed">
@@ -501,13 +501,13 @@ export const ProformaDocument: React.FC<ProformaDocumentProps> = ({
       <div className="text-slate-500 text-[10px] space-y-0.5 max-w-sm">
         <p className="font-semibold text-slate-700">Commercial Validity & Acceptance</p>
         <p>This proforma invoice is valid until {proforma.validUntil}. Standard warranty & inspection clauses apply.</p>
-        <p>Issued by Jubilant Metal and Alloys. E. & O.E.</p>
+        <p>Issued by {company.name || 'Bhawal Steel & Engineering Company'}. E. & O.E.</p>
       </div>
 
       <div className="flex flex-col items-center text-center">
         <p className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">For</p>
         <p className="font-bold text-slate-900 text-xs uppercase tracking-wider mb-1">
-          {company.name || 'JUBILANT METAL AND ALLOYS'}
+          {company.name || 'BHAWAL STEEL & ENGINEERING COMPANY'}
         </p>
 
         <div className="flex flex-col items-center justify-center py-1.5 min-h-[90px] gap-1.5">
@@ -556,18 +556,18 @@ export const ProformaDocument: React.FC<ProformaDocumentProps> = ({
 
   // 9. Document Continuation Header
   const renderContinuationHeader = (pageNumber: number, totalPages: number) => (
-    <div className="flex justify-between items-center pb-3 border-b-2 border-red-600 mb-4">
+    <div className="flex justify-between items-center pb-3 border-b-2 border-[#0D5C46] mb-4">
       <div className="flex items-center gap-3">
         <div className="bg-white rounded flex items-center">
           <img
             src={logoSrc}
-            alt={company.name || 'Jubilant Metal and Alloys'}
+            alt={company.name || 'Bhawal Steel & Engineering Company'}
             className="h-9 w-auto max-w-[180px] object-contain shrink-0"
             crossOrigin="anonymous"
           />
         </div>
         <div>
-          {company.name && !company.name.toLowerCase().includes('jubilant') && (
+          {company.name && !company.name.toLowerCase().includes('bhawal') && (
             <h3 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider font-display">
               {company.name}
             </h3>
@@ -597,7 +597,7 @@ export const ProformaDocument: React.FC<ProformaDocumentProps> = ({
   const renderFooter = (pageNumber: number, totalPages: number, hasNextPage = false) => (
     <div className="mt-auto pt-3 border-t border-slate-200 flex justify-between items-center text-[10px] text-slate-400">
       <p>
-        This is a computer generated proforma invoice document • {company.name || 'Jubilant Metal and Alloys'}
+        This is a computer generated proforma invoice document • {company.name || 'Bhawal Steel & Engineering Company'}
       </p>
       <p>
         {hasNextPage ? (

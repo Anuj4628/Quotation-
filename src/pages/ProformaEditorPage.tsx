@@ -730,7 +730,7 @@ export const ProformaEditorPage: React.FC = () => {
   const previewProforma: ProformaInvoice = useMemo(() => {
     return {
       id: id || 'preview-temp-id',
-      proformaNumber: proformaNumber || 'JMA-PI-2026-0000',
+      proformaNumber: proformaNumber || 'PI-2026-0000',
       proformaDate,
       validUntil,
       customerReference,
@@ -849,7 +849,7 @@ export const ProformaEditorPage: React.FC = () => {
           </button>
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded text-[11px] font-extrabold uppercase tracking-wider bg-red-600 text-white shadow-xs">
+              <span className="px-2.5 py-0.5 rounded text-[11px] font-extrabold uppercase tracking-wider bg-[#0D5C46] text-white shadow-xs">
                 PROFORMA
               </span>
               <h1 className="text-xl sm:text-2xl font-display font-extrabold text-slate-900 tracking-tight">
@@ -881,7 +881,7 @@ export const ProformaEditorPage: React.FC = () => {
                 activeTab === 'preview' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <Eye className="w-3.5 h-3.5 text-red-600" />
+              <Eye className="w-3.5 h-3.5 text-[#0D5C46]" />
               <span>Live A4 Preview</span>
             </button>
           </div>
@@ -896,7 +896,7 @@ export const ProformaEditorPage: React.FC = () => {
           <button
             type="button"
             onClick={() => handleSaveProforma(status, true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-xs shadow-md shadow-red-600/20"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0D5C46] hover:bg-[#084434] text-white font-semibold text-xs shadow-md shadow-[#0D5C46]/20 transition-all"
           >
             <Save className="w-4 h-4" />
             <span>Save & View</span>
@@ -913,7 +913,7 @@ export const ProformaEditorPage: React.FC = () => {
             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-soft space-y-4">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-red-600" />
+                  <Building2 className="w-4 h-4 text-[#0D5C46]" />
                   <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
                     1. Buyer (Bill To) & Consignee (Ship To)
                   </h2>
@@ -921,7 +921,7 @@ export const ProformaEditorPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsNewCustomerModalOpen(true)}
-                  className="flex items-center gap-1 text-xs text-red-600 hover:text-red-700 font-bold"
+                  className="flex items-center gap-1 text-xs text-[#0D5C46] hover:text-[#084434] font-bold"
                 >
                   <UserPlus className="w-3.5 h-3.5" />
                   <span>+ Add New Customer</span>
@@ -936,7 +936,7 @@ export const ProformaEditorPage: React.FC = () => {
                 <select
                   value={selectedCustomerId}
                   onChange={(e) => handleCustomerSelect(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-900 focus:outline-none focus:border-red-500 focus:bg-white"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-medium text-slate-900 focus:outline-none focus:border-[#0D5C46] focus:bg-white"
                 >
                   <option value="">-- Choose Customer from Database --</option>
                   {customers.map((c) => (
@@ -973,7 +973,7 @@ export const ProformaEditorPage: React.FC = () => {
                   <div className="pt-3 border-t border-slate-200">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-1.5">
-                        <Truck className="w-4 h-4 text-red-600" />
+                        <Truck className="w-4 h-4 text-[#0D5C46]" />
                         <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
                           Consignee / Delivery Address (Ship To)
                         </span>
@@ -983,7 +983,7 @@ export const ProformaEditorPage: React.FC = () => {
                           type="checkbox"
                           checked={sameAsBilling}
                           onChange={(e) => handleSameAsBillingToggle(e.target.checked)}
-                          className="rounded text-red-600 focus:ring-red-500 mr-1.5"
+                          className="rounded text-[#0D5C46] focus:ring-[#0D5C46] mr-1.5"
                         />
                         Same as Billing Address
                       </label>
@@ -1084,7 +1084,7 @@ export const ProformaEditorPage: React.FC = () => {
             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-soft space-y-4">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2">
-                  <Package className="w-4 h-4 text-red-600" />
+                  <Package className="w-4 h-4 text-[#0D5C46]" />
                   <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
                     2. Product & Material Specifications
                   </h2>
@@ -1112,7 +1112,7 @@ export const ProformaEditorPage: React.FC = () => {
                     onClick={() => setIsProductPickerOpen(true)}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors"
                   >
-                    <Package className="w-3.5 h-3.5 text-red-600" />
+                    <Package className="w-3.5 h-3.5 text-[#0D5C46]" />
                     <span>From Catalog</span>
                   </button>
 
@@ -1129,7 +1129,7 @@ export const ProformaEditorPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => handleAddItem(true)}
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-sm shadow-red-600/20 transition-all"
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#0D5C46] hover:bg-[#084434] text-white text-xs font-bold shadow-sm shadow-[#0D5C46]/20 transition-all"
                     title="Add blank row (Shortcut: Press Enter on Rate or GST)"
                   >
                     <Plus className="w-4 h-4" />
@@ -1297,7 +1297,7 @@ export const ProformaEditorPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => handleAddItem(true)}
-                  className="text-red-600 hover:text-red-700 font-bold hover:underline mt-1 sm:mt-0"
+                  className="text-[#0D5C46] hover:text-[#084434] font-bold hover:underline mt-1 sm:mt-0"
                 >
                   + Add another item
                 </button>
@@ -1308,7 +1308,7 @@ export const ProformaEditorPage: React.FC = () => {
             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-soft space-y-4">
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-red-600" />
+                  <Layers className="w-4 h-4 text-[#0D5C46]" />
                   <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
                     3. Commercial Terms & Special Instructions
                   </h2>
@@ -1357,7 +1357,7 @@ export const ProformaEditorPage: React.FC = () => {
                   value={otherComments}
                   onChange={(e) => setOtherComments(e.target.value)}
                   placeholder="e.g. LC terms, inspection at manufacturer works prior to dispatch, specific markings or packaging instructions."
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-900 focus:outline-none focus:border-red-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-900 focus:outline-none focus:border-[#0D5C46]"
                 />
               </div>
 
@@ -1401,7 +1401,7 @@ export const ProformaEditorPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setTerms([...terms, ''])}
-                  className="text-xs text-red-600 font-bold hover:underline"
+                  className="text-xs text-[#0D5C46] font-bold hover:underline"
                 >
                   + Add Condition
                 </button>
@@ -1545,7 +1545,7 @@ export const ProformaEditorPage: React.FC = () => {
             <div className="bg-gradient-to-br from-slate-900 to-slate-800 p-5 rounded-2xl text-white space-y-3 shadow-xl">
               <h3 className="text-xs font-bold tracking-wider uppercase text-slate-400 border-b border-slate-700 pb-2 flex items-center justify-between">
                 <span>PI Commercial Totals</span>
-                <span className="text-[10px] text-red-400 font-mono">
+                <span className="text-[10px] text-[#BC9647] font-mono font-semibold">
                   {calculations.isInterstate ? 'IGST 18%' : 'CGST+SGST 18%'}
                 </span>
               </h3>
@@ -1587,7 +1587,7 @@ export const ProformaEditorPage: React.FC = () => {
 
               <div className="pt-2 border-t border-slate-700 flex justify-between items-center">
                 <span className="font-bold text-xs uppercase tracking-wider text-slate-200">Grand Total:</span>
-                <span className="font-mono text-xl font-extrabold text-red-400">
+                <span className="font-mono text-xl font-extrabold text-[#BC9647]">
                   {formatINR(calculations.grandTotal)}
                 </span>
               </div>
@@ -1598,7 +1598,7 @@ export const ProformaEditorPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleSaveProforma(status, true)}
-                className="w-full py-3 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-md shadow-red-600/30 flex items-center justify-center gap-2"
+                className="w-full py-3 px-4 rounded-xl bg-[#0D5C46] hover:bg-[#084434] text-white font-bold text-xs shadow-md shadow-[#0D5C46]/30 flex items-center justify-center gap-2 transition-all"
               >
                 <Save className="w-4 h-4" />
                 <span>Save Proforma & View Official Document</span>
@@ -1755,7 +1755,7 @@ export const ProformaEditorPage: React.FC = () => {
               </button>
               <button
                 type="submit"
-                className="px-4 py-1.5 rounded-lg bg-red-600 text-white text-xs font-bold shadow-xs"
+                className="px-4 py-1.5 rounded-lg bg-[#0D5C46] hover:bg-[#084434] text-white text-xs font-bold shadow-xs transition-all"
               >
                 Save & Select Customer
               </button>
@@ -1770,7 +1770,7 @@ export const ProformaEditorPage: React.FC = () => {
           <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
             <div className="p-4 border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <ClipboardList className="w-4 h-4 text-red-600" />
+                <ClipboardList className="w-4 h-4 text-[#0D5C46]" />
                 <h3 className="text-sm font-bold text-slate-900">Bulk Paste Product Descriptions</h3>
               </div>
               <button
@@ -1791,7 +1791,7 @@ export const ProformaEditorPage: React.FC = () => {
                 value={bulkPasteText}
                 onChange={(e) => setBulkPasteText(e.target.value)}
                 placeholder={`SS 316L Seamless Pipe, 2 inch NB, SCH 40, ASTM A312 TP316L, 6M\nStainless Steel Flanges, ASTM A182 F316L, Class 150, 4 inch, RF\nSS 316L Round Bar, 50mm Dia, ASTM A276, 3M`}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-mono text-slate-900 outline-none focus:bg-white focus:border-red-500 leading-relaxed"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-mono text-slate-900 outline-none focus:bg-white focus:border-[#0D5C46] leading-relaxed"
               />
             </div>
 
@@ -1806,7 +1806,7 @@ export const ProformaEditorPage: React.FC = () => {
               <button
                 type="button"
                 onClick={handleApplyBulkPaste}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs shadow-md shadow-red-600/20"
+                className="px-4 py-2 bg-[#0D5C46] hover:bg-[#084434] text-white rounded-xl font-bold text-xs shadow-md shadow-[#0D5C46]/20 transition-all"
               >
                 Insert Rows
               </button>

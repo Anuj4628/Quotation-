@@ -200,7 +200,7 @@ export const CustomersPage: React.FC = () => {
         </div>
         <button
           onClick={openAddModal}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-xs shadow-md shadow-red-600/20 transition-all"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0D5C46] hover:bg-[#084434] text-white font-semibold text-xs shadow-md shadow-[#0D5C46]/20 transition-all"
         >
           <Plus className="w-4 h-4" />
           <span>Add New Customer</span>
@@ -216,7 +216,7 @@ export const CustomersPage: React.FC = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by company name, contact person, city, or GSTIN..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 outline-none focus:border-red-500 focus:bg-white"
+            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 outline-none focus:border-[#0D5C46] focus:bg-white"
           />
         </div>
 
@@ -249,12 +249,12 @@ export const CustomersPage: React.FC = () => {
               <div className="space-y-3">
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <span className="font-mono text-[10px] uppercase font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded">
+                    <span className="font-mono text-[10px] uppercase font-bold text-[#0D5C46] bg-emerald-50 px-2 py-0.5 rounded">
                       {c.customerCode}
                     </span>
                     <h3
                       onClick={() => navigate(`/customers/${c.id}`)}
-                      className="font-bold text-base text-slate-900 mt-1.5 hover:text-red-600 cursor-pointer line-clamp-1"
+                      className="font-bold text-base text-slate-900 mt-1.5 hover:text-[#0D5C46] cursor-pointer line-clamp-1"
                     >
                       {c.companyName}
                     </h3>
@@ -319,7 +319,7 @@ export const CustomersPage: React.FC = () => {
                   <button
                     onClick={() => navigate(`/quotations/new?customerId=${c.id}`)}
                     title="Create Quotation for Customer"
-                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-semibold shadow-sm"
+                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#0D5C46] hover:bg-[#084434] text-white text-xs font-semibold shadow-sm transition-all"
                   >
                     <Plus className="w-3 h-3" />
                     <span>Quote</span>
@@ -337,7 +337,7 @@ export const CustomersPage: React.FC = () => {
           <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden max-h-[90vh] flex flex-col pointer-events-auto">
             <div className="p-4 border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-red-600" />
+                <Building2 className="w-5 h-5 text-[#0D5C46]" />
                 <h3 className="text-base font-bold text-slate-900">
                   {editingCustomer ? 'Edit Customer' : 'Add New Customer'}
                 </h3>
@@ -364,7 +364,7 @@ export const CustomersPage: React.FC = () => {
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
                     placeholder="e.g. Larsen & Toubro Heavy Eng"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 outline-none focus:bg-white focus:border-red-500 font-semibold cursor-text"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-900 outline-none focus:bg-white focus:border-[#0D5C46] font-semibold cursor-text"
                   />
                 </div>
 
@@ -531,7 +531,7 @@ export const CustomersPage: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold shadow-md shadow-red-600/20"
+                  className="px-5 py-2 bg-[#0D5C46] hover:bg-[#084434] text-white rounded-xl font-bold shadow-md shadow-[#0D5C46]/20 transition-all"
                 >
                   {editingCustomer ? 'Update Customer' : 'Save Customer'}
                 </button>

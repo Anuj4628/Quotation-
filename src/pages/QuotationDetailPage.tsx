@@ -79,7 +79,7 @@ export const QuotationDetailPage: React.FC = () => {
         <p className="text-sm text-slate-500 mt-1">The requested quotation ID does not exist.</p>
         <button
           onClick={() => navigate('/quotations')}
-          className="mt-4 px-4 py-2 bg-red-600 text-white rounded-xl text-xs font-semibold"
+          className="mt-4 px-4 py-2 bg-[#0D5C46] hover:bg-[#084434] text-white rounded-xl text-xs font-semibold cursor-pointer"
         >
           Return to Quotations List
         </button>
@@ -139,7 +139,7 @@ export const QuotationDetailPage: React.FC = () => {
     const currSuffix = activeCurrency !== 'INR' ? `-${activeCurrency}` : '';
     const ok = await generateQuotationPDF({
       elementId: 'quotation-print-document',
-      filename: `${quotation.quotationNumber}${currSuffix}-Jubilant.pdf`,
+      filename: `${quotation.quotationNumber}${currSuffix}-Quotation.pdf`,
     });
     setIsGeneratingPdf(false);
     if (ok) {
@@ -167,7 +167,7 @@ export const QuotationDetailPage: React.FC = () => {
     viewed: 'bg-cyan-50 text-cyan-700 border-cyan-300',
     draft: 'bg-slate-100 text-slate-700 border-slate-300',
     expired: 'bg-orange-50 text-orange-700 border-orange-300',
-    rejected: 'bg-red-50 text-red-700 border-red-300',
+    rejected: 'bg-rose-50 text-rose-700 border-rose-300',
     converted: 'bg-purple-50 text-purple-700 border-purple-300',
   };
 
@@ -249,7 +249,7 @@ export const QuotationDetailPage: React.FC = () => {
           <button
             onClick={handleDownloadPdf}
             disabled={isGeneratingPdf}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-md shadow-red-600/20 transition-all"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0D5C46] hover:bg-[#084434] text-white text-xs font-bold shadow-md shadow-[#0D5C46]/20 transition-all cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
             <span>{isGeneratingPdf ? 'Exporting PDF...' : 'Download PDF'}</span>
@@ -257,7 +257,7 @@ export const QuotationDetailPage: React.FC = () => {
 
           <button
             onClick={handleDelete}
-            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
             title="Delete quotation"
           >
             <Trash2 className="w-4 h-4" />
@@ -271,9 +271,9 @@ export const QuotationDetailPage: React.FC = () => {
           {/* Change Theme Button */}
           <button
             onClick={() => setIsThemeModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white text-xs font-bold shadow-md shadow-red-600/20 transition-all cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#0D5C46] hover:bg-[#084434] text-white text-xs font-bold shadow-md shadow-[#0D5C46]/20 border border-[#BC9647]/40 transition-all cursor-pointer"
           >
-            <Palette className="w-4 h-4" />
+            <Palette className="w-4 h-4 text-[#BC9647]" />
             <span>Template: {activeThemeObj.name} ({activeThemeObj.paperSize})</span>
             <ChevronDown className="w-3.5 h-3.5 opacity-80" />
           </button>
@@ -332,7 +332,7 @@ export const QuotationDetailPage: React.FC = () => {
       {/* Audit Trail & Activity Timeline */}
       <div className="no-print bg-white p-6 rounded-2xl border border-slate-200 shadow-soft space-y-4">
         <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-          <History className="w-4 h-4 text-red-600" />
+          <History className="w-4 h-4 text-[#0D5C46]" />
           <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
             Quotation Audit Log & Lifecycle Activity
           </h3>
@@ -342,7 +342,7 @@ export const QuotationDetailPage: React.FC = () => {
           {quotation.statusHistory && quotation.statusHistory.length > 0 ? (
             quotation.statusHistory.map((hist, idx) => (
               <div key={hist.id || idx} className="flex items-start gap-3 text-xs">
-                <div className="w-6 h-6 rounded-full bg-red-50 text-red-600 flex items-center justify-center shrink-0 mt-0.5">
+                <div className="w-6 h-6 rounded-full bg-emerald-50 text-[#0D5C46] flex items-center justify-center shrink-0 mt-0.5">
                   <Clock className="w-3.5 h-3.5" />
                 </div>
                 <div className="flex-1 bg-slate-50 p-3 rounded-xl border border-slate-100">
@@ -418,7 +418,7 @@ export const QuotationDetailPage: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg shadow-sm"
+                  className="px-4 py-2 bg-[#0D5C46] hover:bg-[#084434] text-white font-bold rounded-lg shadow-sm cursor-pointer"
                 >
                   Update Status
                 </button>

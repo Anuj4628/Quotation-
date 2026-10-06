@@ -4,7 +4,7 @@ import fs from 'fs';
 import { DatabaseManager } from './database';
 
 // Configure application identity
-app.name = 'Jubilant Metal and Alloys';
+app.name = 'Quotation Billing Software';
 
 let mainWindow: BrowserWindow | null = null;
 let dbManager: DatabaseManager;
@@ -67,7 +67,7 @@ async function createWindow() {
     height: 960,
     minWidth: 1024,
     minHeight: 720,
-    title: 'Jubilant Metal and Alloys – Quotation Billing',
+    title: 'Quotation Billing Software',
     icon: path.join(__dirname, '../public/favicon.svg'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -240,7 +240,7 @@ function registerIpcHandlers() {
     const dateStr = new Date().toISOString().split('T')[0];
     const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
       title: 'Export SQLite Database Backup',
-      defaultPath: `Jubilant-Quotation-Backup-${dateStr}.db`,
+      defaultPath: `Quotation-Backup-${dateStr}.db`,
       filters: [
         { name: 'SQLite Database (*.db)', extensions: ['db', 'sqlite'] },
         { name: 'All Files (*.*)', extensions: ['*'] },
@@ -365,7 +365,7 @@ function registerIpcHandlers() {
   // Prepare WhatsApp Share: Silent temporary PDF save, copy to clipboard, and open WhatsApp chat
   safeHandle('app:prepareWhatsAppShare', async (_event, base64Data: string, filename: string, messageText: string, targetPhone?: string) => {
     try {
-      const tempDir = path.join(app.getPath('temp'), 'jubilant-shares');
+      const tempDir = path.join(app.getPath('temp'), 'quotation-shares');
       if (!fs.existsSync(tempDir)) {
         fs.mkdirSync(tempDir, { recursive: true });
       }

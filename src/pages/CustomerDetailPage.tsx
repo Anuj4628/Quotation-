@@ -42,7 +42,7 @@ export const CustomerDetailPage: React.FC = () => {
         <h2 className="text-xl font-bold text-slate-800">Customer Not Found</h2>
         <button
           onClick={() => navigate('/customers')}
-          className="mt-4 px-4 py-2 bg-red-600 text-white rounded-xl text-xs font-semibold"
+          className="mt-4 px-4 py-2 bg-[#0D5C46] hover:bg-[#084434] text-white rounded-xl text-xs font-semibold transition-colors"
         >
           Return to Customers
         </button>
@@ -69,7 +69,7 @@ export const CustomerDetailPage: React.FC = () => {
           </button>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-mono text-xs uppercase font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded">
+              <span className="font-mono text-xs uppercase font-bold text-[#0D5C46] bg-emerald-50 px-2 py-0.5 rounded">
                 {customer.customerCode}
               </span>
               <h1 className="text-xl sm:text-2xl font-display font-extrabold text-slate-900">
@@ -87,12 +87,12 @@ export const CustomerDetailPage: React.FC = () => {
             onClick={() => navigate(`/proformas/new?customerId=${customer.id}`)}
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-black text-white font-semibold text-xs shadow-soft transition-all"
           >
-            <Plus className="w-3.5 h-3.5 text-red-400" />
+            <Plus className="w-3.5 h-3.5 text-[#BC9647]" />
             <span>Create Proforma</span>
           </button>
           <button
             onClick={() => navigate(`/quotations/new?customerId=${customer.id}`)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-xs shadow-md shadow-red-600/20"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0D5C46] hover:bg-[#084434] text-white font-semibold text-xs shadow-md shadow-[#0D5C46]/20 transition-all"
           >
             <Plus className="w-4 h-4" />
             <span>Create New Quotation</span>
@@ -209,7 +209,7 @@ export const CustomerDetailPage: React.FC = () => {
               <tbody className="divide-y divide-slate-100">
                 {customerQuotations.map((q) => (
                   <tr key={q.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3 px-4 font-mono font-bold text-red-600">
+                    <td className="py-3 px-4 font-mono font-bold text-[#0D5C46]">
                       {q.quotationNumber}
                     </td>
                     <td className="py-3 px-4 text-slate-600">{q.quotationDate}</td>
@@ -227,7 +227,7 @@ export const CustomerDetailPage: React.FC = () => {
                     <td className="py-3 px-4 text-right">
                       <button
                         onClick={() => navigate(`/quotations/${q.id}`)}
-                        className="text-red-600 hover:text-red-800 font-semibold"
+                        className="text-[#0D5C46] hover:text-[#084434] font-semibold"
                       >
                         View Details →
                       </button>
@@ -249,7 +249,7 @@ export const CustomerDetailPage: React.FC = () => {
           </div>
           <button
             onClick={() => navigate(`/proformas/new?customerId=${customer.id}`)}
-            className="flex items-center gap-1 text-xs text-red-600 hover:text-red-700 font-bold"
+            className="flex items-center gap-1 text-xs text-[#0D5C46] hover:text-[#084434] font-bold"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Create Proforma</span>
@@ -278,7 +278,7 @@ export const CustomerDetailPage: React.FC = () => {
               <tbody className="divide-y divide-slate-100">
                 {customerProformas.map((p) => (
                   <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3 px-4 font-mono font-bold text-red-600">
+                    <td className="py-3 px-4 font-mono font-bold text-[#0D5C46]">
                       {p.proformaNumber}
                     </td>
                     <td className="py-3 px-4 text-slate-600">{p.proformaDate}</td>
@@ -298,7 +298,7 @@ export const CustomerDetailPage: React.FC = () => {
                     <td className="py-3 px-4 text-right">
                       <button
                         onClick={() => navigate(`/proformas/${p.id}`)}
-                        className="text-red-600 hover:text-red-800 font-semibold"
+                        className="text-[#0D5C46] hover:text-[#084434] font-semibold"
                       >
                         View Details →
                       </button>
