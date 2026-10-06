@@ -49,6 +49,7 @@ export const BillbookTemplate: React.FC<TemplateProps> = ({
                 <div className="font-mono text-[9px] text-slate-800">
                   <div>GSTIN: <strong>{company.gstin}</strong></div>
                   {company.pan && <div>PAN: <strong>{company.pan}</strong></div>}
+                  {company.stateCode && <div>State Code: <strong>{company.stateCode}</strong></div>}
                 </div>
               </div>
             </div>

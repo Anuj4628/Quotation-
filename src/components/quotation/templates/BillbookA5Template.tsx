@@ -37,7 +37,7 @@ export const BillbookA5Template: React.FC<TemplateProps> = ({
                     {cleanAddress(company.addressLine1)}, {company.city}
                   </p>
                   <p className="text-[7px] text-slate-500 font-mono mt-0.5">
-                    GSTIN: <strong>{company.gstin}</strong> | Tel: {company.phone}
+                    GSTIN: <strong>{company.gstin}</strong> {company.stateCode ? `| State: ${company.stateCode}` : ''} | Tel: {company.phone}
                   </p>
                 </div>
               </div>

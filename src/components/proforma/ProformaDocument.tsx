@@ -21,23 +21,36 @@ const DEFAULT_PROFORMA_TERMS = [
 
 export const ProformaDocument: React.FC<ProformaDocumentProps> = ({
   proforma,
-  company = storage.getCompany(),
+  company: _propCompany,
   id = 'proforma-print-document',
 }) => {
-  const bank = proforma.bankDetails || storage.getBankAccounts()[0];
-
-  // Resolve signature & stamp settings: proforma snapshot takes priority for historical preservation
+  // Global Settings and Company Profile are the single authoritative source of truth.
+  // Dynamically load the latest values from storage so edits in Settings reflect everywhere.
+  const company = storage.getCompany();
   const settings = storage.getSettings();
-  const rawSignatureUrl = proforma.signatureUrl !== undefined ? proforma.signatureUrl : settings.signatureUrl;
-  const rawStampUrl = proforma.stampUrl !== undefined ? proforma.stampUrl : settings.stampUrl;
+
+  const bank =
+    storage.getBankAccounts().find((b) => b.id === proforma.bankAccountId) ||
+    storage.getBankAccounts().find((b) => b.isDefault) ||
+    storage.getBankAccounts()[0] ||
+    proforma.bankDetails;
+
+  // Resolve signature & stamp settings: Global Settings is authoritative
+  const rawSignatureUrl =
+    settings.signatureUrl !== undefined ? settings.signatureUrl : proforma.signatureUrl;
+  const rawStampUrl =
+    settings.stampUrl !== undefined ? settings.stampUrl : proforma.stampUrl;
   const signatureUrl = resolveSignatureUrl(rawSignatureUrl);
   const stampUrl = resolveStampUrl(rawStampUrl);
-  const signatureEnabled = proforma.signatureEnabled !== undefined ? proforma.signatureEnabled : (settings.signatureEnabled ?? true);
-  const stampEnabled = proforma.stampEnabled !== undefined ? proforma.stampEnabled : (settings.stampEnabled ?? true);
-  const signatureSize = proforma.signatureSize || settings.signatureSize || 'md';
-  const stampSize = proforma.stampSize || settings.stampSize || 'md';
-  const signatoryName = proforma.signatoryName || settings.signatoryName || 'Demo Name';
-  const signatoryDesignation = proforma.signatoryDesignation || settings.signatoryDesignation || 'Commercial & Technical Operations';
+  const signatureEnabled =
+    settings.signatureEnabled !== undefined ? settings.signatureEnabled : (proforma.signatureEnabled ?? true);
+  const stampEnabled =
+    settings.stampEnabled !== undefined ? settings.stampEnabled : (proforma.stampEnabled ?? true);
+  const signatureSize = settings.signatureSize || proforma.signatureSize || 'md';
+  const stampSize = settings.stampSize || proforma.stampSize || 'md';
+  const signatoryName = settings.signatoryName || proforma.signatoryName || 'Demo Name';
+  const signatoryDesignation =
+    settings.signatoryDesignation || proforma.signatoryDesignation || 'Commercial & Technical Operations';
 
   // Resolve terms:
   const rawTerms =
@@ -114,6 +127,9 @@ export const ProformaDocument: React.FC<ProformaDocumentProps> = ({
           <span className="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded leading-none">GSTIN: {company.gstin}</span>
           {company.pan && company.pan.trim() ? (
             <span className="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded leading-none">PAN: {company.pan}</span>
+          ) : null}
+          {company.stateCode ? (
+            <span className="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded leading-none">State Code: {company.stateCode}</span>
           ) : null}
           {company.cin && company.cin.trim() ? (
             <span className="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded leading-none">CIN: {company.cin}</span>

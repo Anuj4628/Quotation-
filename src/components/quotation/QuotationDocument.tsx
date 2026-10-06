@@ -28,7 +28,7 @@ const DEFAULT_QUOTATION_TERMS = [
 
 export const QuotationDocument: React.FC<QuotationDocumentProps> = ({
   quotation,
-  company = storage.getCompany(),
+  company: _propCompany,
   id = 'quotation-print-document',
   themeId: propThemeId,
   displayCurrency: propCurrency,
@@ -36,6 +36,10 @@ export const QuotationDocument: React.FC<QuotationDocumentProps> = ({
   exchangeRateDate: propDate,
   isCustomRate: propIsCustom,
 }) => {
+  // Global Settings and Company Profile are the single authoritative source of truth.
+  // Dynamically retrieve the latest company profile and settings so changes in Settings
+  // (e.g., State Code, address, gstin, bank, signatory, stamp) always reflect across all saved quotations.
+  const company = storage.getCompany();
   const settings = storage.getSettings();
 
   // 1. Resolve Active Template from Registry
@@ -55,35 +59,39 @@ export const QuotationDocument: React.FC<QuotationDocumentProps> = ({
     propIsCustom
   );
 
-  const bank = quotation.bankDetails || storage.getBankAccounts()[0];
+  const bank =
+    storage.getBankAccounts().find((b) => b.id === quotation.bankAccountId) ||
+    storage.getBankAccounts().find((b) => b.isDefault) ||
+    storage.getBankAccounts()[0] ||
+    quotation.bankDetails;
 
-  // 3. Resolve Signature and Stamp
+  // 3. Resolve Signature and Stamp (Global Settings is authoritative)
   const rawSignatureUrl =
-    quotation.signatureUrl !== undefined ? quotation.signatureUrl : settings.signatureUrl;
+    settings.signatureUrl !== undefined ? settings.signatureUrl : quotation.signatureUrl;
   const rawStampUrl =
-    quotation.stampUrl !== undefined ? quotation.stampUrl : settings.stampUrl;
+    settings.stampUrl !== undefined ? settings.stampUrl : quotation.stampUrl;
 
   const signatureData = {
     url: resolveSignatureUrl(rawSignatureUrl),
     enabled:
-      quotation.signatureEnabled !== undefined
-        ? quotation.signatureEnabled
-        : (settings.signatureEnabled ?? true),
-    size: quotation.signatureSize || settings.signatureSize || 'md',
-    signatoryName: quotation.signatoryName || settings.signatoryName || 'Demo Name',
+      settings.signatureEnabled !== undefined
+        ? settings.signatureEnabled
+        : (quotation.signatureEnabled ?? true),
+    size: settings.signatureSize || quotation.signatureSize || 'md',
+    signatoryName: settings.signatoryName || quotation.signatoryName || 'Demo Name',
     signatoryDesignation:
-      quotation.signatoryDesignation ||
       settings.signatoryDesignation ||
+      quotation.signatoryDesignation ||
       'Commercial & Technical Operations',
   };
 
   const stampData = {
     url: resolveStampUrl(rawStampUrl),
     enabled:
-      quotation.stampEnabled !== undefined
-        ? quotation.stampEnabled
-        : (settings.stampEnabled ?? true),
-    size: quotation.stampSize || settings.stampSize || 'md',
+      settings.stampEnabled !== undefined
+        ? settings.stampEnabled
+        : (quotation.stampEnabled ?? true),
+    size: settings.stampSize || quotation.stampSize || 'md',
   };
 
   // 4. Resolve Terms & Conditions

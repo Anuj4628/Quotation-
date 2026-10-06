@@ -57,6 +57,11 @@ export const ClassicTemplate: React.FC<TemplateProps> = ({
                       PAN: {company.pan}
                     </span>
                   )}
+                  {company.stateCode && (
+                    <span className="bg-slate-100 border border-slate-300 px-2 py-0.5 rounded font-bold text-slate-900">
+                      State Code: {company.stateCode}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>

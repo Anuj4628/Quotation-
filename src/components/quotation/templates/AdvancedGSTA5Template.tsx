@@ -35,7 +35,7 @@ export const AdvancedGSTA5Template: React.FC<TemplateProps> = ({
                     {cleanAddress(`${company.city}, ${company.state} - ${company.pinCode}`)}
                   </p>
                   <p className="text-[7.5px] text-slate-600 font-mono mt-0.5">
-                    GSTIN: <strong>{company.gstin}</strong> | Tel: {company.phone}
+                    GSTIN: <strong>{company.gstin}</strong> {company.stateCode ? `| State: ${company.stateCode}` : ''} | Tel: {company.phone}
                   </p>
                 </div>
               </div>

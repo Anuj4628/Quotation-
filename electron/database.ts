@@ -983,21 +983,34 @@ export class DatabaseManager {
 
   public updateCompany(data: any): any {
     const current = this.getCompany();
-    const updated = { ...current, ...data };
-    this.run(
-      `UPDATE company_profile SET
-        name = ?, tagline = ?, logo = ?, gstin = ?, pan = ?, cin = ?,
-        addressLine1 = ?, addressLine2 = ?, city = ?, state = ?, stateCode = ?,
-        country = ?, pinCode = ?, phone = ?, email = ?, website = ?
-       WHERE id = ?`,
-      [
-        updated.name, updated.tagline, updated.logo, updated.gstin, updated.pan, updated.cin,
-        updated.addressLine1, updated.addressLine2, updated.city, updated.state, updated.stateCode,
-        updated.country, updated.pinCode, updated.phone, updated.email, updated.website,
-        updated.id,
-      ]
-    );
-    return updated;
+    const targetId = current?.id || data?.id || 'comp-bhawal-01';
+    const updated = { ...current, ...data, id: targetId };
+    if (!current) {
+      this.run(
+        `INSERT INTO company_profile (id, name, tagline, logo, gstin, pan, cin, addressLine1, addressLine2, city, state, stateCode, country, pinCode, phone, email, website)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          targetId, updated.name || '', updated.tagline || '', updated.logo || '', updated.gstin || '', updated.pan || '', updated.cin || '',
+          updated.addressLine1 || '', updated.addressLine2 || '', updated.city || '', updated.state || '', updated.stateCode || '',
+          updated.country || '', updated.pinCode || '', updated.phone || '', updated.email || '', updated.website || '',
+        ]
+      );
+    } else {
+      this.run(
+        `UPDATE company_profile SET
+          name = ?, tagline = ?, logo = ?, gstin = ?, pan = ?, cin = ?,
+          addressLine1 = ?, addressLine2 = ?, city = ?, state = ?, stateCode = ?,
+          country = ?, pinCode = ?, phone = ?, email = ?, website = ?
+         WHERE id = ? OR id = ? OR 1=1`,
+        [
+          updated.name, updated.tagline, updated.logo, updated.gstin, updated.pan, updated.cin,
+          updated.addressLine1, updated.addressLine2, updated.city, updated.state, updated.stateCode,
+          updated.country, updated.pinCode, updated.phone, updated.email, updated.website,
+          current.id, targetId,
+        ]
+      );
+    }
+    return this.getCompany();
   }
 
   // ============================================================================

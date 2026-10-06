@@ -186,18 +186,24 @@ class StorageService {
   // --------------------------------------------------------------------------
   public getCompany(): CompanyProfile {
     if (this.isElectron()) {
-      return window.electronAPI!.getCompany() || INITIAL_COMPANY;
+      const c = window.electronAPI!.getCompany();
+      if (c) {
+        localStorage.setItem(STORAGE_KEYS.COMPANY, JSON.stringify(c));
+        return c;
+      }
     }
     const raw = localStorage.getItem(STORAGE_KEYS.COMPANY);
     return raw ? JSON.parse(raw) : INITIAL_COMPANY;
   }
 
   public updateCompany(data: Partial<CompanyProfile>): CompanyProfile {
+    let updated: CompanyProfile;
     if (this.isElectron()) {
-      return window.electronAPI!.updateCompany(data);
+      updated = window.electronAPI!.updateCompany(data);
+    } else {
+      const current = this.getCompany();
+      updated = { ...current, ...data };
     }
-    const current = this.getCompany();
-    const updated = { ...current, ...data };
     localStorage.setItem(STORAGE_KEYS.COMPANY, JSON.stringify(updated));
     return updated;
   }
@@ -662,6 +668,7 @@ class StorageService {
       const merged = { ...INITIAL_SETTINGS, ...(s || {}) };
       if (merged.defaultValidityDays === 15) merged.defaultValidityDays = 8;
       if (!merged.signatoryName || merged.signatoryName === 'Mohan Jha') merged.signatoryName = 'Demo Name';
+      localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(merged));
       return merged;
     }
     const raw = localStorage.getItem(STORAGE_KEYS.SETTINGS);
@@ -673,12 +680,15 @@ class StorageService {
   }
 
   public updateSettings(settings: Partial<QuotationSettings>): QuotationSettings {
+    let updated: QuotationSettings;
     if (this.isElectron()) {
-      const updated = window.electronAPI?.updateSettings(settings);
-      return { ...INITIAL_SETTINGS, ...(updated || {}) };
+      const res = window.electronAPI?.updateSettings(settings);
+      updated = { ...INITIAL_SETTINGS, ...(res || {}) };
+    } else {
+      const current = this.getSettings();
+      updated = { ...current, ...settings };
     }
-    const current = this.getSettings();
-    const updated = { ...current, ...settings };
+    if (updated.defaultValidityDays === 15) updated.defaultValidityDays = 8;
     localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(updated));
     return updated;
   }

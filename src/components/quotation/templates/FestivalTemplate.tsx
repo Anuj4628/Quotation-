@@ -72,6 +72,11 @@ export const FestivalTemplate: React.FC<TemplateProps> = ({
                       PAN: {company.pan}
                     </span>
                   )}
+                  {company.stateCode && (
+                    <span className="bg-slate-100 border border-slate-300 text-slate-800 px-2 py-0.5 rounded font-bold">
+                      State Code: {company.stateCode}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>

@@ -58,6 +58,11 @@ export const StylishTemplate: React.FC<TemplateProps> = ({
                       PAN: {company.pan}
                     </span>
                   )}
+                  {company.stateCode && (
+                    <span className="bg-rose-50 border border-rose-200 text-rose-900 px-2 py-0.5 rounded-md font-bold">
+                      State Code: {company.stateCode}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>

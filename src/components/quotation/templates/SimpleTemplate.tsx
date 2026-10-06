@@ -45,6 +45,7 @@ export const SimpleTemplate: React.FC<TemplateProps> = ({
                 <div className="pt-1 font-mono text-[9px]">
                   <span>GSTIN: <strong>{company.gstin}</strong></span>
                   {company.pan && <span className="ml-2">PAN: <strong>{company.pan}</strong></span>}
+                  {company.stateCode && <span className="ml-2">State Code: <strong>{company.stateCode}</strong></span>}
                 </div>
               </div>
             </div>
