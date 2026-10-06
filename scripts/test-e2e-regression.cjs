@@ -3,7 +3,7 @@ const fs = require('fs');
 
 async function runRegressionSuite() {
   console.log('================================================================');
-  console.log('   JUBILANT METAL & ALLOYS — PRODUCTION REGRESSION TEST SUITE   ');
+  console.log('   BHAWAL STEEL & ENGINEERING COMPANY — REGRESSION TEST SUITE   ');
   console.log('================================================================\n');
 
   const { DatabaseManager } = require('../dist-electron/database.js');
@@ -207,9 +207,9 @@ async function runRegressionSuite() {
   // Check 13: Silent Temp File Storage Validation
   const tempShareDir = path.join(testDbDir, 'test-shares');
   if (!fs.existsSync(tempShareDir)) fs.mkdirSync(tempShareDir, { recursive: true });
-  const samplePdfName = `${pi1.piNumber}-Jubilant.pdf`;
+  const samplePdfName = `${pi1.piNumber}-Bhawal.pdf`;
   const samplePdfPath = path.join(tempShareDir, samplePdfName);
-  fs.writeFileSync(samplePdfPath, Buffer.from('%PDF-1.4 Mock PDF Stream for Jubilant Test'));
+  fs.writeFileSync(samplePdfPath, Buffer.from('%PDF-1.4 Mock PDF Stream for Bhawal Test'));
   
   if (!fs.existsSync(samplePdfPath) || fs.statSync(samplePdfPath).size === 0 || !samplePdfPath.endsWith('.pdf')) {
     throw new Error('Silent PDF validation failed');
@@ -217,8 +217,8 @@ async function runRegressionSuite() {
   console.log(`✓ Check 13: Silent PDF validation passed: ${samplePdfPath} (${fs.statSync(samplePdfPath).size} bytes)`);
 
   // Check 14: Filename Distinction
-  const quotationFilename = `${q1.quotationNumber}-Jubilant.pdf`;
-  const proformaFilename = `${pi1.piNumber}-Jubilant.pdf`;
+  const quotationFilename = `${q1.quotationNumber}-Bhawal.pdf`;
+  const proformaFilename = `${pi1.piNumber}-Bhawal.pdf`;
   if (quotationFilename === proformaFilename || quotationFilename.includes('PI') || !proformaFilename.includes('PI')) {
     throw new Error('Filename distinction failed');
   }

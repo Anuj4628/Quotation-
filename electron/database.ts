@@ -789,7 +789,7 @@ export class DatabaseManager {
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           'comp-bhawal-01',
-          'BHAWAL STEEL & ENGINEERING COMPANY',
+          'Bhawal steel and engineering company',
           'Stockist, Manufacturer & Global Exporters of High Nickel Alloys, Stainless Steel & Pipes',
           '/New logo.png',
           '27AABCJ4589K1Z5',
@@ -806,6 +806,18 @@ export class DatabaseManager {
           'sales@bhawalsteel.com',
           'www.bhawalsteel.com',
         ]
+      );
+    } else {
+      // Ensure existing database row is updated from Jubilant to Bhawal steel and engineering company
+      this.run(
+        `UPDATE company_profile 
+         SET name = 'Bhawal steel and engineering company' 
+         WHERE name LIKE '%jubilant%' OR name LIKE '%JUBILANT%' OR name IS NULL OR name = ''`
+      );
+      this.run(
+        `UPDATE bank_accounts 
+         SET accountName = 'Bhawal steel and engineering company' 
+         WHERE accountName LIKE '%jubilant%' OR accountName LIKE '%JUBILANT%'`
       );
     }
 
@@ -978,7 +990,12 @@ export class DatabaseManager {
   // Company Profile CRUD
   // ============================================================================
   public getCompany(): any {
-    return this.queryOne('SELECT * FROM company_profile LIMIT 1');
+    const comp = this.queryOne('SELECT * FROM company_profile LIMIT 1');
+    if (comp && (!comp.name || comp.name.toLowerCase().includes('jubilant'))) {
+      comp.name = 'Bhawal steel and engineering company';
+      this.run("UPDATE company_profile SET name = 'Bhawal steel and engineering company' WHERE id = ?", [comp.id]);
+    }
+    return comp;
   }
 
   public updateCompany(data: any): any {

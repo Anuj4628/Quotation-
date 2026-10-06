@@ -18,7 +18,7 @@ async function runTests() {
 
   // Test Company Profile
   const comp = db.getCompany();
-  if (!comp || !comp.name.includes('BHAWAL')) throw new Error('Company profile seed failed');
+  if (!comp || !comp.name.toUpperCase().includes('BHAWAL')) throw new Error('Company profile seed failed');
   console.log(`✓ Test 2: Seeded Company Profile verified: "${comp.name}"`);
 
   // Test Settings & Sequence Numbering

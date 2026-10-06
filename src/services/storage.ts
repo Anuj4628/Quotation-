@@ -154,6 +154,36 @@ class StorageService {
     } catch (e) {
       console.warn('Terms/Settings migration error in localStorage:', e);
     }
+
+    // Ensure company profile name is Bhawal steel and engineering company (never Jubilant)
+    try {
+      const rawComp = localStorage.getItem(STORAGE_KEYS.COMPANY);
+      if (rawComp) {
+        const compObj = JSON.parse(rawComp);
+        if (!compObj.name || compObj.name.toLowerCase().includes('jubilant')) {
+          compObj.name = 'Bhawal steel and engineering company';
+          if (compObj.email && compObj.email.includes('jubilant')) compObj.email = 'sales@bhawalsteel.com';
+          if (compObj.website && compObj.website.includes('jubilant')) compObj.website = 'www.bhawalsteel.com';
+          localStorage.setItem(STORAGE_KEYS.COMPANY, JSON.stringify(compObj));
+        }
+      }
+      const rawBank = localStorage.getItem(STORAGE_KEYS.BANK_ACCOUNTS);
+      if (rawBank) {
+        const bankList = JSON.parse(rawBank);
+        let bChanged = false;
+        bankList.forEach((b: any) => {
+          if (b.accountName && b.accountName.toLowerCase().includes('jubilant')) {
+            b.accountName = 'Bhawal steel and engineering company';
+            bChanged = true;
+          }
+        });
+        if (bChanged) {
+          localStorage.setItem(STORAGE_KEYS.BANK_ACCOUNTS, JSON.stringify(bankList));
+        }
+      }
+    } catch (e) {
+      console.warn('Company self-heal error in localStorage:', e);
+    }
   }
 
   public resetToSampleData() {
@@ -188,12 +218,20 @@ class StorageService {
     if (this.isElectron()) {
       const c = window.electronAPI!.getCompany();
       if (c) {
+        if (!c.name || c.name.toLowerCase().includes('jubilant')) {
+          c.name = 'Bhawal steel and engineering company';
+        }
         localStorage.setItem(STORAGE_KEYS.COMPANY, JSON.stringify(c));
         return c;
       }
     }
     const raw = localStorage.getItem(STORAGE_KEYS.COMPANY);
-    return raw ? JSON.parse(raw) : INITIAL_COMPANY;
+    const comp: CompanyProfile = raw ? JSON.parse(raw) : INITIAL_COMPANY;
+    if (!comp.name || comp.name.toLowerCase().includes('jubilant')) {
+      comp.name = 'Bhawal steel and engineering company';
+      localStorage.setItem(STORAGE_KEYS.COMPANY, JSON.stringify(comp));
+    }
+    return comp;
   }
 
   public updateCompany(data: Partial<CompanyProfile>): CompanyProfile {

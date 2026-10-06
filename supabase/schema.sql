@@ -1,5 +1,5 @@
 -- ==============================================================================
--- JUBILANT METAL AND ALLOYS - Quotation & Billing Management System Schema
+-- BHAWAL STEEL & ENGINEERING COMPANY - Quotation & Billing Management System Schema
 -- PostgreSQL / Supabase Production Schema
 -- ==============================================================================
 
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS users (
 -- 2. Companies / Profile Settings
 CREATE TABLE IF NOT EXISTS companies (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name TEXT NOT NULL DEFAULT 'JUBILANT METAL AND ALLOYS',
+    name TEXT NOT NULL DEFAULT 'Bhawal steel and engineering company',
     tagline TEXT DEFAULT 'Stockist, Manufacturer & Global Exporters of High Nickel Alloys, Stainless Steel, Titanium & Pipes',
     logo_url TEXT,
     gstin TEXT NOT NULL,

@@ -8,7 +8,7 @@ async function runQATests() {
   console.log('   COMPREHENSIVE BACKEND & DATABASE QA TEST SUITE   ');
   console.log('====================================================\n');
 
-  const testDbDir = path.join(os.tmpdir(), 'jubilant-qa-test-' + Date.now());
+  const testDbDir = path.join(os.tmpdir(), 'bhawal-qa-test-' + Date.now());
   fs.mkdirSync(testDbDir, { recursive: true });
   const testDbPath = path.join(testDbDir, 'test-qa.sqlite');
 
