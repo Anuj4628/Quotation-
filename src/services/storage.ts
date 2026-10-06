@@ -661,12 +661,14 @@ class StorageService {
       const s = window.electronAPI?.getSettings();
       const merged = { ...INITIAL_SETTINGS, ...(s || {}) };
       if (merged.defaultValidityDays === 15) merged.defaultValidityDays = 8;
+      if (!merged.signatoryName || merged.signatoryName === 'Mohan Jha') merged.signatoryName = 'Demo Name';
       return merged;
     }
     const raw = localStorage.getItem(STORAGE_KEYS.SETTINGS);
     const stored = raw ? JSON.parse(raw) : {};
     const merged = { ...INITIAL_SETTINGS, ...stored };
     if (merged.defaultValidityDays === 15) merged.defaultValidityDays = 8;
+    if (!merged.signatoryName || merged.signatoryName === 'Mohan Jha') merged.signatoryName = 'Demo Name';
     return merged;
   }
 
@@ -888,7 +890,7 @@ class StorageService {
       stampEnabled: orig.stampEnabled ?? settings.stampEnabled ?? true,
       signatureSize: orig.signatureSize || settings.signatureSize || 'md',
       stampSize: orig.stampSize || settings.stampSize || 'md',
-      signatoryName: orig.signatoryName || settings.signatoryName || 'Mohan Jha',
+      signatoryName: orig.signatoryName || settings.signatoryName || 'Demo Name',
       signatoryDesignation: orig.signatoryDesignation || settings.signatoryDesignation || 'Commercial & Technical Operations',
       statusHistory: [
         {
@@ -1065,7 +1067,7 @@ class StorageService {
       stampEnabled: proforma.stampEnabled !== undefined ? proforma.stampEnabled : (settings.stampEnabled ?? true),
       signatureSize: proforma.signatureSize || settings.signatureSize || 'md',
       stampSize: proforma.stampSize || settings.stampSize || 'md',
-      signatoryName: proforma.signatoryName || settings.signatoryName || 'Mohan Jha',
+      signatoryName: proforma.signatoryName || settings.signatoryName || 'Demo Name',
       signatoryDesignation: proforma.signatoryDesignation || settings.signatoryDesignation || 'Commercial & Technical Operations',
 
       ...proforma,

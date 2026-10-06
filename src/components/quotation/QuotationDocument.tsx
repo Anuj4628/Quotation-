@@ -70,7 +70,7 @@ export const QuotationDocument: React.FC<QuotationDocumentProps> = ({
         ? quotation.signatureEnabled
         : (settings.signatureEnabled ?? true),
     size: quotation.signatureSize || settings.signatureSize || 'md',
-    signatoryName: quotation.signatoryName || settings.signatoryName || 'Authorized Signatory',
+    signatoryName: quotation.signatoryName || settings.signatoryName || 'Demo Name',
     signatoryDesignation:
       quotation.signatoryDesignation ||
       settings.signatoryDesignation ||

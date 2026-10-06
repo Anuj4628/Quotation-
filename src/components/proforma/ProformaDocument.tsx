@@ -36,6 +36,7 @@ export const ProformaDocument: React.FC<ProformaDocumentProps> = ({
   const stampEnabled = proforma.stampEnabled !== undefined ? proforma.stampEnabled : (settings.stampEnabled ?? true);
   const signatureSize = proforma.signatureSize || settings.signatureSize || 'md';
   const stampSize = proforma.stampSize || settings.stampSize || 'md';
+  const signatoryName = proforma.signatoryName || settings.signatoryName || 'Demo Name';
   const signatoryDesignation = proforma.signatoryDesignation || settings.signatoryDesignation || 'Commercial & Technical Operations';
 
   // Resolve terms:
@@ -543,7 +544,7 @@ export const ProformaDocument: React.FC<ProformaDocumentProps> = ({
         </div>
 
         <div className="border-t border-slate-400 pt-1 px-6 text-center min-w-[200px] mt-1">
-          <span className="font-bold text-slate-800 block text-xs">Authorized Signatory</span>
+          <span className="font-bold text-slate-800 block text-xs">{signatoryName}</span>
           {signatoryDesignation && (
             <span className="text-[10px] text-slate-500 block">
               {signatoryDesignation}

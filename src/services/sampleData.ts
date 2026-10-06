@@ -649,7 +649,7 @@ export const INITIAL_SETTINGS: QuotationSettings = {
   stampEnabled: true,
   signatureSize: 'md',
   stampSize: 'md',
-  signatoryName: 'Mohan Jha',
+  signatoryName: 'Demo Name',
   signatoryDesignation: 'Commercial & Technical Operations',
 };
 

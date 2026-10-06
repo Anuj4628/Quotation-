@@ -71,7 +71,7 @@ export class DatabaseManager {
     stampEnabled: true,
     signatureSize: 'md',
     stampSize: 'md',
-    signatoryName: 'Mohan Jha',
+    signatoryName: 'Demo Name',
     signatoryDesignation: 'Commercial & Technical Operations',
     piPrefix: 'JMA-PI',
     piSequenceNumber: 501,
@@ -485,7 +485,7 @@ export class DatabaseManager {
         stampEnabled INTEGER DEFAULT 1,
         signatureSize TEXT DEFAULT 'md',
         stampSize TEXT DEFAULT 'md',
-        signatoryName TEXT DEFAULT 'Mohan Jha',
+        signatoryName TEXT DEFAULT 'Demo Name',
         signatoryDesignation TEXT DEFAULT 'Commercial & Technical Operations'
       );
 
@@ -938,14 +938,15 @@ export class DatabaseManager {
           1,
           'md',
           'md',
-          'Mohan Jha',
+          'Demo Name',
           'Commercial & Technical Operations',
         ]
       );
     }
 
-    // Ensure existing databases update default terms & 8 days validity
+    // Ensure existing databases update default terms & 8 days validity, and update legacy signatory name
     try {
+      this.run("UPDATE settings SET signatoryName = 'Demo Name' WHERE signatoryName = 'Mohan Jha' OR signatoryName IS NULL");
       const defaultTemplate = this.queryOne("SELECT * FROM terms_templates WHERE id = 'terms-01' OR isDefault = 1 LIMIT 1");
       if (defaultTemplate) {
         const termsStr = typeof defaultTemplate.terms === 'string' ? defaultTemplate.terms : JSON.stringify(defaultTemplate.terms);
@@ -1564,7 +1565,7 @@ export class DatabaseManager {
           updated.stampEnabled ? 1 : 0,
           updated.signatureSize || 'md',
           updated.stampSize || 'md',
-          updated.signatoryName || 'Mohan Jha',
+          updated.signatoryName || 'Demo Name',
           updated.signatoryDesignation || 'Commercial & Technical Operations',
           updated.piPrefix || 'JMA-PI',
           updated.piSequenceNumber || 501,
@@ -1783,7 +1784,7 @@ export class DatabaseManager {
             quotation.notes || null, historyJson, quotation.signatureUrl || null, quotation.stampUrl || null,
             quotation.signatureEnabled !== false ? 1 : 0, quotation.stampEnabled !== false ? 1 : 0,
             quotation.signatureSize || 'md', quotation.stampSize || 'md',
-            quotation.signatoryName || 'Mohan Jha', quotation.signatoryDesignation || 'Commercial & Technical Operations',
+            quotation.signatoryName || 'Demo Name', quotation.signatoryDesignation || 'Commercial & Technical Operations',
             quotation.themeId || 'modern', quotation.originalCurrency || 'INR', quotation.displayCurrency || 'INR',
             typeof quotation.exchangeRate === 'number' ? quotation.exchangeRate : 1, quotation.exchangeRateDate || qDate,
             quotation.isCustomRate ? 1 : 0, typeof quotation.customRate === 'number' ? quotation.customRate : null,
@@ -1829,7 +1830,7 @@ export class DatabaseManager {
             quotation.notes || null, historyJson, quotation.signatureUrl || null, quotation.stampUrl || null,
             quotation.signatureEnabled !== false ? 1 : 0, quotation.stampEnabled !== false ? 1 : 0,
             quotation.signatureSize || 'md', quotation.stampSize || 'md',
-            quotation.signatoryName || 'Mohan Jha', quotation.signatoryDesignation || 'Commercial & Technical Operations',
+            quotation.signatoryName || 'Demo Name', quotation.signatoryDesignation || 'Commercial & Technical Operations',
             quotation.themeId || 'modern', quotation.originalCurrency || 'INR', quotation.displayCurrency || 'INR',
             typeof quotation.exchangeRate === 'number' ? quotation.exchangeRate : 1, quotation.exchangeRateDate || qDate,
             quotation.isCustomRate ? 1 : 0, typeof quotation.customRate === 'number' ? quotation.customRate : null,
@@ -2096,7 +2097,7 @@ export class DatabaseManager {
             proforma.notes || null, historyJson, proforma.signatureUrl || null, proforma.stampUrl || null,
             proforma.signatureEnabled !== false ? 1 : 0, proforma.stampEnabled !== false ? 1 : 0,
             proforma.signatureSize || 'md', proforma.stampSize || 'md',
-            proforma.signatoryName || 'Mohan Jha', proforma.signatoryDesignation || 'Commercial & Technical Operations',
+            proforma.signatoryName || 'Demo Name', proforma.signatoryDesignation || 'Commercial & Technical Operations',
             currentUser.id, currentUser.name, now, now,
           ]
         );
@@ -2144,7 +2145,7 @@ export class DatabaseManager {
             proforma.notes || null, historyJson, proforma.signatureUrl || null, proforma.stampUrl || null,
             proforma.signatureEnabled !== false ? 1 : 0, proforma.stampEnabled !== false ? 1 : 0,
             proforma.signatureSize || 'md', proforma.stampSize || 'md',
-            proforma.signatoryName || 'Mohan Jha', proforma.signatoryDesignation || 'Commercial & Technical Operations',
+            proforma.signatoryName || 'Demo Name', proforma.signatoryDesignation || 'Commercial & Technical Operations',
             now, piId,
           ]
         );

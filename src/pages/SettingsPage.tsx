@@ -223,10 +223,10 @@ export const SettingsPage: React.FC = () => {
       stampEnabled: true,
       signatureSize: 'md',
       stampSize: 'md',
-      signatoryName: 'Mohan Jha',
+      signatoryName: 'Demo Name',
       signatoryDesignation: 'Commercial & Technical Operations',
     }));
-    success('Official Assets Restored', 'Official signature and stamp restored to defaults.');
+    success('Official Assets Restored', 'Official signature, stamp, and signatory name restored to defaults.');
   };
 
   // Save Bank Account
@@ -841,7 +841,7 @@ export const SettingsPage: React.FC = () => {
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3">
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                    <Stamp className="w-4 h-4 text-red-600" />
+                    <Stamp className="w-4 h-4 text-[#0D5C46]" />
                     <span>Authorized Signature & Company Stamp</span>
                   </h3>
                   <p className="text-[11px] text-slate-500 mt-0.5">
@@ -887,6 +887,40 @@ export const SettingsPage: React.FC = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Editable Signatory Fields on Quotation Defaults Tab */}
+              <div className="mt-4 pt-3 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Signatory Officer Name (Printed below stamp & signature)
+                  </label>
+                  <input
+                    type="text"
+                    value={qSettings.signatoryName || ''}
+                    onChange={(e) => setQSettings({ ...qSettings, signatoryName: e.target.value })}
+                    placeholder="e.g. Demo Name"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 outline-none focus:bg-white focus:border-[#0D5C46]"
+                  />
+                  <p className="text-[10px] text-slate-400 mt-1">
+                    Appears directly below the stamp & signature on all PDF quotations and proformas.
+                  </p>
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">
+                    Signatory Designation / Subtitle
+                  </label>
+                  <input
+                    type="text"
+                    value={qSettings.signatoryDesignation || ''}
+                    onChange={(e) => setQSettings({ ...qSettings, signatoryDesignation: e.target.value })}
+                    placeholder="e.g. Commercial & Technical Operations"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-slate-800 outline-none focus:bg-white focus:border-[#0D5C46]"
+                  />
+                  <p className="text-[10px] text-slate-400 mt-1">
+                    Department or official title (e.g. Authorized Signatory, Commercial Operations).
+                  </p>
+                </div>
+              </div>
             </div>
 
             <div className="pt-4 border-t border-slate-100 flex justify-end">
@@ -921,7 +955,7 @@ export const SettingsPage: React.FC = () => {
                 type="button"
                 onClick={handleRestoreOfficialAssets}
                 className="flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition-all"
-                title="Restore Mohan Jha signature and company stamp"
+                title="Restore signature and company stamp to defaults"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 <span>Restore Official Assets</span>
@@ -1128,19 +1162,24 @@ export const SettingsPage: React.FC = () => {
 
               {/* 3. Signatory Details */}
               <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-soft space-y-4">
-                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider border-b border-slate-100 pb-2">
-                  Signatory Information
-                </h3>
+                <div className="border-b border-slate-100 pb-2">
+                  <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+                    Signatory Information & Title
+                  </h3>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    This name and designation are displayed directly below the stamp and signature on all quotations, proforma invoices, and PDF downloads.
+                  </p>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block font-semibold text-slate-700 mb-1">
-                      Signatory Officer Name
+                      Signatory Officer Name (Below Stamp & Signature)
                     </label>
                     <input
                       type="text"
                       value={qSettings.signatoryName || ''}
                       onChange={(e) => setQSettings({ ...qSettings, signatoryName: e.target.value })}
-                      placeholder="e.g. Mohan Jha"
+                      placeholder="e.g. Demo Name"
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 font-bold text-slate-900 outline-none focus:bg-white focus:border-[#0D5C46]"
                     />
                   </div>
@@ -1225,7 +1264,7 @@ export const SettingsPage: React.FC = () => {
 
                     <div className="border-t border-slate-400 pt-1.5 px-6 text-center min-w-[200px] mt-1">
                       <span className="font-bold text-slate-800 block text-xs">
-                        Authorized Signatory
+                        {qSettings.signatoryName || 'Demo Name'}
                       </span>
                       {qSettings.signatoryDesignation && (
                         <span className="text-[10px] text-slate-500 block">
